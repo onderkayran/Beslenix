@@ -112,7 +112,63 @@ const mealDatabase = {
                 { name: "Cherry domates", amount: "5 adet" }
             ]
         },
-        // 500-1000 kcal arası yemekler
+        
+{
+    name: "Izgara Sebzeli Hindi",
+    description: "Izgara hindi göğsü ve sebzelerle hafif bir öğün",
+    calories: 400,
+    ingredients: [
+        { name: "Hindi göğsü", amount: "120 gr" },
+        { name: "Kabak", amount: "1 adet" },
+        { name: "Patlıcan", amount: "1 adet" },
+        { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+    ]
+},
+{
+    name: "Narlı Kinoa Salatası",
+    description: "Taze nar taneleri ve kinoalı besleyici salata",
+    calories: 350,
+    ingredients: [
+        { name: "Kinoa", amount: "70 gr" },
+        { name: "Nar taneleri", amount: "50 gr" },
+        { name: "Salatalık", amount: "1 adet" },
+        { name: "Zeytinyağı", amount: "1 tatlı kaşığı" }
+    ]
+},
+{
+    name: "Izgara Somon Salatası",
+    description: "Roka ve salatalıkla servis edilen ızgara somon",
+    calories: 480,
+    ingredients: [
+        { name: "Somon fileto", amount: "100 gr" },
+        { name: "Roka", amount: "1 demet" },
+        { name: "Salatalık", amount: "1 adet" },
+        { name: "Limon", amount: "1/2 adet" }
+    ]
+},
+{
+    name: "Zencefilli Tavuk Sote",
+    description: "Zencefil aromalı hafif tavuk sote",
+    calories: 390,
+    ingredients: [
+        { name: "Tavuk göğsü", amount: "120 gr" },
+        { name: "Havuç", amount: "1 adet" },
+        { name: "Zencefil", amount: "1 tatlı kaşığı" },
+        { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+    ]
+},
+{
+    name: "Avokadolu Yumurta Salatası",
+    description: "Avokado ve yumurta ile protein dolu salata",
+    calories: 420,
+    ingredients: [
+        { name: "Yumurta", amount: "2 adet" },
+        { name: "Avokado", amount: "1/2 adet" },
+        { name: "Marul", amount: "4 yaprak" },
+        { name: "Zeytinyağı", amount: "1 tatlı kaşığı" }
+    ]
+},
+// 500-1000 kcal arası yemekler
         {
             name: "Etli Taze Fasulye",
             description: "Zeytinyağlı taze fasulye ve et sote",
@@ -179,7 +235,75 @@ const mealDatabase = {
                 { name: "Soğan", amount: "1 adet" }
             ]
         },
-        // 1000-1500 kcal arası yemekler
+        
+{
+    name: "Tavuklu Sebzeli Kuskus",
+    description: "Sebzeli ve tavuklu doyurucu kuskus tabağı",
+    calories: 650,
+    ingredients: [
+        { name: "Tavuk göğsü", amount: "150 gr" },
+        { name: "Kuskus", amount: "100 gr" },
+        { name: "Biber", amount: "1 adet" },
+        { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+    ]
+},
+{
+    name: "Izgara Et ve Sebze Tabağı",
+    description: "Izgara dana eti ve bol yeşillikli sebze tabağı",
+    calories: 720,
+    ingredients: [
+        { name: "Dana bonfile", amount: "150 gr" },
+        { name: "Brokoli", amount: "100 gr" },
+        { name: "Kabak", amount: "1 adet" },
+        { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+    ]
+},
+{
+    name: "Fırınlanmış Somon ve Sebzeler",
+    description: "Fırında somon ve renkli sebzeler",
+    calories: 850,
+    ingredients: [
+        { name: "Somon fileto", amount: "150 gr" },
+        { name: "Havuç", amount: "2 adet" },
+        { name: "Brokoli", amount: "150 gr" },
+        { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+    ]
+},
+{
+    name: "Köfteli Nohut Salatası",
+    description: "Izgara köfte ile nohutlu yeşillik salatası",
+    calories: 780,
+    ingredients: [
+        { name: "Dana köfte", amount: "150 gr" },
+        { name: "Nohut", amount: "100 gr" },
+        { name: "Marul", amount: "1 demet" },
+        { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+    ]
+},
+{
+    name: "Tavuklu Kinoa Tabağı",
+    description: "Protein ve lif dolu tavuklu kinoa tabağı",
+    calories: 900,
+    ingredients: [
+        { name: "Tavuk göğsü", amount: "200 gr" },
+        { name: "Kinoa", amount: "80 gr" },
+        { name: "Salatalık", amount: "1 adet" },
+        { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+    ]
+},
+{
+    name: "Kuru Fasulye ve Pirinç Pilavı",
+    description: "Geleneksel Türk mutfağından kuru fasulye ve beyaz pilav",
+    calories: 950,
+    ingredients: [
+        { name: "Kuru fasulye", amount: "1 su bardağı (200 gr)" },
+        { name: "Pirinç", amount: "1 su bardağı" },
+        { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+        { name: "Soğan", amount: "1 adet" },
+        { name: "Domates salçası", amount: "1 yemek kaşığı" }
+    ]
+},
+// 1000-1500 kcal arası yemekler
         {
             name: "Etli Bezelye ve Pirinç Pilavı",
             description: "Bezelye, kuşbaşı et ve yanında sade pilavla geleneksel bir akşam yemeği.",
@@ -1742,3 +1866,59 @@ const mealDatabase = {
         }
     ]
 }; 
+
+{
+    name: "Dana Antrikot ve Sebzeli Pilav",
+    description: "Izgara dana antrikot ve sebzeli pilav",
+    calories: 1150,
+    ingredients: [
+        { name: "Dana antrikot", amount: "250 gr" },
+        { name: "Pirinç", amount: "1 su bardağı" },
+        { name: "Havuç", amount: "1 adet" },
+        { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+    ]
+},
+{
+    name: "Tavuklu Lazanya",
+    description: "Tavuklu ve sebzeli lazanya",
+    calories: 1300,
+    ingredients: [
+        { name: "Tavuk göğsü", amount: "200 gr" },
+        { name: "Lazanya yaprağı", amount: "200 gr" },
+        { name: "Domates sosu", amount: "100 gr" },
+        { name: "Beyaz peynir", amount: "100 gr" }
+    ]
+},
+{
+    name: "Fırınlanmış Etli Sebze Güveç",
+    description: "Dana eti ve sebzelerle fırınlanmış güveç",
+    calories: 1250,
+    ingredients: [
+        { name: "Dana eti", amount: "300 gr" },
+        { name: "Patates", amount: "2 adet" },
+        { name: "Patlıcan", amount: "2 adet" },
+        { name: "Domates", amount: "2 adet" }
+    ]
+},
+{
+    name: "Karışık Izgara Tabak",
+    description: "Tavuk, köfte ve sebze ızgara tabağı",
+    calories: 1400,
+    ingredients: [
+        { name: "Tavuk şiş", amount: "150 gr" },
+        { name: "Dana köfte", amount: "150 gr" },
+        { name: "Közlenmiş biber", amount: "2 adet" },
+        { name: "Pilav", amount: "1 porsiyon" }
+    ]
+},
+{
+    name: "Etli Mantarlı Pilav",
+    description: "Mantar ve etle zenginleştirilmiş pilav",
+    calories: 1350,
+    ingredients: [
+        { name: "Dana eti", amount: "200 gr" },
+        { name: "Mantar", amount: "200 gr" },
+        { name: "Pirinç", amount: "1 su bardağı" },
+        { name: "Tereyağı", amount: "2 yemek kaşığı" }
+    ]
+},
