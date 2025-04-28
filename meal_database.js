@@ -1,6 +1,105 @@
 // Genişletilmiş yemek veritabanı (kalori aralıklarına göre güncellendi)
 const mealDatabase = {
     balanced: [
+        {
+            name: "Nohutlu Semizotu Salatası",
+            description: "Kırmızı soğan, nohut ve zeytinyağı ile hafif bir semizotu salatası",
+            calories: 320,
+            ingredients: [
+                { name: "Semizotu", amount: "1 demet" },
+                { name: "Haşlanmış nohut", amount: "1 su bardağı" },
+                { name: "Kırmızı soğan", amount: "1/2 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Yoğurtlu Kabak Sote",
+            description: "Sotelenmiş kabak ve yoğurt sos ile hafif öğün",
+            calories: 380,
+            ingredients: [
+                { name: "Kabak", amount: "2 adet" },
+                { name: "Yoğurt", amount: "150 gr" },
+                { name: "Sarımsak", amount: "1 diş" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Fırınlanmış Sebzeli Omlet",
+            description: "Ispanak ve biberle hazırlanan hafif fırın omlet",
+            calories: 450,
+            ingredients: [
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Ispanak", amount: "100 gr" },
+                { name: "Kırmızı biber", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Tavuklu Sebzeli Güveç",
+            description: "Tavuk göğsü ve sebzelerle hazırlanan ev yapımı güveç",
+            calories: 650,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "200 gr" },
+                { name: "Patates", amount: "1 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Domates", amount: "1 adet" },
+            ]
+        },
+        {
+            name: "Kıymalı Kabak Dolması",
+            description: "Kıymalı iç harcı ile hazırlanan kabak dolması",
+            calories: 720,
+            ingredients: [
+                { name: "Kabak", amount: "4 adet" },
+                { name: "Dana kıyma", amount: "150 gr" },
+                { name: "Pirinç", amount: "1/2 su bardağı" },
+                { name: "Domates sosu", amount: "1 su bardağı" },
+            ]
+        },
+        {
+            name: "Fırın Makarna ve Tavuk",
+            description: "Fırında beşamel soslu makarna ve tavuk parçaları",
+            calories: 800,
+            ingredients: [
+                { name: "Makarna", amount: "200 gr" },
+                { name: "Tavuk göğsü", amount: "150 gr" },
+                { name: "Beşamel sos", amount: "150 gr" },
+                { name: "Kaşar peyniri", amount: "50 gr" },
+            ]
+        },
+        {
+            name: "Kuzu İncik ve Sebzeli Pilav",
+            description: "Fırında pişmiş kuzu incik ve sebzeli pilav",
+            calories: 1200,
+            ingredients: [
+                { name: "Kuzu incik", amount: "250 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Bezelye", amount: "1 su bardağı" },
+            ]
+        },
+        {
+            name: "Fırında Soslu Kanat ve Patates",
+            description: "Baharatlı sosla marine edilmiş tavuk kanadı ve patates",
+            calories: 1350,
+            ingredients: [
+                { name: "Tavuk kanat", amount: "400 gr" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Barbekü sos", amount: "100 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Dana Rosto ve Sebzeli Garnitür",
+            description: "Dana rosto ve fırınlanmış sebze garnitürü",
+            calories: 1450,
+            ingredients: [
+                { name: "Dana rosto", amount: "300 gr" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Kereviz", amount: "1 adet" },
+            ]
+        },
         // 100-500 kcal arası yemekler
         {
             name: "Izgara Köfte ve Salata",
@@ -1431,6 +1530,116 @@ const mealDatabase = {
                 { name: "Vegan beşamel", amount: "300 gr" },
                 { name: "Vegan peynir", amount: "200 gr" }
             ]
+        },
+        {
+            name: "Protein Zengini Izgara Tabağı",
+            description: "Çeşitli ızgara etler ve sebzeler",
+            calories: 1250,
+            ingredients: [
+                { name: "Dana bonfile", amount: "250 gr" },
+                { name: "Tavuk göğsü", amount: "200 gr" },
+                { name: "Izgara sebze", amount: "300 gr" },
+                { name: "Zeytinyağı", amount: "3 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Izgara Balık ve Sebze Tabağı",
+            description: "Çeşitli ızgara balıklar ve sebzeler",
+            calories: 1180,
+            ingredients: [
+                { name: "Somon fileto", amount: "250 gr" },
+                { name: "Levrek fileto", amount: "200 gr" },
+                { name: "Izgara sebze", amount: "300 gr" },
+                { name: "Zeytinyağı", amount: "3 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Etli Mantar Güveç",
+            description: "Dana etli ve mantarlı güveç",
+            calories: 1350,
+            ingredients: [
+                { name: "Dana kuşbaşı", amount: "400 gr" },
+                { name: "Mantar", amount: "300 gr" },
+                { name: "Biber", amount: "3 adet" },
+                { name: "Zeytinyağı", amount: "4 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Izgara Kuzu ve Sebze",
+            description: "Izgara kuzu eti ve sebzeler",
+            calories: 1420,
+            ingredients: [
+                { name: "Kuzu pirzola", amount: "400 gr" },
+                { name: "Patlıcan", amount: "2 adet" },
+                { name: "Biber", amount: "3 adet" },
+                { name: "Zeytinyağı", amount: "3 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Karışık Deniz Ürünleri Tabağı",
+            description: "Çeşitli ızgara deniz ürünleri",
+            calories: 1280,
+            ingredients: [
+                { name: "Karides", amount: "250 gr" },
+                { name: "Kalamar", amount: "200 gr" },
+                { name: "Izgara sebze", amount: "300 gr" },
+                { name: "Zeytinyağı", amount: "3 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Izgara Hindi ve Sebze",
+            description: "Izgara hindi göğsü ve mevsim sebzeleri",
+            calories: 680,
+            ingredients: [
+                { name: "Hindi göğsü", amount: "250 gr" },
+                { name: "Brokoli", amount: "200 gr" },
+                { name: "Kabak", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Somon ve Avokado Salatası",
+            description: "Izgara somon ve avokadolu yeşil salata",
+            calories: 750,
+            ingredients: [
+                { name: "Somon fileto", amount: "200 gr" },
+                { name: "Avokado", amount: "1 adet" },
+                { name: "Roka", amount: "1 demet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Izgara Dana Antrikot",
+            description: "Izgara dana antrikot ve sebzeler",
+            calories: 850,
+            ingredients: [
+                { name: "Dana antrikot", amount: "300 gr" },
+                { name: "Patlıcan", amount: "1 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Karides ve Mantar Sote",
+            description: "Karides ve mantarlı sote",
+            calories: 620,
+            ingredients: [
+                { name: "Karides", amount: "300 gr" },
+                { name: "Mantar", amount: "200 gr" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Izgara Kuzu Pirzola",
+            description: "Izgara kuzu pirzola ve sebzeler",
+            calories: 780,
+            ingredients: [
+                { name: "Kuzu pirzola", amount: "300 gr" },
+                { name: "Patlıcan", amount: "1 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
         }
     ],
     "high-protein": [
@@ -1519,6 +1728,61 @@ const mealDatabase = {
                 { name: "Brokoli", amount: "100 gr" },
                 { name: "Havuç", amount: "1 adet" },
                 { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Yumurtalı Lor Peyniri",
+            description: "Lor peyniri ve yumurta ile protein açısından zengin kahvaltı",
+            calories: 420,
+            ingredients: [
+                { name: "Lor peyniri", amount: "200 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Roka", amount: "1 demet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Izgara Karides Salatası",
+            description: "Izgara karides ve yeşil salata",
+            calories: 380,
+            ingredients: [
+                { name: "Karides", amount: "200 gr" },
+                { name: "Marul", amount: "4 yaprak" },
+                { name: "Salatalık", amount: "1 adet" },
+                { name: "Limon", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Hindi Füme Wrap",
+            description: "Hindi füme ve sebzeli tam buğday wrap",
+            calories: 450,
+            ingredients: [
+                { name: "Hindi füme", amount: "150 gr" },
+                { name: "Tam buğday lavaş", amount: "1 adet" },
+                { name: "Marul", amount: "4 yaprak" },
+                { name: "Domates", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Izgara Levrek Fileto",
+            description: "Izgara levrek fileto ve yeşillikler",
+            calories: 400,
+            ingredients: [
+                { name: "Levrek fileto", amount: "200 gr" },
+                { name: "Roka", amount: "1 demet" },
+                { name: "Limon", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Proteinli Sebze Çorbası",
+            description: "Tavuk suyu ve sebzelerle hazırlanmış protein açısından zengin çorba",
+            calories: 350,
+            ingredients: [
+                { name: "Tavuk suyu", amount: "2 su bardağı" },
+                { name: "Tavuk göğsü", amount: "100 gr" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Brokoli", amount: "100 gr" }
             ]
         },
         // 500-1000 kcal arası yemekler
