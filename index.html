@@ -198,6 +198,17 @@
 
         .btn-change {
             background-color: var(--lowcarb-color);
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            width: 36px;
+            margin: 0;
         }
 
         .btn-change:hover {
@@ -248,6 +259,50 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 15px;
+            gap: 10px;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .share-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            height: 36px;
+        }
+
+        .share-btn.whatsapp {
+            background-color: #25D366;
+            color: white;
+        }
+
+        .share-btn.telegram {
+            background-color: #0088cc;
+            color: white;
+        }
+
+        .share-btn.copy {
+            background-color: var(--gray-color);
+            color: var(--dark-color);
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .share-btn:active {
+            transform: translateY(0);
         }
 
         .favorite-btn {
@@ -518,6 +573,28 @@
         .week-actions {
             display: flex;
             gap: 10px;
+            align-items: center;
+        }
+
+        .week-actions .share-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .week-actions .share-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .week-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .week-actions .share-buttons {
+                justify-content: space-between;
+            }
         }
 
         .week-action-btn {
@@ -812,7 +889,19 @@
                         <span id="current-week">Hafta 1</span>
                         <button class="week-pagination-btn" data-action="next"><i class="fas fa-chevron-right"></i></button>
                     </div>
-                    <button id="save-week" class="btn"><i class="fas fa-save"></i> Planı Kaydet</button>
+                    <div class="week-actions">
+                        <div class="share-buttons">
+                            <button class="share-btn whatsapp" onclick="shareWeeklyPlan('whatsapp')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="share-btn telegram" onclick="shareWeeklyPlan('telegram')">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                            <button class="share-btn copy" onclick="shareWeeklyPlan('copy')">
+                                <i class="fas fa-copy"></i> Kopyala
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="weekly-plan" class="weekly-plan">
@@ -1225,13 +1314,22 @@
                         </div>
                     </div>
                     <div class="meal-actions">
-                        ${filteredMeals.length > 1 ? 
-                            `<button id="change-meal" class="btn btn-change">
-                                <i class="fas fa-sync-alt"></i> 
-                                ${isPremium ? `Başka Öneri (${currentMealIndex+1}/${filteredMeals.length})` : 
-                                    hasUsedSuggestion ? 'Premium ile daha fazla öneri' : 'Başka Öneri'}
-                            </button>` 
-                            : ''}
+                        <div class="share-buttons">
+                            <button class="share-btn whatsapp" onclick="shareMeal('${meal.name}', 'whatsapp')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="share-btn telegram" onclick="shareMeal('${meal.name}', 'telegram')">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                            <button class="share-btn copy" onclick="shareMeal('${meal.name}', 'copy')">
+                                <i class="fas fa-copy"></i> Kopyala
+                            </button>
+                            ${filteredMeals.length > 1 ? 
+                                `<button id="change-meal" class="share-btn" title="Başka öneri">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>` 
+                                : ''}
+                        </div>
                     </div>
                 </div>
             `;
@@ -1893,13 +1991,11 @@
             document.getElementById('current-week').textContent = `Hafta ${currentWeek}`;
             const prevBtn = document.querySelector('[data-action="prev"]');
             const nextBtn = document.querySelector('[data-action="next"]');
-            const saveBtn = document.getElementById('save-week');
             
             if (isPremium) {
                 // Premium kullanıcılar için tüm haftalar
                 prevBtn.disabled = currentWeek === 1;
                 nextBtn.disabled = currentWeek === 52;
-                saveBtn.style.display = 'block';
             } else {
                 // Ücretsiz kullanıcılar için sadece mevcut ayın ilk 2 haftası
                 const firstDayOfMonth = new Date(currentDate.getFullYear(), currentMonth, 1);
@@ -1908,7 +2004,6 @@
                 
                 prevBtn.disabled = currentWeek <= firstWeekOfMonth;
                 nextBtn.disabled = currentWeek >= firstWeekOfMonth + 1; // Sadece 2 hafta görüntülenebilir
-                saveBtn.style.display = 'none';
                 
                 // Eğer kullanıcı izin verilmeyen bir haftayı görüntülemeye çalışıyorsa
                 if (currentWeek > firstWeekOfMonth + 1) {
@@ -1925,13 +2020,8 @@
                 }
             }
 
-            // Eğer bu hafta için kaydedilmiş bir plan varsa, onu yükle
-            if (savedWeeks[currentWeek]) {
-                loadWeek(currentWeek);
-            } else {
-                // Kaydedilmiş plan yoksa, yeni bir plan oluştur
-                generateNewWeekPlan();
-            }
+            // Yeni bir plan oluştur
+            generateNewWeekPlan();
         }
 
         // Yeni haftalık plan oluştur
@@ -2077,7 +2167,6 @@
             // Üyelik durumunu kontrol et
             checkMembershipStatus();
             updateWeekNavigation();
-            displaySavedWeeks();
         });
 
         function closeModal() {
@@ -2160,15 +2249,6 @@
                 for (let i = 0; i < remainingCount; i++) {
                     const randomIndex = Math.floor(Math.random() * availableMeals.length);
                     weeklyMeals.push(availableMeals[randomIndex]);
-                }
-            }
-
-            // Plan oluşturulduktan sonra ücretsiz üye için kaydet
-            if (!localStorage.getItem('isPremium') === 'true') {
-                const viewedPlans = JSON.parse(localStorage.getItem('viewedPlans') || '{}');
-                if (viewedPlans[dietType]) {
-                    viewedPlans[dietType].plan = weeklyMeals;
-                    localStorage.setItem('viewedPlans', JSON.stringify(viewedPlans));
                 }
             }
 
@@ -2351,13 +2431,22 @@
                         </div>
                     </div>
                     <div class="meal-actions">
-                        ${filteredMeals.length > 1 ? 
-                            `<button id="change-meal" class="btn btn-change">
-                                <i class="fas fa-sync-alt"></i> 
-                                ${isPremium ? `Başka Öneri (${currentMealIndex+1}/${filteredMeals.length})` : 
-                                    hasUsedSuggestion ? 'Premium ile daha fazla öneri' : 'Başka Öneri'}
-                            </button>` 
-                            : ''}
+                        <div class="share-buttons">
+                            <button class="share-btn whatsapp" onclick="shareMeal('${meal.name}', 'whatsapp')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="share-btn telegram" onclick="shareMeal('${meal.name}', 'telegram')">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                            <button class="share-btn copy" onclick="shareMeal('${meal.name}', 'copy')">
+                                <i class="fas fa-copy"></i> Kopyala
+                            </button>
+                            ${filteredMeals.length > 1 ? 
+                                `<button id="change-meal" class="share-btn" title="Başka öneri">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>` 
+                                : ''}
+                        </div>
                     </div>
                 </div>
             `;
@@ -2386,6 +2475,121 @@
                         button.classList.add('favorited');
                     }
                 }
+            }
+        }
+
+        // Paylaşım fonksiyonları
+        function shareMeal(mealName, platform) {
+            const meal = filteredMeals.find(m => m.name === mealName);
+            if (!meal) return;
+
+            const shareText = createShareText(meal);
+            const encodedText = encodeURIComponent(shareText);
+
+            switch(platform) {
+                case 'whatsapp':
+                    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+                    break;
+                case 'telegram':
+                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`, '_blank');
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(shareText)
+                        .then(() => {
+                            alert('Tarif panoya kopyalandı!');
+                        })
+                        .catch(err => {
+                            console.error('Kopyalama hatası:', err);
+                            alert('Kopyalama başarısız oldu. Lütfen tekrar deneyin.');
+                        });
+                    break;
+            }
+        }
+
+        function createShareText(meal) {
+            let text = `🍽️ ${meal.name}\n\n`;
+            text += `📝 Açıklama:\n${meal.description}\n\n`;
+            text += `🔥 Kalori: ${meal.calories} kcal\n\n`;
+            text += `🛒 Malzemeler:\n`;
+            meal.ingredients.forEach(ing => {
+                text += `- ${ing.amount} ${ing.name}\n`;
+            });
+            text += `\nBu tarifi Öğün Planlayıcı uygulamasından paylaştım!`;
+            return text;
+        }
+
+        // Paylaşım fonksiyonları
+        function shareWeeklyPlan(platform) {
+            if (!weeklyMeals || weeklyMeals.length === 0) {
+                alert('Lütfen önce bir haftalık plan oluşturun.');
+                return;
+            }
+
+            const weekData = {
+                meals: weeklyMeals,
+                dietType: weeklyDietTypeSelect.value,
+                calorieRange: weeklyCalorieRangeSelect.value,
+                excludeItems: weeklyExcludeInput.value
+            };
+
+            const shareText = createWeeklyShareText(weekData);
+            const encodedText = encodeURIComponent(shareText);
+
+            switch(platform) {
+                case 'whatsapp':
+                    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+                    break;
+                case 'telegram':
+                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`, '_blank');
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(shareText)
+                        .then(() => {
+                            alert('Haftalık plan panoya kopyalandı!');
+                        })
+                        .catch(err => {
+                            console.error('Kopyalama hatası:', err);
+                            alert('Kopyalama başarısız oldu. Lütfen tekrar deneyin.');
+                        });
+                    break;
+            }
+        }
+
+        function createWeeklyShareText(weekData) {
+            let text = `🍽️ Haftalık Plan\n\n`;
+            text += `📅 Hafta: ${currentWeek}\n\n`;
+            text += `🍽️ Diyet Tipi: ${getDietTypeName(weekData.dietType)}\n\n`;
+            text += `🔥 Kalori Aralığı: ${weekData.calorieRange}\n\n`;
+            text += `📋 Günlük Menüler:\n\n`;
+            weekData.meals.forEach((meal, index) => {
+                text += `${['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'][index]}:\n`;
+                text += `🍽️ ${meal.name}\n`;
+                text += `🔥 ${meal.calories} kcal\n`;
+                text += `📝 ${meal.description}\n`;
+                text += `🛒 Malzemeler:\n`;
+                meal.ingredients.forEach(ing => {
+                    text += `- ${ing.amount} ${ing.name}\n`;
+                });
+                text += `\n`;
+            });
+            text += `Bu haftalık planı Öğün Planlayıcı uygulamasından paylaştım!`;
+            return text;
+        }
+
+        function getDietTypeName(dietType) {
+            switch(dietType) {
+                case 'balanced':
+                    return 'Dengeli Beslenme';
+                case 'vegetarian':
+                    return 'Vejetaryen';
+                case 'vegan':
+                    return 'Vegan';
+                case 'low-carb':
+                    return 'Düşük Karbonhidrat';
+                case 'high-protein':
+                    return 'Yüksek Protein';
+                default:
+                    return dietType;
             }
         }
     </script>
