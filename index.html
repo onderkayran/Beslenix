@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akşam Öğünü Planlayıcı - Haftalık Menü</title>
+    <title>FitPlan - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Temel Stiller */
@@ -43,21 +43,40 @@
 
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .letter-icon {
             position: relative;
+            display: inline-block;
+            margin: 0 2px;
+            transition: transform 0.3s ease;
         }
 
-        header h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
+        .letter-icon i {
+            position: absolute;
+            font-size: 0.5em;
+            top: -0.7em;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.8;
+            color: #4CAF50;
         }
 
-        header p {
-            color: #666;
+        .letter-icon:hover {
+            transform: translateY(-5px);
+        }
+
+        .letter-icon:hover i {
+            transform: translateX(-50%) scale(1.2);
         }
 
         .membership-status {
@@ -508,10 +527,11 @@
 
         .cart-item {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr auto;
             gap: 10px;
             padding: 10px;
             border-bottom: 1px solid var(--gray-color);
+            align-items: center;
         }
 
         .cart-total {
@@ -520,6 +540,50 @@
             margin: 20px 0;
             padding-top: 10px;
             border-top: 2px solid var(--gray-color);
+        }
+
+        .market-prices {
+            margin: 20px 0;
+            border: 1px solid var(--gray-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .market-price-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .market-price-item {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            padding: 10px;
+            border-bottom: 1px solid var(--gray-color);
+        }
+
+        .market-price-item:last-child {
+            border-bottom: none;
+        }
+
+        .market-name {
+            font-weight: bold;
+        }
+
+        .best-price {
+            background-color: #e8f5e9;
+            position: relative;
+        }
+
+        .best-price::after {
+            content: '✓ En Uygun';
+            position: absolute;
+            right: 10px;
+            color: var(--primary-color);
+            font-size: 0.8em;
+            font-weight: bold;
         }
 
         /* Responsive Tasarım */
@@ -769,20 +833,57 @@
         .add-to-favorites.favorited {
             color: var(--danger-color);
         }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #shopping-cart-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #shopping-cart-btn:hover {
+            background-color: #45a049;
+        }
     </style>
     <script src="meal_database.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-utensils"></i> Akşam Öğünü Planlayıcı</h1>
-            <p>Sağlıklı ve dengeli akşam yemekleri için kişiselleştirilmiş planlama</p>
-            <div id="membership-status" class="membership-status membership-free">
-                Ücretsiz Üyelik
-            </div>
-            <button id="upgrade-btn" class="upgrade-btn">
-                <i class="fas fa-crown"></i> Premium'a Yükselt
-            </button>
+            <h1 class="app-title">
+                <span class="letter-icon"><i class="fas fa-dumbbell"></i>F</span>
+                <span class="letter-icon"><i class="fas fa-heartbeat"></i>I</span>
+                <span class="letter-icon"><i class="fas fa-running"></i>T</span>
+                <span class="letter-icon"><i class="fas fa-apple-alt"></i>P</span>
+                <span class="letter-icon"><i class="fas fa-carrot"></i>L</span>
+                <span class="letter-icon"><i class="fas fa-utensils"></i>A</span>
+                <span class="letter-icon"><i class="fas fa-weight"></i>N</span>
+            </h1>
         </header>
 
         <div class="tab-buttons">
@@ -1441,193 +1542,242 @@
         // Market ürün fiyatları
         const marketProducts = {
             migros: {
-                "Dana kıyma": { price: 120, unit: "kg" },
-                "Tavuk göğsü": { price: 85, unit: "kg" },
-                "Tavuk but": { price: 75, unit: "kg" },
-                "Dana eti": { price: 150, unit: "kg" },
-                "Dana kuşbaşı": { price: 140, unit: "kg" },
-                "Kuzu eti": { price: 180, unit: "kg" },
-                "Kuzu but": { price: 170, unit: "kg" },
-                "Marul": { price: 5, unit: "adet" },
-                "Domates": { price: 8, unit: "kg" },
-                "Soğan": { price: 4, unit: "kg" },
-                "Havuç": { price: 6, unit: "kg" },
-                "Zeytinyağı": { price: 45, unit: "litre" },
-                "Tereyağı": { price: 60, unit: "kg" },
-                "Kırmızı mercimek": { price: 25, unit: "kg" },
-                "Pirinç": { price: 30, unit: "kg" },
-                "Bulgur": { price: 20, unit: "kg" },
-                "Ispanak": { price: 10, unit: "kg" },
-                "Bezelye": { price: 15, unit: "kg" },
-                "Brokoli": { price: 12, unit: "kg" },
-                "Bamya": { price: 18, unit: "kg" },
-                "Patlıcan": { price: 10, unit: "kg" },
-                "Patates": { price: 5, unit: "kg" },
-                "Nohut": { price: 22, unit: "kg" },
-                "Yoğurt": { price: 15, unit: "kg" },
-                "Beyaz peynir": { price: 80, unit: "kg" }
+                "Tavuk göğsü": { price: 159.90, unit: "kg" },
+                "Tavuk but": { price: 129.90, unit: "kg" },
+                "Dana kıyma": { price: 449.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 479.90, unit: "kg" },
+                "Kuzu eti": { price: 499.90, unit: "kg" },
+                "Domates": { price: 34.90, unit: "kg" },
+                "Salatalık": { price: 39.90, unit: "kg" },
+                "Soğan": { price: 19.90, unit: "kg" },
+                "Patates": { price: 24.90, unit: "kg" },
+                "Havuç": { price: 29.90, unit: "kg" },
+                "Biber": { price: 44.90, unit: "kg" },
+                "Patlıcan": { price: 49.90, unit: "kg" },
+                "Maydanoz": { price: 7.90, unit: "demet" },
+                "Dereotu": { price: 7.90, unit: "demet" },
+                "Nane": { price: 7.90, unit: "demet" },
+                "Roka": { price: 9.90, unit: "demet" },
+                "Marul": { price: 29.90, unit: "adet" },
+                "Pirinç": { price: 84.90, unit: "kg" },
+                "Bulgur": { price: 49.90, unit: "kg" },
+                "Mercimek": { price: 64.90, unit: "kg" },
+                "Nohut": { price: 69.90, unit: "kg" },
+                "Fasulye": { price: 79.90, unit: "kg" },
+                "Makarna": { price: 29.90, unit: "kg" },
+                "Un": { price: 39.90, unit: "kg" },
+                "Yoğurt": { price: 49.90, unit: "kg" },
+                "Süt": { price: 39.90, unit: "litre" },
+                "Yumurta": { price: 109.90, unit: "30'lu" },
+                "Peynir": { price: 289.90, unit: "kg" },
+                "Zeytin": { price: 199.90, unit: "kg" },
+                "Zeytinyağı": { price: 419.90, unit: "litre" },
+                "Tereyağı": { price: 399.90, unit: "kg" },
+                "Ekmek": { price: 7.50, unit: "adet" }
             },
             carrefour: {
-                "Dana kıyma": { price: 125, unit: "kg" },
-                "Tavuk göğsü": { price: 90, unit: "kg" },
-                "Tavuk but": { price: 80, unit: "kg" },
-                "Dana eti": { price: 155, unit: "kg" },
-                "Dana kuşbaşı": { price: 145, unit: "kg" },
-                "Kuzu eti": { price: 185, unit: "kg" },
-                "Kuzu but": { price: 175, unit: "kg" },
-                "Marul": { price: 6, unit: "adet" },
-                "Domates": { price: 9, unit: "kg" },
-                "Soğan": { price: 5, unit: "kg" },
-                "Havuç": { price: 7, unit: "kg" },
-                "Zeytinyağı": { price: 48, unit: "litre" },
-                "Tereyağı": { price: 65, unit: "kg" },
-                "Kırmızı mercimek": { price: 28, unit: "kg" },
-                "Pirinç": { price: 32, unit: "kg" },
-                "Bulgur": { price: 22, unit: "kg" },
-                "Ispanak": { price: 12, unit: "kg" },
-                "Bezelye": { price: 16, unit: "kg" },
-                "Brokoli": { price: 13, unit: "kg" },
-                "Bamya": { price: 20, unit: "kg" },
-                "Patlıcan": { price: 11, unit: "kg" },
-                "Patates": { price: 6, unit: "kg" },
-                "Nohut": { price: 24, unit: "kg" },
-                "Yoğurt": { price: 16, unit: "kg" },
-                "Beyaz peynir": { price: 85, unit: "kg" }
-            },
-            getir: {
-                "Dana kıyma": { price: 130, unit: "kg" },
-                "Tavuk göğsü": { price: 95, unit: "kg" },
-                "Tavuk but": { price: 85, unit: "kg" },
-                "Dana eti": { price: 160, unit: "kg" },
-                "Dana kuşbaşı": { price: 150, unit: "kg" },
-                "Kuzu eti": { price: 190, unit: "kg" },
-                "Kuzu but": { price: 180, unit: "kg" },
-                "Marul": { price: 7, unit: "adet" },
-                "Domates": { price: 10, unit: "kg" },
-                "Soğan": { price: 6, unit: "kg" },
-                "Havuç": { price: 8, unit: "kg" },
-                "Zeytinyağı": { price: 50, unit: "litre" },
-                "Tereyağı": { price: 70, unit: "kg" },
-                "Kırmızı mercimek": { price: 30, unit: "kg" },
-                "Pirinç": { price: 35, unit: "kg" },
-                "Bulgur": { price: 25, unit: "kg" },
-                "Ispanak": { price: 13, unit: "kg" },
-                "Bezelye": { price: 18, unit: "kg" },
-                "Brokoli": { price: 15, unit: "kg" },
-                "Bamya": { price: 22, unit: "kg" },
-                "Patlıcan": { price: 12, unit: "kg" },
-                "Patates": { price: 7, unit: "kg" },
-                "Nohut": { price: 26, unit: "kg" },
-                "Yoğurt": { price: 18, unit: "kg" },
-                "Beyaz peynir": { price: 90, unit: "kg" }
+                "Tavuk göğsü": { price: 154.90, unit: "kg" },
+                "Tavuk but": { price: 124.90, unit: "kg" },
+                "Dana kıyma": { price: 444.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 474.90, unit: "kg" },
+                "Kuzu eti": { price: 494.90, unit: "kg" },
+                "Domates": { price: 32.90, unit: "kg" },
+                "Salatalık": { price: 37.90, unit: "kg" },
+                "Soğan": { price: 18.90, unit: "kg" },
+                "Patates": { price: 23.90, unit: "kg" },
+                "Havuç": { price: 28.90, unit: "kg" },
+                "Biber": { price: 42.90, unit: "kg" },
+                "Patlıcan": { price: 47.90, unit: "kg" },
+                "Maydanoz": { price: 6.90, unit: "demet" },
+                "Dereotu": { price: 6.90, unit: "demet" },
+                "Nane": { price: 6.90, unit: "demet" },
+                "Roka": { price: 8.90, unit: "demet" },
+                "Marul": { price: 27.90, unit: "adet" },
+                "Pirinç": { price: 82.90, unit: "kg" },
+                "Bulgur": { price: 47.90, unit: "kg" },
+                "Mercimek": { price: 62.90, unit: "kg" },
+                "Nohut": { price: 67.90, unit: "kg" },
+                "Fasulye": { price: 77.90, unit: "kg" },
+                "Makarna": { price: 27.90, unit: "kg" },
+                "Un": { price: 37.90, unit: "kg" },
+                "Yoğurt": { price: 47.90, unit: "kg" },
+                "Süt": { price: 37.90, unit: "litre" },
+                "Yumurta": { price: 107.90, unit: "30'lu" },
+                "Peynir": { price: 284.90, unit: "kg" },
+                "Zeytin": { price: 194.90, unit: "kg" },
+                "Zeytinyağı": { price: 414.90, unit: "litre" },
+                "Tereyağı": { price: 394.90, unit: "kg" },
+                "Ekmek": { price: 7.50, unit: "adet" }
             },
             a101: {
-                "Dana kıyma": { price: 115, unit: "kg" },
-                "Tavuk göğsü": { price: 80, unit: "kg" },
-                "Tavuk but": { price: 70, unit: "kg" },
-                "Dana eti": { price: 145, unit: "kg" },
-                "Dana kuşbaşı": { price: 135, unit: "kg" },
-                "Kuzu eti": { price: 175, unit: "kg" },
-                "Kuzu but": { price: 165, unit: "kg" },
-                "Marul": { price: 4, unit: "adet" },
-                "Domates": { price: 7, unit: "kg" },
-                "Soğan": { price: 3, unit: "kg" },
-                "Havuç": { price: 5, unit: "kg" },
-                "Zeytinyağı": { price: 42, unit: "litre" },
-                "Tereyağı": { price: 55, unit: "kg" },
-                "Kırmızı mercimek": { price: 22, unit: "kg" },
-                "Pirinç": { price: 28, unit: "kg" },
-                "Bulgur": { price: 18, unit: "kg" },
-                "Ispanak": { price: 9, unit: "kg" },
-                "Bezelye": { price: 14, unit: "kg" },
-                "Brokoli": { price: 11, unit: "kg" },
-                "Bamya": { price: 16, unit: "kg" },
-                "Patlıcan": { price: 9, unit: "kg" },
-                "Patates": { price: 4, unit: "kg" },
-                "Nohut": { price: 20, unit: "kg" },
-                "Yoğurt": { price: 14, unit: "kg" },
-                "Beyaz peynir": { price: 75, unit: "kg" }
+                "Tavuk göğsü": { price: 149.90, unit: "kg" },
+                "Tavuk but": { price: 119.90, unit: "kg" },
+                "Dana kıyma": { price: 439.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 469.90, unit: "kg" },
+                "Kuzu eti": { price: 489.90, unit: "kg" },
+                "Domates": { price: 29.90, unit: "kg" },
+                "Salatalık": { price: 34.90, unit: "kg" },
+                "Soğan": { price: 16.90, unit: "kg" },
+                "Patates": { price: 21.90, unit: "kg" },
+                "Havuç": { price: 26.90, unit: "kg" },
+                "Biber": { price: 39.90, unit: "kg" },
+                "Patlıcan": { price: 44.90, unit: "kg" },
+                "Maydanoz": { price: 5.90, unit: "demet" },
+                "Dereotu": { price: 5.90, unit: "demet" },
+                "Nane": { price: 5.90, unit: "demet" },
+                "Roka": { price: 7.90, unit: "demet" },
+                "Marul": { price: 24.90, unit: "adet" },
+                "Pirinç": { price: 79.90, unit: "kg" },
+                "Bulgur": { price: 44.90, unit: "kg" },
+                "Mercimek": { price: 59.90, unit: "kg" },
+                "Nohut": { price: 64.90, unit: "kg" },
+                "Fasulye": { price: 74.90, unit: "kg" },
+                "Makarna": { price: 24.90, unit: "kg" },
+                "Un": { price: 34.90, unit: "kg" },
+                "Yoğurt": { price: 44.90, unit: "kg" },
+                "Süt": { price: 34.90, unit: "litre" },
+                "Yumurta": { price: 104.90, unit: "30'lu" },
+                "Peynir": { price: 279.90, unit: "kg" },
+                "Zeytin": { price: 189.90, unit: "kg" },
+                "Zeytinyağı": { price: 409.90, unit: "litre" },
+                "Tereyağı": { price: 389.90, unit: "kg" },
+                "Ekmek": { price: 7.00, unit: "adet" }
+            },
+            getir: {
+                "Tavuk göğsü": { price: 164.90, unit: "kg" },
+                "Tavuk but": { price: 134.90, unit: "kg" },
+                "Dana kıyma": { price: 459.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 489.90, unit: "kg" },
+                "Kuzu eti": { price: 509.90, unit: "kg" },
+                "Domates": { price: 36.90, unit: "kg" },
+                "Salatalık": { price: 41.90, unit: "kg" },
+                "Soğan": { price: 21.90, unit: "kg" },
+                "Patates": { price: 26.90, unit: "kg" },
+                "Havuç": { price: 31.90, unit: "kg" },
+                "Biber": { price: 46.90, unit: "kg" },
+                "Patlıcan": { price: 51.90, unit: "kg" },
+                "Maydanoz": { price: 8.90, unit: "demet" },
+                "Dereotu": { price: 8.90, unit: "demet" },
+                "Nane": { price: 8.90, unit: "demet" },
+                "Roka": { price: 10.90, unit: "demet" },
+                "Marul": { price: 31.90, unit: "adet" },
+                "Pirinç": { price: 86.90, unit: "kg" },
+                "Bulgur": { price: 51.90, unit: "kg" },
+                "Mercimek": { price: 66.90, unit: "kg" },
+                "Nohut": { price: 71.90, unit: "kg" },
+                "Fasulye": { price: 81.90, unit: "kg" },
+                "Makarna": { price: 31.90, unit: "kg" },
+                "Un": { price: 41.90, unit: "kg" },
+                "Yoğurt": { price: 51.90, unit: "kg" },
+                "Süt": { price: 41.90, unit: "litre" },
+                "Yumurta": { price: 111.90, unit: "30'lu" },
+                "Peynir": { price: 294.90, unit: "kg" },
+                "Zeytin": { price: 204.90, unit: "kg" },
+                "Zeytinyağı": { price: 424.90, unit: "litre" },
+                "Tereyağı": { price: 404.90, unit: "kg" },
+                "Ekmek": { price: 8.00, unit: "adet" }
             },
             bim: {
-                "Dana kıyma": { price: 110, unit: "kg" },
-                "Tavuk göğsü": { price: 75, unit: "kg" },
-                "Tavuk but": { price: 65, unit: "kg" },
-                "Dana eti": { price: 140, unit: "kg" },
-                "Dana kuşbaşı": { price: 130, unit: "kg" },
-                "Kuzu eti": { price: 170, unit: "kg" },
-                "Kuzu but": { price: 160, unit: "kg" },
-                "Marul": { price: 3, unit: "adet" },
-                "Domates": { price: 6, unit: "kg" },
-                "Soğan": { price: 2, unit: "kg" },
-                "Havuç": { price: 4, unit: "kg" },
-                "Zeytinyağı": { price: 40, unit: "litre" },
-                "Tereyağı": { price: 50, unit: "kg" },
-                "Kırmızı mercimek": { price: 20, unit: "kg" },
-                "Pirinç": { price: 25, unit: "kg" },
-                "Bulgur": { price: 15, unit: "kg" },
-                "Ispanak": { price: 8, unit: "kg" },
-                "Bezelye": { price: 12, unit: "kg" },
-                "Brokoli": { price: 10, unit: "kg" },
-                "Bamya": { price: 15, unit: "kg" },
-                "Patlıcan": { price: 8, unit: "kg" },
-                "Patates": { price: 3, unit: "kg" },
-                "Nohut": { price: 18, unit: "kg" },
-                "Yoğurt": { price: 12, unit: "kg" },
-                "Beyaz peynir": { price: 70, unit: "kg" }
+                "Tavuk göğsü": { price: 144.90, unit: "kg" },
+                "Tavuk but": { price: 114.90, unit: "kg" },
+                "Dana kıyma": { price: 434.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 464.90, unit: "kg" },
+                "Kuzu eti": { price: 484.90, unit: "kg" },
+                "Domates": { price: 27.90, unit: "kg" },
+                "Salatalık": { price: 32.90, unit: "kg" },
+                "Soğan": { price: 15.90, unit: "kg" },
+                "Patates": { price: 20.90, unit: "kg" },
+                "Havuç": { price: 25.90, unit: "kg" },
+                "Biber": { price: 37.90, unit: "kg" },
+                "Patlıcan": { price: 42.90, unit: "kg" },
+                "Maydanoz": { price: 4.90, unit: "demet" },
+                "Dereotu": { price: 4.90, unit: "demet" },
+                "Nane": { price: 4.90, unit: "demet" },
+                "Roka": { price: 6.90, unit: "demet" },
+                "Marul": { price: 22.90, unit: "adet" },
+                "Pirinç": { price: 77.90, unit: "kg" },
+                "Bulgur": { price: 42.90, unit: "kg" },
+                "Mercimek": { price: 57.90, unit: "kg" },
+                "Nohut": { price: 62.90, unit: "kg" },
+                "Fasulye": { price: 72.90, unit: "kg" },
+                "Makarna": { price: 22.90, unit: "kg" },
+                "Un": { price: 32.90, unit: "kg" },
+                "Yoğurt": { price: 42.90, unit: "kg" },
+                "Süt": { price: 32.90, unit: "litre" },
+                "Yumurta": { price: 102.90, unit: "30'lu" },
+                "Peynir": { price: 274.90, unit: "kg" },
+                "Zeytin": { price: 184.90, unit: "kg" },
+                "Zeytinyağı": { price: 404.90, unit: "litre" },
+                "Tereyağı": { price: 384.90, unit: "kg" },
+                "Ekmek": { price: 6.50, unit: "adet" }
             },
             sok: {
-                "Dana kıyma": { price: 112, unit: "kg" },
-                "Tavuk göğsü": { price: 78, unit: "kg" },
-                "Tavuk but": { price: 68, unit: "kg" },
-                "Dana eti": { price: 142, unit: "kg" },
-                "Dana kuşbaşı": { price: 132, unit: "kg" },
-                "Kuzu eti": { price: 172, unit: "kg" },
-                "Kuzu but": { price: 162, unit: "kg" },
-                "Marul": { price: 3.5, unit: "adet" },
-                "Domates": { price: 6.5, unit: "kg" },
-                "Soğan": { price: 2.5, unit: "kg" },
-                "Havuç": { price: 4.5, unit: "kg" },
-                "Zeytinyağı": { price: 41, unit: "litre" },
-                "Tereyağı": { price: 52, unit: "kg" },
-                "Kırmızı mercimek": { price: 21, unit: "kg" },
-                "Pirinç": { price: 26, unit: "kg" },
-                "Bulgur": { price: 16, unit: "kg" },
-                "Ispanak": { price: 8.5, unit: "kg" },
-                "Bezelye": { price: 13, unit: "kg" },
-                "Brokoli": { price: 10.5, unit: "kg" },
-                "Bamya": { price: 15.5, unit: "kg" },
-                "Patlıcan": { price: 8.5, unit: "kg" },
-                "Patates": { price: 3.5, unit: "kg" },
-                "Nohut": { price: 19, unit: "kg" },
-                "Yoğurt": { price: 13, unit: "kg" },
-                "Beyaz peynir": { price: 72, unit: "kg" }
+                "Tavuk göğsü": { price: 146.90, unit: "kg" },
+                "Tavuk but": { price: 116.90, unit: "kg" },
+                "Dana kıyma": { price: 436.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 466.90, unit: "kg" },
+                "Kuzu eti": { price: 486.90, unit: "kg" },
+                "Domates": { price: 28.90, unit: "kg" },
+                "Salatalık": { price: 33.90, unit: "kg" },
+                "Soğan": { price: 16.90, unit: "kg" },
+                "Patates": { price: 21.90, unit: "kg" },
+                "Havuç": { price: 26.90, unit: "kg" },
+                "Biber": { price: 38.90, unit: "kg" },
+                "Patlıcan": { price: 43.90, unit: "kg" },
+                "Maydanoz": { price: 5.90, unit: "demet" },
+                "Dereotu": { price: 5.90, unit: "demet" },
+                "Nane": { price: 5.90, unit: "demet" },
+                "Roka": { price: 7.90, unit: "demet" },
+                "Marul": { price: 23.90, unit: "adet" },
+                "Pirinç": { price: 78.90, unit: "kg" },
+                "Bulgur": { price: 43.90, unit: "kg" },
+                "Mercimek": { price: 58.90, unit: "kg" },
+                "Nohut": { price: 63.90, unit: "kg" },
+                "Fasulye": { price: 73.90, unit: "kg" },
+                "Makarna": { price: 23.90, unit: "kg" },
+                "Un": { price: 33.90, unit: "kg" },
+                "Yoğurt": { price: 43.90, unit: "kg" },
+                "Süt": { price: 33.90, unit: "litre" },
+                "Yumurta": { price: 103.90, unit: "30'lu" },
+                "Peynir": { price: 276.90, unit: "kg" },
+                "Zeytin": { price: 186.90, unit: "kg" },
+                "Zeytinyağı": { price: 406.90, unit: "litre" },
+                "Tereyağı": { price: 386.90, unit: "kg" },
+                "Ekmek": { price: 6.75, unit: "adet" }
             },
             yemeksepeti: {
-                "Dana kıyma": { price: 125, unit: "kg" },
-                "Tavuk göğsü": { price: 90, unit: "kg" },
-                "Tavuk but": { price: 80, unit: "kg" },
-                "Dana eti": { price: 155, unit: "kg" },
-                "Dana kuşbaşı": { price: 145, unit: "kg" },
-                "Kuzu eti": { price: 185, unit: "kg" },
-                "Kuzu but": { price: 175, unit: "kg" },
-                "Marul": { price: 6, unit: "adet" },
-                "Domates": { price: 9, unit: "kg" },
-                "Soğan": { price: 5, unit: "kg" },
-                "Havuç": { price: 7, unit: "kg" },
-                "Zeytinyağı": { price: 48, unit: "litre" },
-                "Tereyağı": { price: 65, unit: "kg" },
-                "Kırmızı mercimek": { price: 28, unit: "kg" },
-                "Pirinç": { price: 32, unit: "kg" },
-                "Bulgur": { price: 22, unit: "kg" },
-                "Ispanak": { price: 12, unit: "kg" },
-                "Bezelye": { price: 16, unit: "kg" },
-                "Brokoli": { price: 13, unit: "kg" },
-                "Bamya": { price: 20, unit: "kg" },
-                "Patlıcan": { price: 11, unit: "kg" },
-                "Patates": { price: 6, unit: "kg" },
-                "Nohut": { price: 24, unit: "kg" },
-                "Yoğurt": { price: 16, unit: "kg" },
-                "Beyaz peynir": { price: 85, unit: "kg" }
+                "Tavuk göğsü": { price: 169.90, unit: "kg" },
+                "Tavuk but": { price: 139.90, unit: "kg" },
+                "Dana kıyma": { price: 464.90, unit: "kg" },
+                "Dana kuşbaşı": { price: 494.90, unit: "kg" },
+                "Kuzu eti": { price: 514.90, unit: "kg" },
+                "Domates": { price: 38.90, unit: "kg" },
+                "Salatalık": { price: 43.90, unit: "kg" },
+                "Soğan": { price: 23.90, unit: "kg" },
+                "Patates": { price: 28.90, unit: "kg" },
+                "Havuç": { price: 33.90, unit: "kg" },
+                "Biber": { price: 48.90, unit: "kg" },
+                "Patlıcan": { price: 53.90, unit: "kg" },
+                "Maydanoz": { price: 9.90, unit: "demet" },
+                "Dereotu": { price: 9.90, unit: "demet" },
+                "Nane": { price: 9.90, unit: "demet" },
+                "Roka": { price: 11.90, unit: "demet" },
+                "Marul": { price: 33.90, unit: "adet" },
+                "Pirinç": { price: 88.90, unit: "kg" },
+                "Bulgur": { price: 53.90, unit: "kg" },
+                "Mercimek": { price: 68.90, unit: "kg" },
+                "Nohut": { price: 73.90, unit: "kg" },
+                "Fasulye": { price: 83.90, unit: "kg" },
+                "Makarna": { price: 33.90, unit: "kg" },
+                "Un": { price: 43.90, unit: "kg" },
+                "Yoğurt": { price: 53.90, unit: "kg" },
+                "Süt": { price: 43.90, unit: "litre" },
+                "Yumurta": { price: 113.90, unit: "30'lu" },
+                "Peynir": { price: 298.90, unit: "kg" },
+                "Zeytin": { price: 208.90, unit: "kg" },
+                "Zeytinyağı": { price: 428.90, unit: "litre" },
+                "Tereyağı": { price: 408.90, unit: "kg" },
+                "Ekmek": { price: 8.50, unit: "adet" }
             }
         };
 
@@ -1644,11 +1794,18 @@
                 .map(input => {
                     const label = input.nextElementSibling;
                     const text = label.textContent.trim();
+                    console.log('İşlenen alışveriş öğesi:', text);
+                    
                     // İlk boşluğa kadar olan kısmı miktar, geri kalanı isim olarak al
                     const firstSpace = text.indexOf(' ');
                     const amount = text.substring(0, firstSpace);
                     const name = text.substring(firstSpace + 1);
-                    console.log('Bulunan malzeme:', { amount, name });
+                    
+                    console.log('Ayrıştırılan bilgiler:', {
+                        amount: amount,
+                        name: name
+                    });
+                    
                     return { amount, name };
                 });
 
@@ -1671,54 +1828,132 @@
 
         // Market sepeti oluşturma fonksiyonu
         function createMarketCart(market, ingredients) {
-            console.log('Sepet oluşturuluyor:', market, ingredients);
+            console.log('Sepet oluşturuluyor:', market);
+            console.log('Gelen malzemeler:', ingredients);
+            console.log('Market ürünleri:', marketProducts[market]);
+            
             let cart = [];
             let totalPrice = 0;
 
             ingredients.forEach(ingredient => {
-                const product = marketProducts[market][ingredient.name];
+                // Malzeme ismini temizle ve normalize et
+                const rawName = ingredient.name.trim();
+                const normalizedName = rawName.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+                
+                console.log('İşlenen malzeme:', {
+                    raw: rawName,
+                    normalized: normalizedName,
+                    amount: ingredient.amount
+                });
+                
+                const product = marketProducts[market][normalizedName];
                 if (product) {
-                    // Miktarı gramdan kg'a çevir (eğer gerekliyse)
+                    console.log('Ürün bulundu:', product);
+                    
+                    // Miktar ve birim dönüşümlerini yap
                     let amount = ingredient.amount;
                     let numericAmount = 0;
-
-                    if (amount.includes('gr')) {
-                        numericAmount = parseFloat(amount) / 1000;
-                    } else if (amount.includes('kg')) {
-                        numericAmount = parseFloat(amount);
-                    } else if (amount.includes('adet')) {
-                        numericAmount = parseInt(amount);
-                    } else {
-                        // Sayısal değeri ayıkla
-                        numericAmount = parseFloat(amount.replace(/[^0-9.]/g, ''));
-                        // Eğer gr cinsindense kg'a çevir
-                        if (amount.includes('g')) {
-                            numericAmount = numericAmount / 1000;
+                    
+                    // Sayısal değeri ve birimi ayır
+                    const matches = amount.match(/(\d+(?:\.\d+)?)\s*([a-zA-ZğüşıöçĞÜŞİÖÇ]+)/);
+                    if (matches) {
+                        const value = parseFloat(matches[1]);
+                        const unit = matches[2].toLowerCase();
+                        
+                        console.log('Miktar analizi:', {
+                            fullMatch: matches[0],
+                            value: value,
+                            unit: unit
+                        });
+                        
+                        // Birim dönüşümlerini yap
+                        switch (unit) {
+                            case 'gr':
+                            case 'gram':
+                            case 'g':
+                                numericAmount = value / 1000; // kg'a çevir
+                                break;
+                            case 'kg':
+                            case 'kilo':
+                            case 'kilogram':
+                                numericAmount = value;
+                                break;
+                            case 'adet':
+                            case 'tane':
+                                numericAmount = value;
+                                break;
+                            case 'ml':
+                            case 'mililitre':
+                                numericAmount = value / 1000; // litreye çevir
+                                break;
+                            case 'lt':
+                            case 'l':
+                            case 'litre':
+                                numericAmount = value;
+                                break;
+                            case 'su bardağı':
+                            case 'bardak':
+                                numericAmount = value * 0.2; // 1 su bardağı = 200ml = 0.2L
+                                break;
+                            case 'yemek kaşığı':
+                            case 'çorba kaşığı':
+                                numericAmount = value * 0.015; // 1 yemek kaşığı = 15ml = 0.015L
+                                break;
+                            case 'çay kaşığı':
+                            case 'tatlı kaşığı':
+                                numericAmount = value * 0.005; // 1 çay kaşığı = 5ml = 0.005L
+                                break;
+                            case 'demet':
+                                numericAmount = value;
+                                break;
+                            default:
+                                console.log('Bilinmeyen birim:', unit);
+                                numericAmount = value;
                         }
+                    } else {
+                        console.log('Miktar formatı tanınamadı:', amount);
+                        numericAmount = 1;
                     }
 
-                    console.log('Hesaplanan miktar:', { 
-                        original: amount, 
-                        converted: numericAmount, 
-                        unit: product.unit 
+                    console.log('Hesaplanan miktar:', {
+                        original: amount,
+                        converted: numericAmount,
+                        unit: product.unit,
+                        price: product.price
                     });
 
                     const price = product.price * numericAmount;
                     totalPrice += price;
 
+                    console.log('Ürün fiyat hesaplaması:', {
+                        unitPrice: product.price,
+                        quantity: numericAmount,
+                        totalPrice: price
+                    });
+
                     cart.push({
-                        name: ingredient.name,
+                        name: normalizedName,
                         amount: ingredient.amount,
                         unitPrice: product.price,
                         totalPrice: price.toFixed(2),
                         unit: product.unit
                     });
                 } else {
-                    console.log('Ürün fiyatı bulunamadı:', ingredient.name);
+                    console.warn('Ürün fiyatı bulunamadı:', {
+                        market: market,
+                        searchedName: normalizedName,
+                        availableProducts: Object.keys(marketProducts[market])
+                    });
                 }
             });
 
-            console.log('Sepet oluşturuldu:', { items: cart, totalPrice });
+            console.log('Sepet oluşturuldu:', {
+                items: cart,
+                totalPrice: totalPrice
+            });
+
             return {
                 items: cart,
                 totalPrice: totalPrice.toFixed(2)
@@ -1728,6 +1963,7 @@
         // Modal içeriğini güncelleme fonksiyonu
         function updateModalContent(market, cart) {
             console.log('Modal içeriği güncelleniyor:', market, cart);
+            
             const modalContent = document.querySelector('.modal-content');
             modalContent.innerHTML = `
                 <span class="close">&times;</span>
@@ -1825,284 +2061,49 @@
 
         // Üyelik durumu ve yükseltme işlemleri
         function checkMembershipStatus() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (isPremium) {
-                membershipStatus.textContent = 'Premium Üyelik';
-                membershipStatus.classList.remove('membership-free');
-                membershipStatus.classList.add('membership-premium');
-                upgradeBtn.style.display = 'none';
-            } else {
-                membershipStatus.textContent = 'Ücretsiz Üyelik';
-                membershipStatus.classList.remove('membership-premium');
-                membershipStatus.classList.add('membership-free');
-                upgradeBtn.style.display = 'block';
-            }
+            // Artık bu fonksiyona gerek yok
         }
 
         // Haftalık plan erişimini kontrol et
         function checkWeeklyPlanAccess() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (!isPremium) {
-                const dietType = weeklyDietTypeSelect.value;
-                const calorieRange = weeklyCalorieRangeSelect.value;
-                const viewedPlans = JSON.parse(localStorage.getItem('viewedPlans') || '{}');
-                
-                if (viewedPlans[dietType]) {
-                    if (viewedPlans[dietType].calorieRange !== calorieRange) {
-                        const weeklyPlanDiv = document.getElementById('weekly-plan');
-                        weeklyPlanDiv.innerHTML = `
-                            <div class="week-limit-message">
-                                <p>Ücretsiz versiyonda "${dietType}" kategorisinde sadece "${viewedPlans[dietType].calorieRange}" kalori aralığında plan görüntüleyebilirsiniz.</p>
-                                <p>Tüm kalori aralıklarına erişmek için Premium üyeliğe yükseltin!</p>
-                                <button class="btn upgrade-btn" onclick="openPremiumModal()">
-                                    <i class="fas fa-crown"></i> Premium'a Yükselt
-                                </button>
-                            </div>
-                        `;
-                        return false;
-                    }
-                    
-                    if (viewedPlans[dietType].plan) {
-                        weeklyMeals = viewedPlans[dietType].plan;
-                        showWeeklyPlan();
-                        return false;
-                    }
-                }
-                
-                viewedPlans[dietType] = {
-                    calorieRange: calorieRange,
-                    plan: null
-                };
-                localStorage.setItem('viewedPlans', JSON.stringify(viewedPlans));
-            }
-            return true;
+            return true; // Herkes erişebilir
         }
 
         // Premium modalı aç
         function openPremiumModal() {
-            premiumModal.style.display = 'block';
+            // Modal açılmayacak
         }
 
         // Premium modalı kapat
         function closePremiumModal() {
-            premiumModal.style.display = 'none';
+            // Modal kapanmayacak
         }
 
         // Ödeme işlemi
         function proceedToPayment() {
-            localStorage.setItem('isPremium', 'true');
-            checkMembershipStatus();
-            closePremiumModal();
-            alert('Premium üyeliğiniz başarıyla aktifleştirildi!');
+            // Ödeme işlemi olmayacak
         }
 
         // Event listeners
-        upgradeBtn.addEventListener('click', openPremiumModal);
-        proceedPaymentBtn.addEventListener('click', proceedToPayment);
-        cancelPremiumBtn.addEventListener('click', closePremiumModal);
-        closePremiumBtn.addEventListener('click', closePremiumModal);
-
-        // Haftalık plan kaydet
-        function saveWeeklyPlan() {
-            if (!weeklyMeals || weeklyMeals.length === 0) {
-                alert('Önce bir haftalık plan oluşturun!');
-                return;
-            }
-
-            const weekData = {
-                meals: weeklyMeals,
-                dietType: weeklyDietTypeSelect.value,
-                calorieRange: weeklyCalorieRangeSelect.value,
-                excludeItems: weeklyExcludeInput.value,
-                date: new Date().toISOString()
-            };
-
-            savedWeeks[currentWeek] = weekData;
-            localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-            displaySavedWeeks();
-            
-            // Kaydetme butonunun stilini sıfırla
-            document.getElementById('save-week').classList.remove('btn-change');
-            
-            alert('Haftalık plan başarıyla kaydedildi!');
-        }
-
-        // Kaydedilmiş haftaları göster
-        function displaySavedWeeks() {
-            const container = document.getElementById('saved-weeks');
-            container.innerHTML = '';
-
-            Object.entries(savedWeeks).forEach(([weekNumber, weekData]) => {
-                const weekCard = document.createElement('div');
-                weekCard.className = 'week-card';
-                weekCard.innerHTML = `
-                    <div class="week-header">
-                        <span class="week-number">Hafta ${weekNumber}</span>
-                        <div class="week-actions">
-                            <button class="week-action-btn" onclick="loadWeek(${weekNumber})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="week-action-btn" onclick="deleteWeek(${weekNumber})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="week-days">
-                        ${weekData.meals.map((meal, index) => `
-                            <div class="day-slot">
-                                <strong>${['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'][index]}</strong>
-                                <p>${meal.name}</p>
-                                <small>${meal.calories} kcal</small>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                container.appendChild(weekCard);
-            });
-        }
-
-        // Haftayı yükle
-        function loadWeek(weekNumber) {
-            const weekData = savedWeeks[weekNumber];
-            if (weekData) {
-                weeklyDietTypeSelect.value = weekData.dietType;
-                weeklyCalorieRangeSelect.value = weekData.calorieRange;
-                weeklyExcludeInput.value = weekData.excludeItems;
-                weeklyMeals = weekData.meals;
-                showWeeklyPlan();
-            }
-        }
-
-        // Haftayı sil
-        function deleteWeek(weekNumber) {
-            if (confirm('Bu haftalık planı silmek istediğinizden emin misiniz?')) {
-                delete savedWeeks[weekNumber];
-                localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-                displaySavedWeeks();
-            }
-        }
+        upgradeBtn.style.display = 'none';
+        proceedPaymentBtn.style.display = 'none';
+        cancelPremiumBtn.style.display = 'none';
+        closePremiumBtn.style.display = 'none';
+        premiumModal.style.display = 'none';
 
         // Hafta navigasyonu
         function updateWeekNavigation() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const currentDate = new Date();
-            const currentMonth = currentDate.getMonth();
-            
             document.getElementById('current-week').textContent = `Hafta ${currentWeek}`;
             const prevBtn = document.querySelector('[data-action="prev"]');
             const nextBtn = document.querySelector('[data-action="next"]');
             
-            if (isPremium) {
-                // Premium kullanıcılar için tüm haftalar
-                prevBtn.disabled = currentWeek === 1;
-                nextBtn.disabled = currentWeek === 52;
-            } else {
-                // Ücretsiz kullanıcılar için sadece mevcut ayın ilk 2 haftası
-                const firstDayOfMonth = new Date(currentDate.getFullYear(), currentMonth, 1);
-                const firstWeekOfMonth = Math.ceil(firstDayOfMonth.getDate() / 7);
-                const currentWeekOfMonth = Math.ceil(currentDate.getDate() / 7);
-                
-                prevBtn.disabled = currentWeek <= firstWeekOfMonth;
-                nextBtn.disabled = currentWeek >= firstWeekOfMonth + 1; // Sadece 2 hafta görüntülenebilir
-                
-                // Eğer kullanıcı izin verilmeyen bir haftayı görüntülemeye çalışıyorsa
-                if (currentWeek > firstWeekOfMonth + 1) {
-                    weeklyPlanDiv.innerHTML = `
-                        <div class="week-limit-message">
-                            <p>Ücretsiz versiyonda sadece mevcut ayın ilk 2 haftasını görüntüleyebilirsiniz.</p>
-                            <p>Tüm haftalara erişmek için Premium üyeliğe yükseltin!</p>
-                            <button class="btn upgrade-btn" onclick="openPremiumModal()">
-                                <i class="fas fa-crown"></i> Premium'a Yükselt
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-            }
-
-            // Yeni bir plan oluştur
-            generateNewWeekPlan();
+            // Tüm haftalar erişilebilir
+            prevBtn.disabled = currentWeek === 1;
+            nextBtn.disabled = currentWeek === 52;
         }
-
-        // Yeni haftalık plan oluştur
-        function generateNewWeekPlan() {
-            const dietType = weeklyDietTypeSelect.value;
-            const calorieRange = weeklyCalorieRangeSelect.value;
-            const excludeItems = weeklyExcludeInput.value.split(',').map(item => item.trim()).filter(item => item);
-
-            if (!mealDatabase || !mealDatabase[dietType]) {
-                console.error('Yemek veritabanı yüklenemedi veya diyet tipi geçersiz:', dietType);
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            const availableMeals = filterMeals(dietType, calorieRange, excludeItems);
-
-            if (!availableMeals || availableMeals.length === 0) {
-                console.log('Uygun haftalık öğün bulunamadı');
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            // Tekrar eden yemekleri önlemek için Set kullan
-            const selectedMeals = new Set();
-            weeklyMeals = [];
-
-            // Mevcut yemekleri kopyala
-            const mealsToChooseFrom = [...availableMeals];
-
-            while (weeklyMeals.length < 7 && mealsToChooseFrom.length > 0) {
-                const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
-                const meal = mealsToChooseFrom[randomIndex];
-                
-                // Eğer bu yemek daha önce seçilmediyse ekle
-                if (!selectedMeals.has(meal.name)) {
-                    selectedMeals.add(meal.name);
-                    weeklyMeals.push(meal);
-                }
-                
-                // Bu yemeği kullanılabilir yemeklerden çıkar
-                mealsToChooseFrom.splice(randomIndex, 1);
-            }
-
-            // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
-            if (weeklyMeals.length < 7) {
-                const remainingCount = 7 - weeklyMeals.length;
-                for (let i = 0; i < remainingCount; i++) {
-                    const randomIndex = Math.floor(Math.random() * availableMeals.length);
-                    weeklyMeals.push(availableMeals[randomIndex]);
-                }
-            }
-
-            console.log('Seçilen haftalık yemekler:', weeklyMeals);
-            showWeeklyPlan();
-        }
-
-        // Event listeners
-        document.querySelector('[data-action="prev"]').addEventListener('click', () => {
-            if (currentWeek > 1) {
-                currentWeek--;
-                updateWeekNavigation();
-            }
-        });
-
-        document.querySelector('[data-action="next"]').addEventListener('click', () => {
-            if (currentWeek < 52) {
-                currentWeek++;
-                updateWeekNavigation();
-            }
-        });
-
-        document.getElementById('save-week').addEventListener('click', saveWeeklyPlan);
 
         // Rastgele haftalık plan oluşturma fonksiyonu
         function generateRandomWeekPlan() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (!isPremium) {
-                alert('Rastgele plan oluşturma özelliği yalnızca Premium üyelere açıktır!');
-                return;
-            }
-
             console.log('Rastgele haftalık plan oluşturma başladı');
 
             // Tüm diyet tiplerindeki yemekleri birleştir
