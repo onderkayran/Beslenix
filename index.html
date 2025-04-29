@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FitPlan - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -27,18 +27,225 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: #f5f5f5;
             color: var(--dark-color);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
+        }
+
+        /* Mobil için responsive düzenlemeler */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+
+            .app-title {
+                font-size: 1.8rem;
+            }
+
+            .tab-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .tab-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+                flex: 1 1 auto;
+                min-width: 120px;
+                text-align: center;
+            }
+
+            .app-container {
+                flex-direction: column;
+            }
+
+            .meal-planner, .shopping-list {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 10px;
+            }
+
+            select, input {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .meal-item {
+                padding: 10px;
+            }
+
+            .meal-actions {
+                flex-wrap: wrap;
+            }
+
+            .share-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .share-btn {
+                flex: 1 1 auto;
+                min-width: 100px;
+                margin: 5px;
+            }
+
+            .market-links {
+                flex-direction: column;
+            }
+
+            .market-btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .weekly-plan {
+                grid-template-columns: 1fr;
+            }
+
+            .day-card {
+                margin-bottom: 10px;
+            }
+
+            .week-navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .week-pagination {
+                margin-bottom: 10px;
+            }
+
+            .week-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .cart-items {
+                max-height: 200px;
+            }
+
+            .cart-item {
+                grid-template-columns: 1fr 1fr;
+                font-size: 14px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 15px;
+            }
+
+            .favorites-container {
+                grid-template-columns: 1fr;
+            }
+
+            .favorite-item {
+                margin-bottom: 10px;
+            }
+
+            /* Mobil için özel düzenlemeler */
+            .letter-icon {
+                margin: 0 1px;
+            }
+
+            .letter-icon i {
+                font-size: 0.4em;
+                top: -0.5em;
+            }
+
+            .membership-status, .upgrade-btn {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 10px;
+            }
+
+            .week-days {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .day-slot {
+                min-height: 50px;
+            }
+
+            .meal-details {
+                grid-template-columns: 1fr;
+            }
+
+            .ingredients-section {
+                padding: 10px;
+            }
+
+            .ingredients-section ul {
+                margin-left: 15px;
+            }
+        }
+
+        /* Küçük ekranlar için ek düzenlemeler */
+        @media (max-width: 480px) {
+            .app-title {
+                font-size: 1.5rem;
+            }
+
+            .tab-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .meal-item h3 {
+                font-size: 16px;
+            }
+
+            .share-btn {
+                min-width: 80px;
+                font-size: 12px;
+            }
+
+            .cart-item {
+                font-size: 12px;
+            }
+        }
+
+        /* Yatay mod için düzenlemeler */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                padding: 5px;
+            }
+
+            .app-title {
+                font-size: 1.5rem;
+            }
+
+            .meal-planner, .shopping-list {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
         }
 
         header {
@@ -986,9 +1193,9 @@
 
                 <div class="week-navigation">
                     <div class="week-pagination">
-                        <button class="week-pagination-btn" data-action="prev"><i class="fas fa-chevron-left"></i></button>
+                        <button class="week-pagination-btn" data-action="prev" onclick="goToPrevWeek()"><i class="fas fa-chevron-left"></i></button>
                         <span id="current-week">Hafta 1</span>
-                        <button class="week-pagination-btn" data-action="next"><i class="fas fa-chevron-right"></i></button>
+                        <button class="week-pagination-btn" data-action="next" onclick="goToNextWeek()"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="week-actions">
                         <div class="share-buttons">
@@ -1323,12 +1530,6 @@
 
         // Haftalık planı kaydet
         function saveWeeklyPlan() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (!isPremium) {
-                alert('Plan kaydetme özelliği Premium üyelere özeldir!');
-                return;
-            }
-
             if (!weeklyMeals || weeklyMeals.length === 0) {
                 alert('Önce bir haftalık plan oluşturun!');
                 return;
@@ -1344,10 +1545,6 @@
 
             savedWeeks[currentWeek] = weekData;
             localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-            displaySavedWeeks();
-            
-            // Kaydetme butonunun stilini sıfırla
-            document.getElementById('save-week').classList.remove('btn-change');
             
             alert('Haftalık plan başarıyla kaydedildi!');
         }
@@ -2093,13 +2290,60 @@
 
         // Hafta navigasyonu
         function updateWeekNavigation() {
-            document.getElementById('current-week').textContent = `Hafta ${currentWeek}`;
+            console.log('Hafta güncelleniyor:', currentWeek);
+            const currentWeekElement = document.getElementById('current-week');
             const prevBtn = document.querySelector('[data-action="prev"]');
             const nextBtn = document.querySelector('[data-action="next"]');
             
-            // Tüm haftalar erişilebilir
-            prevBtn.disabled = currentWeek === 1;
-            nextBtn.disabled = currentWeek === 52;
+            if (currentWeekElement) {
+                currentWeekElement.textContent = `Hafta ${currentWeek}`;
+            }
+            
+            if (prevBtn) {
+                prevBtn.disabled = currentWeek === 1;
+            }
+            
+            if (nextBtn) {
+                nextBtn.disabled = currentWeek === 52;
+            }
+        }
+
+        // Hafta değiştirme fonksiyonları
+        function goToPrevWeek() {
+            console.log('Önceki haftaya geçiliyor');
+            if (currentWeek > 1) {
+                currentWeek--;
+                console.log('Yeni hafta:', currentWeek);
+                updateWeekNavigation();
+                loadWeekPlan();
+            }
+        }
+
+        function goToNextWeek() {
+            console.log('Sonraki haftaya geçiliyor');
+            if (currentWeek < 52) {
+                currentWeek++;
+                console.log('Yeni hafta:', currentWeek);
+                updateWeekNavigation();
+                loadWeekPlan();
+            }
+        }
+
+        // Hafta planını yükle
+        function loadWeekPlan() {
+            console.log('Hafta planı yükleniyor:', currentWeek);
+            const weekData = savedWeeks[currentWeek];
+            if (weekData) {
+                console.log('Hafta verisi bulundu:', weekData);
+                weeklyMeals = weekData.meals;
+                weeklyDietTypeSelect.value = weekData.dietType;
+                weeklyCalorieRangeSelect.value = weekData.calorieRange;
+                weeklyExcludeInput.value = weekData.excludeItems;
+                showWeeklyPlan();
+            } else {
+                console.log('Hafta verisi bulunamadı');
+                weeklyPlanDiv.innerHTML = '<p class="empty-message">Bu hafta için kaydedilmiş plan bulunamadı</p>';
+            }
         }
 
         // Rastgele haftalık plan oluşturma fonksiyonu
@@ -2157,17 +2401,31 @@
 
         // Sayfa yüklendiğinde
         window.addEventListener('DOMContentLoaded', () => {
+            console.log('Sayfa yüklendi');
+            // Mevcut event listener'lar
             disableMarketButtons();
             disableWeeklyMarketButtons();
             displayFavorites();
 
             // Haftalık plan oluştur butonlarına event listener ekle
-            document.getElementById('generate-week').addEventListener('click', generateWeeklyPlan);
-            document.getElementById('generate-random-week').addEventListener('click', generateRandomWeekPlan);
+            const generateWeekBtn = document.getElementById('generate-week');
+            const generateRandomWeekBtn = document.getElementById('generate-random-week');
+            
+            if (generateWeekBtn) {
+                generateWeekBtn.addEventListener('click', generateWeeklyPlan);
+            }
+            
+            if (generateRandomWeekBtn) {
+                generateRandomWeekBtn.addEventListener('click', generateRandomWeekPlan);
+            }
 
             // Üyelik durumunu kontrol et
             checkMembershipStatus();
+            
+            // İlk hafta planını yükle
+            currentWeek = 1;
             updateWeekNavigation();
+            loadWeekPlan();
         });
 
         function closeModal() {
@@ -2223,38 +2481,57 @@
                 return;
             }
 
-            // Tekrar eden yemekleri önlemek için Set kullan
-            const selectedMeals = new Set();
-            weeklyMeals = [];
+            // Tüm haftalar için plan oluştur
+            for (let week = 1; week <= 52; week++) {
+                // Tekrar eden yemekleri önlemek için Set kullan
+                const selectedMeals = new Set();
+                const weekMeals = [];
 
-            // Mevcut yemekleri kopyala
-            const mealsToChooseFrom = [...availableMeals];
+                // Mevcut yemekleri kopyala
+                const mealsToChooseFrom = [...availableMeals];
 
-            while (weeklyMeals.length < 7 && mealsToChooseFrom.length > 0) {
-                const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
-                const meal = mealsToChooseFrom[randomIndex];
-                
-                // Eğer bu yemek daha önce seçilmediyse ekle
-                if (!selectedMeals.has(meal.name)) {
-                    selectedMeals.add(meal.name);
-                    weeklyMeals.push(meal);
+                while (weekMeals.length < 7 && mealsToChooseFrom.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
+                    const meal = mealsToChooseFrom[randomIndex];
+                    
+                    // Eğer bu yemek daha önce seçilmediyse ekle
+                    if (!selectedMeals.has(meal.name)) {
+                        selectedMeals.add(meal.name);
+                        weekMeals.push(meal);
+                    }
+                    
+                    // Bu yemeği kullanılabilir yemeklerden çıkar
+                    mealsToChooseFrom.splice(randomIndex, 1);
                 }
-                
-                // Bu yemeği kullanılabilir yemeklerden çıkar
-                mealsToChooseFrom.splice(randomIndex, 1);
+
+                // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
+                if (weekMeals.length < 7) {
+                    const remainingCount = 7 - weekMeals.length;
+                    for (let i = 0; i < remainingCount; i++) {
+                        const randomIndex = Math.floor(Math.random() * availableMeals.length);
+                        weekMeals.push(availableMeals[randomIndex]);
+                    }
+                }
+
+                // Hafta verisini kaydet
+                const weekData = {
+                    meals: weekMeals,
+                    dietType: dietType,
+                    calorieRange: calorieRange,
+                    excludeItems: excludeItems,
+                    date: new Date().toISOString()
+                };
+
+                savedWeeks[week] = weekData;
             }
 
-            // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
-            if (weeklyMeals.length < 7) {
-                const remainingCount = 7 - weeklyMeals.length;
-                for (let i = 0; i < remainingCount; i++) {
-                    const randomIndex = Math.floor(Math.random() * availableMeals.length);
-                    weeklyMeals.push(availableMeals[randomIndex]);
-                }
-            }
+            // Tüm haftaları localStorage'a kaydet
+            localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
 
-            console.log('Seçilen haftalık yemekler:', weeklyMeals);
+            // Mevcut haftayı göster
+            weeklyMeals = savedWeeks[currentWeek].meals;
             showWeeklyPlan();
+
         }
 
         // Haftalık alışveriş listesi oluşturma fonksiyonu
