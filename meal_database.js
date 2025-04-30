@@ -1,2875 +1,1455 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitPlan - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Temel Stiller */
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #45a049;
-            --accent-color: #8BC34A;
-            --light-color: #f9f9f9;
-            --dark-color: #333;
-            --gray-color: #e0e0e0;
-            --danger-color: #f44336;
-            --vegetarian-color: #8BC34A;
-            --vegan-color: #4CAF50;
-            --lowcarb-color: #2196F3;
-            --highprotein-color: #FF9800;
-            --weekday-color: #607D8B;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            color: var(--dark-color);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
-        /* Mobil için responsive düzenlemeler */
-        @media (max-width: 768px) {
-            .container {
-                padding: 5px;
-            }
-
-            .app-title {
-                font-size: 1.8rem;
-            }
-
-            .tab-buttons {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .tab-btn {
-                padding: 8px 15px;
-                font-size: 14px;
-                flex: 1 1 auto;
-                min-width: 120px;
-                text-align: center;
-            }
-
-            .app-container {
-                flex-direction: column;
-            }
-
-            .meal-planner, .shopping-list {
-                width: 100%;
-                margin-bottom: 15px;
-            }
-
-            .form-group {
-                margin-bottom: 10px;
-            }
-
-            select, input {
-                font-size: 14px;
-                padding: 8px;
-            }
-
-            .btn {
-                padding: 10px 15px;
-                font-size: 14px;
-            }
-
-            .meal-item {
-                padding: 10px;
-            }
-
-            .meal-actions {
-                flex-wrap: wrap;
-            }
-
-            .share-buttons {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .share-btn {
-                flex: 1 1 auto;
-                min-width: 100px;
-                margin: 5px;
-            }
-
-            .market-links {
-                flex-direction: column;
-            }
-
-            .market-btn {
-                width: 100%;
-                margin-bottom: 5px;
-            }
-
-            .weekly-plan {
-                grid-template-columns: 1fr;
-            }
-
-            .day-card {
-                margin-bottom: 10px;
-            }
-
-            .week-navigation {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .week-pagination {
-                margin-bottom: 10px;
-            }
-
-            .week-actions {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .cart-items {
-                max-height: 200px;
-            }
-
-            .cart-item {
-                grid-template-columns: 1fr 1fr;
-                font-size: 14px;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 10% auto;
-                padding: 15px;
-            }
-
-            .favorites-container {
-                grid-template-columns: 1fr;
-            }
-
-            .favorite-item {
-                margin-bottom: 10px;
-            }
-
-            /* Mobil için özel düzenlemeler */
-            .letter-icon {
-                margin: 0 1px;
-            }
-
-            .letter-icon i {
-                font-size: 0.4em;
-                top: -0.5em;
-            }
-
-            .membership-status, .upgrade-btn {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin: 10px;
-            }
-
-            .week-days {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-
-            .day-slot {
-                min-height: 50px;
-            }
-
-            .meal-details {
-                grid-template-columns: 1fr;
-            }
-
-            .ingredients-section {
-                padding: 10px;
-            }
-
-            .ingredients-section ul {
-                margin-left: 15px;
-            }
-        }
-
-        /* Küçük ekranlar için ek düzenlemeler */
-        @media (max-width: 480px) {
-            .app-title {
-                font-size: 1.5rem;
-            }
-
-            .tab-btn {
-                padding: 6px 10px;
-                font-size: 12px;
-                min-width: 100px;
-            }
-
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .meal-item h3 {
-                font-size: 16px;
-            }
-
-            .share-btn {
-                min-width: 80px;
-                font-size: 12px;
-            }
-
-            .cart-item {
-                font-size: 12px;
-            }
-        }
-
-        /* Yatay mod için düzenlemeler */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .container {
-                padding: 5px;
-            }
-
-            .app-title {
-                font-size: 1.5rem;
-            }
-
-            .meal-planner, .shopping-list {
-                max-height: 80vh;
-                overflow-y: auto;
-            }
-        }
-
-        header {
-            text-align: center;
-            padding: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .app-title {
-            font-size: 2.5rem;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        .letter-icon {
-            position: relative;
-            display: inline-block;
-            margin: 0 2px;
-            transition: transform 0.3s ease;
-        }
-
-        .letter-icon i {
-            position: absolute;
-            font-size: 0.5em;
-            top: -0.7em;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0.8;
-            color: #4CAF50;
-        }
-
-        .letter-icon:hover {
-            transform: translateY(-5px);
-        }
-
-        .letter-icon:hover i {
-            transform: translateX(-50%) scale(1.2);
-        }
-
-        .membership-status {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .membership-free {
-            background-color: #f0f0f0;
-            color: #666;
-        }
-
-        .membership-premium {
-            background-color: #FFD700;
-            color: #000;
-        }
-
-        .upgrade-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .upgrade-btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .week-limit-message {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .tab-buttons {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--gray-color);
-        }
-
-        .tab-btn {
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--dark-color);
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--primary-color);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .app-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .meal-planner, .shopping-list {
-            flex: 1;
-            min-width: 300px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--gray-color);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--gray-color);
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .btn-change {
-            background-color: var(--lowcarb-color);
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 36px;
-            width: 36px;
-            margin: 0;
-        }
-
-        .btn-change:hover {
-            background-color: #1976D2;
-        }
-
-        .btn-try-again {
-            background-color: var(--highprotein-color);
-        }
-
-        .btn-try-again:hover {
-            background-color: #F57C00;
-        }
-
-        .btn-generate-week {
-            background-color: var(--weekday-color);
-            margin-bottom: 15px;
-        }
-
-        .btn-generate-week:hover {
-            background-color: #455A64;
-        }
-
-        .meal-result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: var(--light-color);
-            border-radius: 4px;
-        }
-
-        .meal-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed var(--gray-color);
-            position: relative;
-        }
-
-        .meal-item h3 {
-            color: var(--primary-color);
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .meal-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            gap: 10px;
-        }
-
-        .share-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .share-btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            height: 36px;
-        }
-
-        .share-btn.whatsapp {
-            background-color: #25D366;
-            color: white;
-        }
-
-        .share-btn.telegram {
-            background-color: #0088cc;
-            color: white;
-        }
-
-        .share-btn.copy {
-            background-color: var(--gray-color);
-            color: var(--dark-color);
-        }
-
-        .share-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .share-btn:active {
-            transform: translateY(0);
-        }
-
-        .favorite-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: #ccc;
-            transition: all 0.3s ease;
-            padding: 5px;
-        }
-
-        .favorite-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .favorite-btn.favorited {
-            color: var(--danger-color);
-        }
-
-        .favorite-btn.favorited:hover {
-            color: #d32f2f;
-        }
-
-        .meal-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .meal-tags {
-            display: flex;
-            gap: 10px;
-        }
-
-        .diet-balanced {
-            background-color: var(--primary-color);
-        }
-
-        .diet-vegetarian {
-            background-color: var(--vegetarian-color);
-        }
-
-        .diet-vegan {
-            background-color: var(--vegan-color);
-        }
-
-        .diet-lowcarb {
-            background-color: var(--lowcarb-color);
-        }
-
-        .diet-highprotein {
-            background-color: var(--highprotein-color);
-        }
-
-        .meal-item p {
-            margin-bottom: 5px;
-        }
-
-        .calorie-info {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .empty-message {
-            color: #666;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .shopping-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid var(--gray-color);
-        }
-
-        .shopping-item:last-child {
-            border-bottom: none;
-        }
-
-        .shopping-item input {
-            width: auto;
-            margin-right: 10px;
-        }
-
-        .market-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .market-btn {
-            flex: 1;
-            min-width: 120px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .market-btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .market-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        /* Haftalık planlama */
-        .weekly-plan {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .day-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .day-header {
-            color: var(--weekday-color);
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--gray-color);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .day-meal {
-            margin-bottom: 10px;
-        }
-
-        .day-meal h4 {
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        /* Modal Stilleri */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 500px;
-            position: relative;
-        }
-
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-cancel {
-            background-color: var(--danger-color);
-        }
-
-        .btn-cancel:hover {
-            background-color: #d32f2f;
-        }
-
-        /* Sepet Stilleri */
-        .cart-items {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 20px 0;
-        }
-
-        .cart-item {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
-            gap: 10px;
-            padding: 10px;
-            border-bottom: 1px solid var(--gray-color);
-            align-items: center;
-        }
-
-        .cart-total {
-            text-align: right;
-            font-size: 1.2em;
-            margin: 20px 0;
-            padding-top: 10px;
-            border-top: 2px solid var(--gray-color);
-        }
-
-        .market-prices {
-            margin: 20px 0;
-            border: 1px solid var(--gray-color);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .market-price-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .market-price-item {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            padding: 10px;
-            border-bottom: 1px solid var(--gray-color);
-        }
-
-        .market-price-item:last-child {
-            border-bottom: none;
-        }
-
-        .market-name {
-            font-weight: bold;
-        }
-
-        .best-price {
-            background-color: #e8f5e9;
-            position: relative;
-        }
-
-        .best-price::after {
-            content: '✓ En Uygun';
-            position: absolute;
-            right: 10px;
-            color: var(--primary-color);
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-
-        /* Responsive Tasarım */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .market-links {
-                flex-direction: column;
-            }
-            
-            .market-btn {
-                width: 100%;
-            }
-            
-            .weekly-plan {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .weekly-plans-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .week-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative;
-        }
-
-        .week-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--gray-color);
-        }
-
-        .week-number {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .week-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .week-actions .share-buttons {
-            display: flex;
-            gap: 5px;
-        }
-
-        .week-actions .share-btn {
-            padding: 6px 10px;
-            font-size: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .week-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .week-actions .share-buttons {
-                justify-content: space-between;
-            }
-        }
-
-        .week-action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--dark-color);
-            font-size: 16px;
-        }
-
-        .week-action-btn:hover {
-            color: var(--primary-color);
-        }
-
-        .week-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .day-slot {
-            padding: 5px;
-            border: 1px solid var(--gray-color);
-            border-radius: 4px;
-            min-height: 60px;
-            cursor: move;
-            transition: background-color 0.3s;
-        }
-
-        .day-slot:hover {
-            background-color: #f0f0f0;
-        }
-
-        .day-slot.dragging {
-            opacity: 0.5;
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .day-slot.drop-target {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .day-slot.empty {
-            background-color: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-        }
-
-        .week-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-        }
-
-        .week-pagination {
-            display: flex;
-            gap: 10px;
-        }
-
-        .week-pagination-btn {
-            padding: 5px 10px;
-            border: 1px solid var(--gray-color);
-            border-radius: 4px;
-            background: none;
-            cursor: pointer;
-        }
-
-        .week-pagination-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .meal-details {
-            margin-top: 15px;
-            display: grid;
-            gap: 20px;
-            grid-template-columns: 1fr;
-        }
-
-        @media (min-width: 768px) {
-            .meal-details {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .ingredients-section {
-            background-color: var(--light-color);
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .ingredients-section ul {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-
-        .ingredients-section li {
-            margin-bottom: 5px;
-        }
-
-        /* Favoriler Stilleri */
-        .favorites-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .favorite-item {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative;
-        }
-
-        .favorite-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--gray-color);
-        }
-
-        .favorite-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .favorite-action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--dark-color);
-            font-size: 16px;
-        }
-
-        .favorite-action-btn:hover {
-            color: var(--primary-color);
-        }
-
-        .favorite-action-btn.delete {
-            color: var(--danger-color);
-        }
-
-        .favorite-action-btn.delete:hover {
-            color: #d32f2f;
-        }
-
-        .add-to-favorites {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: #ccc;
-            transition: color 0.3s;
-        }
-
-        .add-to-favorites:hover {
-            color: var(--danger-color);
-        }
-
-        .add-to-favorites.favorited {
-            color: var(--danger-color);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .logo {
-            text-align: center;
-            flex-grow: 1;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        #shopping-cart-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        #shopping-cart-btn:hover {
-            background-color: #45a049;
-        }
-    </style>
-    <script src="meal_database.js"></script>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1 class="app-title">
-                <span class="letter-icon"><i class="fas fa-dumbbell"></i>F</span>
-                <span class="letter-icon"><i class="fas fa-heartbeat"></i>I</span>
-                <span class="letter-icon"><i class="fas fa-running"></i>T</span>
-                <span class="letter-icon"><i class="fas fa-apple-alt"></i>P</span>
-                <span class="letter-icon"><i class="fas fa-carrot"></i>L</span>
-                <span class="letter-icon"><i class="fas fa-utensils"></i>A</span>
-                <span class="letter-icon"><i class="fas fa-weight"></i>N</span>
-            </h1>
-        </header>
-
-        <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="daily">Günlük Plan</button>
-            <button class="tab-btn" data-tab="weekly">Haftalık Plan</button>
-            <button class="tab-btn" data-tab="favorites">Favoriler</button>
-        </div>
-
-        <!-- Günlük Plan Sekmesi -->
-        <div id="daily" class="tab-content active">
-            <div class="app-container">
-                <div class="meal-planner">
-                    <h2><i class="fas fa-calendar-alt"></i> Öğün Planlayıcı</h2>
-                    
-                    <div class="form-group">
-                        <label for="diet-type">Diyet Tercihi:</label>
-                        <select id="diet-type">
-                            <option value="balanced">Dengeli Beslenme</option>
-                            <option value="vegetarian">Vejetaryen</option>
-                            <option value="vegan">Vegan</option>
-                            <option value="low-carb">Düşük Karbonhidrat</option>
-                            <option value="high-protein">Yüksek Protein</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="calorie-range">Kalori Aralığı:</label>
-                        <select id="calorie-range">
-                            <option value="100-500">100-500 kcal (Hafif)</option>
-                            <option value="500-1000">500-1000 kcal (Orta)</option>
-                            <option value="1000-1500">1000-1500 kcal (Yüksek)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="exclude">Hariç Tutulacaklar (virgülle ayırın):</label>
-                        <input type="text" id="exclude" placeholder="örnek: soya, gluten, süt">
-                    </div>
-
-                    <button id="generate-meal" class="btn"><i class="fas fa-magic"></i> Öğün Önerisi Oluştur</button>
-
-                    <div id="meal-result" class="meal-result">
-                        <!-- Öğün önerisi burada görünecek -->
-                    </div>
-                </div>
-
-                <div class="shopping-list">
-                    <h2><i class="fas fa-shopping-basket"></i> Alışveriş Listesi</h2>
-                    <div id="shopping-items">
-                        <!-- Alışveriş öğeleri burada görünecek -->
-                        <p class="empty-message">Önce bir öğün planı oluşturun</p>
-                    </div>
-                    <div class="market-links">
-                        <button id="migros" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Migros</button>
-                        <button id="carrefour" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Carrefour</button>
-                        <button id="getir" class="market-btn" disabled><i class="fas fa-cart-plus"></i> GetirYemek</button>
-                        <button id="a101" class="market-btn" disabled><i class="fas fa-cart-plus"></i> A101</button>
-                        <button id="bim" class="market-btn" disabled><i class="fas fa-cart-plus"></i> BİM</button>
-                        <button id="sok" class="market-btn" disabled><i class="fas fa-cart-plus"></i> ŞOK</button>
-                        <button id="yemeksepeti" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Yemeksepeti</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Haftalık Plan Sekmesi -->
-        <div id="weekly" class="tab-content">
-            <div class="meal-planner">
-                <h2><i class="fas fa-calendar-week"></i> Haftalık Öğün Planlayıcı</h2>
-                
-                <div class="form-group">
-                    <label for="weekly-diet-type">Diyet Tercihi:</label>
-                    <select id="weekly-diet-type">
-                        <option value="balanced">Dengeli Beslenme</option>
-                        <option value="vegetarian">Vejetaryen</option>
-                        <option value="vegan">Vegan</option>
-                        <option value="low-carb">Düşük Karbonhidrat</option>
-                        <option value="high-protein">Yüksek Protein</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="weekly-calorie-range">Kalori Aralığı:</label>
-                    <select id="weekly-calorie-range">
-                        <option value="100-500">100-500 kcal (Hafif)</option>
-                        <option value="500-1000">500-1000 kcal (Orta)</option>
-                        <option value="1000-1500">1000-1500 kcal (Yüksek)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="weekly-exclude">Hariç Tutulacaklar (virgülle ayırın):</label>
-                    <input type="text" id="weekly-exclude" placeholder="örnek: soya, gluten, süt">
-                </div>
-
-                <button id="generate-week" class="btn btn-generate-week"><i class="fas fa-calendar-plus"></i> Haftalık Plan Oluştur</button>
-                <button id="generate-random-week" class="btn" style="background-color: var(--accent-color); margin-top: 10px;">
-                    <i class="fas fa-random"></i> Rastgele Plan Oluştur
-                </button>
-
-                <div class="week-navigation">
-                    <div class="week-pagination">
-                        <button class="week-pagination-btn" data-action="prev" onclick="goToPrevWeek()"><i class="fas fa-chevron-left"></i></button>
-                        <span id="current-week">Hafta 1</span>
-                        <button class="week-pagination-btn" data-action="next" onclick="goToNextWeek()"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="week-actions">
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareWeeklyPlan('whatsapp')">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn telegram" onclick="shareWeeklyPlan('telegram')">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn copy" onclick="shareWeeklyPlan('copy')">
-                                <i class="fas fa-copy"></i> Kopyala
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="weekly-plan" class="weekly-plan">
-                    <!-- Haftalık plan burada görünecek -->
-                    <p class="empty-message">Haftalık öğün planı oluşturmak için yukarıdaki butona tıklayın</p>
-                </div>
-
-                <div id="saved-weeks" class="weekly-plans-container">
-                    <!-- Kaydedilmiş haftalık planlar burada görünecek -->
-                </div>
-            </div>
-
-            <div class="shopping-list">
-                <h2><i class="fas fa-shopping-basket"></i> Haftalık Alışveriş Listesi</h2>
-                <div id="weekly-shopping-items">
-                    <!-- Haftalık alışveriş öğeleri burada görünecek -->
-                    <p class="empty-message">Önce bir haftalık plan oluşturun</p>
-                </div>
-                <div class="market-links">
-                    <button id="weekly-migros" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Migros</button>
-                    <button id="weekly-carrefour" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Carrefour</button>
-                    <button id="weekly-getir" class="market-btn" disabled><i class="fas fa-cart-plus"></i> GetirYemek</button>
-                    <button id="weekly-a101" class="market-btn" disabled><i class="fas fa-cart-plus"></i> A101</button>
-                    <button id="weekly-bim" class="market-btn" disabled><i class="fas fa-cart-plus"></i> BİM</button>
-                    <button id="weekly-sok" class="market-btn" disabled><i class="fas fa-cart-plus"></i> ŞOK</button>
-                    <button id="weekly-yemeksepeti" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Yemeksepeti</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Favoriler Sekmesi -->
-        <div id="favorites" class="tab-content">
-            <div class="meal-planner">
-                <h2><i class="fas fa-heart"></i> Favori Yemeklerim</h2>
-                <div id="favorites-container" class="favorites-container">
-                    <p class="empty-message">Henüz favori yemek eklemediniz</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Alışveriş Listesi Gönderildi</h2>
-            <p>Seçtiğiniz marketin web sitesine yönlendiriliyorsunuz. Lütfen alışveriş sepetinizi kontrol edip ödeme işlemini tamamlayın.</p>
-            <div class="modal-buttons">
-                <button id="proceed" class="btn">Yönlendir</button>
-                <button id="cancel" class="btn btn-cancel">İptal</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Premium Üyelik Modal -->
-    <div id="premium-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Premium Üyeliğe Yükselt</h2>
-            <div class="premium-features">
-                <h3>Premium Özellikler:</h3>
-                <ul>
-                    <li><i class="fas fa-check"></i> 52 Haftalık Yemek Planına Erişim</li>
-                    <li><i class="fas fa-check"></i> Özel Tarifler ve İpuçları</li>
-                    <li><i class="fas fa-check"></i> Öncelikli Destek</li>
-                    <li><i class="fas fa-check"></i> Reklamsız Deneyim</li>
-                </ul>
-            </div>
-            <div class="pricing">
-                <h3>Yıllık Üyelik: 199 TL</h3>
-                <p>Günlük sadece 0.54 TL!</p>
-            </div>
-            <div class="modal-buttons">
-                <button id="proceed-payment" class="btn">Ödemeye Geç</button>
-                <button id="cancel-premium" class="btn btn-cancel">İptal</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // DOM Elementleri
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const generateMealBtn = document.getElementById('generate-meal');
-        const generateWeekBtn = document.getElementById('generate-week');
-        const generateRandomWeekBtn = document.getElementById('generate-random-week');
-        const mealResultDiv = document.getElementById('meal-result');
-        const shoppingItemsDiv = document.getElementById('shopping-items');
-        const weeklyPlanDiv = document.getElementById('weekly-plan');
-        const weeklyShoppingItemsDiv = document.getElementById('weekly-shopping-items');
-        const dietTypeSelect = document.getElementById('diet-type');
-        const weeklyDietTypeSelect = document.getElementById('weekly-diet-type');
-        const calorieRangeSelect = document.getElementById('calorie-range');
-        const weeklyCalorieRangeSelect = document.getElementById('weekly-calorie-range');
-        const excludeInput = document.getElementById('exclude');
-        const weeklyExcludeInput = document.getElementById('weekly-exclude');
-        const marketButtons = document.querySelectorAll('.market-btn');
-        const weeklyMarketButtons = document.querySelectorAll('#weekly-migros, #weekly-carrefour, #weekly-getir, #weekly-a101, #weekly-bim, #weekly-sok, #weekly-yemeksepeti');
-        const modal = document.getElementById('modal');
-        const proceedBtn = document.getElementById('proceed');
-        const cancelBtn = document.getElementById('cancel');
-        const closeBtn = document.querySelector('.close');
-
-        // Üyelik durumu ve yükseltme işlemleri
-        const membershipStatus = document.getElementById('membership-status');
-        const upgradeBtn = document.getElementById('upgrade-btn');
-        const premiumModal = document.getElementById('premium-modal');
-        const proceedPaymentBtn = document.getElementById('proceed-payment');
-        const cancelPremiumBtn = document.getElementById('cancel-premium');
-        const closePremiumBtn = premiumModal.querySelector('.close');
-
-        // Global değişkenler
-        let currentDietType = '';
-        let currentCalorieRange = '';
-        let currentExcludeItems = [];
-        let filteredMeals = [];
-        let currentMealIndex = 0;
-        let weeklyMeals = [];
-        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-        // Haftalık plan yönetimi
-        let currentWeek = 1;
-        let savedWeeks = JSON.parse(localStorage.getItem('savedWeeks') || '{}');
-
-        // Tab geçiş fonksiyonu
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.getAttribute('data-tab');
-                
-                // Tab butonlarını güncelle
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                // Tab içeriklerini güncelle
-                tabContents.forEach(content => content.classList.remove('active'));
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
-
-        // Öğün filtreleme fonksiyonu
-        function filterMeals(dietType, calorieRange, excludeItems) {
-            console.log('Filtreleme başladı:', { dietType, calorieRange, excludeItems });
-            
-            if (!mealDatabase || !mealDatabase[dietType]) {
-                console.error('Meal database not loaded or invalid diet type:', dietType);
-                return [];
-            }
-
-            // Kalori aralığını parçala
-            const [minCalStr, maxCalStr] = calorieRange.split('-');
-            const minCal = parseInt(minCalStr);
-            const maxCal = parseInt(maxCalStr.split(' ')[0]); // "kcal" kısmını kaldır
-
-            console.log('İşlenen kalori aralığı:', { minCal, maxCal, originalRange: calorieRange });
-
-            // Veritabanındaki tüm yemekleri kontrol et
-            const meals = mealDatabase[dietType];
-            console.log(`${dietType} için toplam yemek sayısı:`, meals.length);
-            console.log('Mevcut yemekler:', meals.map(m => `${m.name} (${m.calories} kcal)`));
-
-            const filtered = meals.filter(meal => {
-                // Kalori kontrolü
-                const isInCalorieRange = meal.calories >= minCal && meal.calories <= maxCal;
-                
-                if (!isInCalorieRange) {
-                    console.log(`Kalori dışı yemek: ${meal.name} (${meal.calories} kcal), beklenen aralık: ${minCal}-${maxCal}`);
-                    return false;
-                }
-
-                // Hariç tutulan malzemeler kontrolü
-                if (excludeItems && excludeItems.length > 0 && excludeItems[0] !== '') {
-                    for (const ingredient of meal.ingredients) {
-                        const ingredientName = ingredient.name.toLowerCase();
-                        if (excludeItems.some(item => {
-                            const trimmedItem = item.trim().toLowerCase();
-                            return trimmedItem && ingredientName.includes(trimmedItem);
-                        })) {
-                            console.log(`Hariç tutulan malzeme içeren yemek: ${meal.name}, malzeme: ${ingredient.name}`);
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            });
-
-            console.log('Filtreleme sonucu:', {
-                totalMeals: meals.length,
-                filteredMeals: filtered.length,
-                calorieRange: `${minCal}-${maxCal}`,
-                filteredMealNames: filtered.map(m => `${m.name} (${m.calories} kcal)`)
-            });
-
-            return filtered;
-        }
-
-        // Öğün oluşturma fonksiyonu
-        function generateMeal() {
-            console.log('Öğün oluşturma başladı');
-            currentDietType = dietTypeSelect.value;
-            currentCalorieRange = calorieRangeSelect.value;
-            currentExcludeItems = excludeInput.value.split(',').map(item => item.trim());
-
-            console.log('Seçilen değerler:', {
-                dietType: currentDietType,
-                calorieRange: currentCalorieRange,
-                excludeItems: currentExcludeItems
-            });
-
-            filteredMeals = filterMeals(currentDietType, currentCalorieRange, currentExcludeItems);
-
-            if (!filteredMeals || filteredMeals.length === 0) {
-                console.log('Uygun öğün bulunamadı');
-                showNoMealFound(mealResultDiv);
-                return;
-            }
-
-            console.log('Filtrelenen öğünler:', filteredMeals.map(m => `${m.name} (${m.calories} kcal)`));
-            
-            // Rastgele bir öğün seç
-            currentMealIndex = Math.floor(Math.random() * filteredMeals.length);
-            showCurrentMeal();
-        }
-
-        // Haftalık planı gösterme fonksiyonu
-        function showWeeklyPlan() {
-            console.log('Haftalık plan gösteriliyor...');
-            console.log('Seçilen yemekler:', weeklyMeals);
-
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-            
-            weeklyPlanDiv.innerHTML = days.map((day, index) => {
-                const meal = weeklyMeals[index];
-                return `
-                    <div class="day-card">
-                        <div class="day-header">
-                            <span>${day}</span>
-                            <span class="diet-tag diet-${weeklyDietTypeSelect.value}">${meal.calories} kcal</span>
-                        </div>
-                        <div class="day-meal" ${isPremium ? 'draggable="true"' : ''} data-day-index="${index}">
-                            <h4>${meal.name}</h4>
-                            <p>${meal.description}</p>
-                            <div class="meal-details">
-                                <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Sadece premium üyeler için sürükle-bırak özelliğini etkinleştir
-            if (isPremium) {
-                setupDragAndDrop();
-            }
-
-            // Tüm malzemeleri topla
-            const allIngredients = weeklyMeals.flatMap(meal => meal.ingredients);
-            console.log('Toplam malzeme listesi:', allIngredients);
-            
-            // Haftalık alışveriş listesini oluştur
-            generateWeeklyShoppingList(allIngredients);
-            
-            // Market butonlarını aktif et
-            enableWeeklyMarketButtons();
-        }
-
-        // Sürükle-bırak işlemleri için gerekli fonksiyonlar
-        function setupDragAndDrop() {
-            const dayMeals = document.querySelectorAll('.day-meal');
-            
-            dayMeals.forEach(meal => {
-                meal.addEventListener('dragstart', handleDragStart);
-                meal.addEventListener('dragend', handleDragEnd);
-                meal.addEventListener('dragover', handleDragOver);
-                meal.addEventListener('drop', handleDrop);
-            });
-        }
-
-        function handleDragStart(e) {
-            e.target.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-day-index'));
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.target.classList.add('drop-target');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.target.classList.remove('drop-target');
-            
-            const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'));
-            const targetIndex = parseInt(e.target.getAttribute('data-day-index'));
-            
-            if (sourceIndex !== targetIndex) {
-                // Yemekleri değiştir
-                const temp = weeklyMeals[sourceIndex];
-                weeklyMeals[sourceIndex] = weeklyMeals[targetIndex];
-                weeklyMeals[targetIndex] = temp;
-                
-                // Planı güncelle
-                showWeeklyPlan();
-                
-                // Değişiklik yapıldığını belirt
-                document.getElementById('save-week').classList.add('btn-change');
-            }
-        }
-
-        // Haftalık planı kaydet
-        function saveWeeklyPlan() {
-            if (!weeklyMeals || weeklyMeals.length === 0) {
-                alert('Önce bir haftalık plan oluşturun!');
-                return;
-            }
-
-            const weekData = {
-                meals: weeklyMeals,
-                dietType: weeklyDietTypeSelect.value,
-                calorieRange: weeklyCalorieRangeSelect.value,
-                excludeItems: weeklyExcludeInput.value,
-                date: new Date().toISOString()
-            };
-
-            savedWeeks[currentWeek] = weekData;
-            localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-            
-            alert('Haftalık plan başarıyla kaydedildi!');
-        }
-
-        // Mevcut öğünü gösterme fonksiyonu
-        function showCurrentMeal() {
-            const selectedMeal = filteredMeals[currentMealIndex];
-            displayMeal(selectedMeal, currentDietType, mealResultDiv);
-            generateShoppingList(selectedMeal.ingredients);
-            enableMarketButtons();
-        }
-
-        // Öğün bilgilerini gösterme fonksiyonu
-        function displayMeal(meal, dietType, container) {
-            let dietTag = '';
-            let dietClass = '';
-            
-            switch(dietType) {
-                case 'vegetarian':
-                    dietTag = 'Vejetaryen';
-                    dietClass = 'diet-vegetarian';
-                    break;
-                case 'vegan':
-                    dietTag = 'Vegan';
-                    dietClass = 'diet-vegan';
-                    break;
-                case 'low-carb':
-                    dietTag = 'Düşük Karbonhidrat';
-                    dietClass = 'diet-lowcarb';
-                    break;
-                case 'high-protein':
-                    dietTag = 'Yüksek Protein';
-                    dietClass = 'diet-highprotein';
-                    break;
-                default:
-                    dietTag = 'Dengeli';
-                    dietClass = 'diet-balanced';
-            }
-            
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const today = new Date().toDateString();
-            const dailySuggestions = JSON.parse(localStorage.getItem('dailySuggestions') || '{}');
-            const hasUsedSuggestion = dailySuggestions[today] && dailySuggestions[today][dietType];
-            const isFavorited = favorites.some(f => f.name === meal.name);
-            
-            container.innerHTML = `
-                <div class="meal-item">
-                    <div class="meal-info">
-                        <h3>${meal.name}</h3>
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(this, '${meal.name}')">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="meal-tags">
-                        <span class="diet-tag ${dietClass}">${dietTag}</span>
-                        <span class="calorie-info">${meal.calories} kcal</span>
-                    </div>
-                    <p><strong>Açıklama:</strong> ${meal.description}</p>
-                    <div class="meal-details">
-                        <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="meal-actions">
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareMeal('${meal.name}', 'whatsapp')">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn telegram" onclick="shareMeal('${meal.name}', 'telegram')">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn copy" onclick="shareMeal('${meal.name}', 'copy')">
-                                <i class="fas fa-copy"></i> Kopyala
-                            </button>
-                            ${filteredMeals.length > 1 ? 
-                                `<button id="change-meal" class="share-btn" title="Başka öneri">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>` 
-                                : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            if (filteredMeals.length > 1) {
-                const changeButton = document.getElementById('change-meal');
-                if (isPremium || !hasUsedSuggestion) {
-                    changeButton.addEventListener('click', changeMeal);
-                } else {
-                    changeButton.addEventListener('click', () => {
-                        openPremiumModal();
-                    });
-                }
-            }
-        }
-
-        // Öğün değiştirme fonksiyonu
-        function changeMeal() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            
-            if (!isPremium) {
-                // Ücretsiz kullanıcılar için günlük öneri sayısını kontrol et
-                const today = new Date().toDateString();
-                const dailySuggestions = JSON.parse(localStorage.getItem('dailySuggestions') || '{}');
-                
-                if (dailySuggestions[today] && dailySuggestions[today][currentDietType]) {
-                    alert('Ücretsiz versiyonda her kategoriden günlük sadece 1 öneri alabilirsiniz.\nSınırsız öneri için Premium üyeliğe yükseltin!');
-                    return;
-                }
-                
-                // Öneriyi kaydet
-                if (!dailySuggestions[today]) {
-                    dailySuggestions[today] = {};
-                }
-                dailySuggestions[today][currentDietType] = true;
-                localStorage.setItem('dailySuggestions', JSON.stringify(dailySuggestions));
-            }
-            
-            currentMealIndex = (currentMealIndex + 1) % filteredMeals.length;
-            showCurrentMeal();
-        }
-
-        // Alışveriş listesi oluşturma fonksiyonu
-        function generateShoppingList(ingredients) {
-            shoppingItemsDiv.innerHTML = `
-                <h3>Alışveriş Listesi</h3>
-                ${ingredients.map(ing => `
-                    <div class="shopping-item">
-                        <div>
-                            <input type="checkbox" id="item-${ing.name.replace(/\s+/g, '-')}" checked>
-                            <label for="item-${ing.name.replace(/\s+/g, '-')}">${ing.amount} ${ing.name}</label>
-                        </div>
-                        <i class="fas fa-trash-alt" data-item="${ing.name.replace(/\s+/g, '-')}"></i>
-                    </div>
-                `).join('')}
-            `;
-            
-            document.querySelectorAll('.fa-trash-alt').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    const itemElement = e.target.closest('.shopping-item');
-                    itemElement.remove();
-                    
-                    if (shoppingItemsDiv.querySelectorAll('.shopping-item').length === 0) {
-                        disableMarketButtons();
-                    }
-                });
-            });
-        }
-
-        // Öğün bulunamadı mesajı
-        function showNoMealFound(container) {
-            container.innerHTML = `
-                <p class="empty-message">Belirtilen kriterlere uygun öğün bulunamadı. Lütfen farklı tercihler deneyin.</p>
-                <button class="btn btn-try-again"><i class="fas fa-redo"></i> Tekrar Dene</button>
-            `;
-            
-            container.querySelector('.btn-try-again').addEventListener('click', () => {
-                if (container.id === 'meal-result') generateMeal();
-                else generateWeeklyPlan();
-            });
-        }
-
-        // Market butonlarını aktif etme fonksiyonları
-        function enableMarketButtons() {
-            marketButtons.forEach(button => {
-                button.disabled = false;
-            });
-        }
-
-        function enableWeeklyMarketButtons() {
-            weeklyMarketButtons.forEach(button => {
-                button.disabled = false;
-            });
-        }
-
-        // Market butonlarını devre dışı bırakma fonksiyonları
-        function disableMarketButtons() {
-            marketButtons.forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        function disableWeeklyMarketButtons() {
-            weeklyMarketButtons.forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        // Market ürün fiyatları
-        const marketProducts = {
-            migros: {
-                "Tavuk göğsü": { price: 159.90, unit: "kg" },
-                "Tavuk but": { price: 129.90, unit: "kg" },
-                "Dana kıyma": { price: 449.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 479.90, unit: "kg" },
-                "Kuzu eti": { price: 499.90, unit: "kg" },
-                "Domates": { price: 34.90, unit: "kg" },
-                "Salatalık": { price: 39.90, unit: "kg" },
-                "Soğan": { price: 19.90, unit: "kg" },
-                "Patates": { price: 24.90, unit: "kg" },
-                "Havuç": { price: 29.90, unit: "kg" },
-                "Biber": { price: 44.90, unit: "kg" },
-                "Patlıcan": { price: 49.90, unit: "kg" },
-                "Maydanoz": { price: 7.90, unit: "demet" },
-                "Dereotu": { price: 7.90, unit: "demet" },
-                "Nane": { price: 7.90, unit: "demet" },
-                "Roka": { price: 9.90, unit: "demet" },
-                "Marul": { price: 29.90, unit: "adet" },
-                "Pirinç": { price: 84.90, unit: "kg" },
-                "Bulgur": { price: 49.90, unit: "kg" },
-                "Mercimek": { price: 64.90, unit: "kg" },
-                "Nohut": { price: 69.90, unit: "kg" },
-                "Fasulye": { price: 79.90, unit: "kg" },
-                "Makarna": { price: 29.90, unit: "kg" },
-                "Un": { price: 39.90, unit: "kg" },
-                "Yoğurt": { price: 49.90, unit: "kg" },
-                "Süt": { price: 39.90, unit: "litre" },
-                "Yumurta": { price: 109.90, unit: "30'lu" },
-                "Peynir": { price: 289.90, unit: "kg" },
-                "Zeytin": { price: 199.90, unit: "kg" },
-                "Zeytinyağı": { price: 419.90, unit: "litre" },
-                "Tereyağı": { price: 399.90, unit: "kg" },
-                "Ekmek": { price: 7.50, unit: "adet" }
-            },
-            carrefour: {
-                "Tavuk göğsü": { price: 154.90, unit: "kg" },
-                "Tavuk but": { price: 124.90, unit: "kg" },
-                "Dana kıyma": { price: 444.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 474.90, unit: "kg" },
-                "Kuzu eti": { price: 494.90, unit: "kg" },
-                "Domates": { price: 32.90, unit: "kg" },
-                "Salatalık": { price: 37.90, unit: "kg" },
-                "Soğan": { price: 18.90, unit: "kg" },
-                "Patates": { price: 23.90, unit: "kg" },
-                "Havuç": { price: 28.90, unit: "kg" },
-                "Biber": { price: 42.90, unit: "kg" },
-                "Patlıcan": { price: 47.90, unit: "kg" },
-                "Maydanoz": { price: 6.90, unit: "demet" },
-                "Dereotu": { price: 6.90, unit: "demet" },
-                "Nane": { price: 6.90, unit: "demet" },
-                "Roka": { price: 8.90, unit: "demet" },
-                "Marul": { price: 27.90, unit: "adet" },
-                "Pirinç": { price: 82.90, unit: "kg" },
-                "Bulgur": { price: 47.90, unit: "kg" },
-                "Mercimek": { price: 62.90, unit: "kg" },
-                "Nohut": { price: 67.90, unit: "kg" },
-                "Fasulye": { price: 77.90, unit: "kg" },
-                "Makarna": { price: 27.90, unit: "kg" },
-                "Un": { price: 37.90, unit: "kg" },
-                "Yoğurt": { price: 47.90, unit: "kg" },
-                "Süt": { price: 37.90, unit: "litre" },
-                "Yumurta": { price: 107.90, unit: "30'lu" },
-                "Peynir": { price: 284.90, unit: "kg" },
-                "Zeytin": { price: 194.90, unit: "kg" },
-                "Zeytinyağı": { price: 414.90, unit: "litre" },
-                "Tereyağı": { price: 394.90, unit: "kg" },
-                "Ekmek": { price: 7.50, unit: "adet" }
-            },
-            a101: {
-                "Tavuk göğsü": { price: 149.90, unit: "kg" },
-                "Tavuk but": { price: 119.90, unit: "kg" },
-                "Dana kıyma": { price: 439.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 469.90, unit: "kg" },
-                "Kuzu eti": { price: 489.90, unit: "kg" },
-                "Domates": { price: 29.90, unit: "kg" },
-                "Salatalık": { price: 34.90, unit: "kg" },
-                "Soğan": { price: 16.90, unit: "kg" },
-                "Patates": { price: 21.90, unit: "kg" },
-                "Havuç": { price: 26.90, unit: "kg" },
-                "Biber": { price: 39.90, unit: "kg" },
-                "Patlıcan": { price: 44.90, unit: "kg" },
-                "Maydanoz": { price: 5.90, unit: "demet" },
-                "Dereotu": { price: 5.90, unit: "demet" },
-                "Nane": { price: 5.90, unit: "demet" },
-                "Roka": { price: 7.90, unit: "demet" },
-                "Marul": { price: 24.90, unit: "adet" },
-                "Pirinç": { price: 79.90, unit: "kg" },
-                "Bulgur": { price: 44.90, unit: "kg" },
-                "Mercimek": { price: 59.90, unit: "kg" },
-                "Nohut": { price: 64.90, unit: "kg" },
-                "Fasulye": { price: 74.90, unit: "kg" },
-                "Makarna": { price: 24.90, unit: "kg" },
-                "Un": { price: 34.90, unit: "kg" },
-                "Yoğurt": { price: 44.90, unit: "kg" },
-                "Süt": { price: 34.90, unit: "litre" },
-                "Yumurta": { price: 104.90, unit: "30'lu" },
-                "Peynir": { price: 279.90, unit: "kg" },
-                "Zeytin": { price: 189.90, unit: "kg" },
-                "Zeytinyağı": { price: 409.90, unit: "litre" },
-                "Tereyağı": { price: 389.90, unit: "kg" },
-                "Ekmek": { price: 7.00, unit: "adet" }
-            },
-            getir: {
-                "Tavuk göğsü": { price: 164.90, unit: "kg" },
-                "Tavuk but": { price: 134.90, unit: "kg" },
-                "Dana kıyma": { price: 459.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 489.90, unit: "kg" },
-                "Kuzu eti": { price: 509.90, unit: "kg" },
-                "Domates": { price: 36.90, unit: "kg" },
-                "Salatalık": { price: 41.90, unit: "kg" },
-                "Soğan": { price: 21.90, unit: "kg" },
-                "Patates": { price: 26.90, unit: "kg" },
-                "Havuç": { price: 31.90, unit: "kg" },
-                "Biber": { price: 46.90, unit: "kg" },
-                "Patlıcan": { price: 51.90, unit: "kg" },
-                "Maydanoz": { price: 8.90, unit: "demet" },
-                "Dereotu": { price: 8.90, unit: "demet" },
-                "Nane": { price: 8.90, unit: "demet" },
-                "Roka": { price: 10.90, unit: "demet" },
-                "Marul": { price: 31.90, unit: "adet" },
-                "Pirinç": { price: 86.90, unit: "kg" },
-                "Bulgur": { price: 51.90, unit: "kg" },
-                "Mercimek": { price: 66.90, unit: "kg" },
-                "Nohut": { price: 71.90, unit: "kg" },
-                "Fasulye": { price: 81.90, unit: "kg" },
-                "Makarna": { price: 31.90, unit: "kg" },
-                "Un": { price: 41.90, unit: "kg" },
-                "Yoğurt": { price: 51.90, unit: "kg" },
-                "Süt": { price: 41.90, unit: "litre" },
-                "Yumurta": { price: 111.90, unit: "30'lu" },
-                "Peynir": { price: 294.90, unit: "kg" },
-                "Zeytin": { price: 204.90, unit: "kg" },
-                "Zeytinyağı": { price: 424.90, unit: "litre" },
-                "Tereyağı": { price: 404.90, unit: "kg" },
-                "Ekmek": { price: 8.00, unit: "adet" }
-            },
-            bim: {
-                "Tavuk göğsü": { price: 144.90, unit: "kg" },
-                "Tavuk but": { price: 114.90, unit: "kg" },
-                "Dana kıyma": { price: 434.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 464.90, unit: "kg" },
-                "Kuzu eti": { price: 484.90, unit: "kg" },
-                "Domates": { price: 27.90, unit: "kg" },
-                "Salatalık": { price: 32.90, unit: "kg" },
-                "Soğan": { price: 15.90, unit: "kg" },
-                "Patates": { price: 20.90, unit: "kg" },
-                "Havuç": { price: 25.90, unit: "kg" },
-                "Biber": { price: 37.90, unit: "kg" },
-                "Patlıcan": { price: 42.90, unit: "kg" },
-                "Maydanoz": { price: 4.90, unit: "demet" },
-                "Dereotu": { price: 4.90, unit: "demet" },
-                "Nane": { price: 4.90, unit: "demet" },
-                "Roka": { price: 6.90, unit: "demet" },
-                "Marul": { price: 22.90, unit: "adet" },
-                "Pirinç": { price: 77.90, unit: "kg" },
-                "Bulgur": { price: 42.90, unit: "kg" },
-                "Mercimek": { price: 57.90, unit: "kg" },
-                "Nohut": { price: 62.90, unit: "kg" },
-                "Fasulye": { price: 72.90, unit: "kg" },
-                "Makarna": { price: 22.90, unit: "kg" },
-                "Un": { price: 32.90, unit: "kg" },
-                "Yoğurt": { price: 42.90, unit: "kg" },
-                "Süt": { price: 32.90, unit: "litre" },
-                "Yumurta": { price: 102.90, unit: "30'lu" },
-                "Peynir": { price: 274.90, unit: "kg" },
-                "Zeytin": { price: 184.90, unit: "kg" },
-                "Zeytinyağı": { price: 404.90, unit: "litre" },
-                "Tereyağı": { price: 384.90, unit: "kg" },
-                "Ekmek": { price: 6.50, unit: "adet" }
-            },
-            sok: {
-                "Tavuk göğsü": { price: 146.90, unit: "kg" },
-                "Tavuk but": { price: 116.90, unit: "kg" },
-                "Dana kıyma": { price: 436.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 466.90, unit: "kg" },
-                "Kuzu eti": { price: 486.90, unit: "kg" },
-                "Domates": { price: 28.90, unit: "kg" },
-                "Salatalık": { price: 33.90, unit: "kg" },
-                "Soğan": { price: 16.90, unit: "kg" },
-                "Patates": { price: 21.90, unit: "kg" },
-                "Havuç": { price: 26.90, unit: "kg" },
-                "Biber": { price: 38.90, unit: "kg" },
-                "Patlıcan": { price: 43.90, unit: "kg" },
-                "Maydanoz": { price: 5.90, unit: "demet" },
-                "Dereotu": { price: 5.90, unit: "demet" },
-                "Nane": { price: 5.90, unit: "demet" },
-                "Roka": { price: 7.90, unit: "demet" },
-                "Marul": { price: 23.90, unit: "adet" },
-                "Pirinç": { price: 78.90, unit: "kg" },
-                "Bulgur": { price: 43.90, unit: "kg" },
-                "Mercimek": { price: 58.90, unit: "kg" },
-                "Nohut": { price: 63.90, unit: "kg" },
-                "Fasulye": { price: 73.90, unit: "kg" },
-                "Makarna": { price: 23.90, unit: "kg" },
-                "Un": { price: 33.90, unit: "kg" },
-                "Yoğurt": { price: 43.90, unit: "kg" },
-                "Süt": { price: 33.90, unit: "litre" },
-                "Yumurta": { price: 103.90, unit: "30'lu" },
-                "Peynir": { price: 276.90, unit: "kg" },
-                "Zeytin": { price: 186.90, unit: "kg" },
-                "Zeytinyağı": { price: 406.90, unit: "litre" },
-                "Tereyağı": { price: 386.90, unit: "kg" },
-                "Ekmek": { price: 6.75, unit: "adet" }
-            },
-            yemeksepeti: {
-                "Tavuk göğsü": { price: 169.90, unit: "kg" },
-                "Tavuk but": { price: 139.90, unit: "kg" },
-                "Dana kıyma": { price: 464.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 494.90, unit: "kg" },
-                "Kuzu eti": { price: 514.90, unit: "kg" },
-                "Domates": { price: 38.90, unit: "kg" },
-                "Salatalık": { price: 43.90, unit: "kg" },
-                "Soğan": { price: 23.90, unit: "kg" },
-                "Patates": { price: 28.90, unit: "kg" },
-                "Havuç": { price: 33.90, unit: "kg" },
-                "Biber": { price: 48.90, unit: "kg" },
-                "Patlıcan": { price: 53.90, unit: "kg" },
-                "Maydanoz": { price: 9.90, unit: "demet" },
-                "Dereotu": { price: 9.90, unit: "demet" },
-                "Nane": { price: 9.90, unit: "demet" },
-                "Roka": { price: 11.90, unit: "demet" },
-                "Marul": { price: 33.90, unit: "adet" },
-                "Pirinç": { price: 88.90, unit: "kg" },
-                "Bulgur": { price: 53.90, unit: "kg" },
-                "Mercimek": { price: 68.90, unit: "kg" },
-                "Nohut": { price: 73.90, unit: "kg" },
-                "Fasulye": { price: 83.90, unit: "kg" },
-                "Makarna": { price: 33.90, unit: "kg" },
-                "Un": { price: 43.90, unit: "kg" },
-                "Yoğurt": { price: 53.90, unit: "kg" },
-                "Süt": { price: 43.90, unit: "litre" },
-                "Yumurta": { price: 113.90, unit: "30'lu" },
-                "Peynir": { price: 298.90, unit: "kg" },
-                "Zeytin": { price: 208.90, unit: "kg" },
-                "Zeytinyağı": { price: 428.90, unit: "litre" },
-                "Tereyağı": { price: 408.90, unit: "kg" },
-                "Ekmek": { price: 8.50, unit: "adet" }
-            }
-        };
-
-        // Modal fonksiyonlarını güncelle
-        function openModal(market) {
-            console.log('Modal açılıyor:', market);
-            
-            // Günlük veya haftalık sekmesine göre doğru div'i seç
-            const isWeekly = market.startsWith('weekly-');
-            const containerSelector = isWeekly ? '#weekly-shopping-items' : '#shopping-items';
-            
-            // Seçili malzemeleri al
-            const ingredients = Array.from(document.querySelectorAll(`${containerSelector} .shopping-item input:checked`))
-                .map(input => {
-                    const label = input.nextElementSibling;
-                    const text = label.textContent.trim();
-                    console.log('İşlenen alışveriş öğesi:', text);
-                    
-                    // İlk boşluğa kadar olan kısmı miktar, geri kalanı isim olarak al
-                    const firstSpace = text.indexOf(' ');
-                    const amount = text.substring(0, firstSpace);
-                    const name = text.substring(firstSpace + 1);
-                    
-                    console.log('Ayrıştırılan bilgiler:', {
-                        amount: amount,
-                        name: name
-                    });
-                    
-                    return { amount, name };
-                });
-
-            console.log('Seçili malzemeler:', ingredients);
-
-            // Market adını düzelt
-            const marketName = market.replace('weekly-', '');
-            
-            // Sepeti oluştur
-            const cart = createMarketCart(marketName, ingredients);
-            console.log('Oluşturulan sepet:', cart);
-
-            // Modal içeriğini güncelle
-            updateModalContent(marketName, cart);
-            
-            // Modalı göster
-            modal.style.display = 'block';
-            modal.setAttribute('data-market', market);
-        }
-
-        // Market sepeti oluşturma fonksiyonu
-        function createMarketCart(market, ingredients) {
-            console.log('Sepet oluşturuluyor:', market);
-            console.log('Gelen malzemeler:', ingredients);
-            console.log('Market ürünleri:', marketProducts[market]);
-            
-            let cart = [];
-            let totalPrice = 0;
-
-            ingredients.forEach(ingredient => {
-                // Malzeme ismini temizle ve normalize et
-                const rawName = ingredient.name.trim();
-                const normalizedName = rawName.split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                    .join(' ');
-                
-                console.log('İşlenen malzeme:', {
-                    raw: rawName,
-                    normalized: normalizedName,
-                    amount: ingredient.amount
-                });
-                
-                const product = marketProducts[market][normalizedName];
-                if (product) {
-                    console.log('Ürün bulundu:', product);
-                    
-                    // Miktar ve birim dönüşümlerini yap
-                    let amount = ingredient.amount;
-                    let numericAmount = 0;
-                    
-                    // Sayısal değeri ve birimi ayır
-                    const matches = amount.match(/(\d+(?:\.\d+)?)\s*([a-zA-ZğüşıöçĞÜŞİÖÇ]+)/);
-                    if (matches) {
-                        const value = parseFloat(matches[1]);
-                        const unit = matches[2].toLowerCase();
-                        
-                        console.log('Miktar analizi:', {
-                            fullMatch: matches[0],
-                            value: value,
-                            unit: unit
-                        });
-                        
-                        // Birim dönüşümlerini yap
-                        switch (unit) {
-                            case 'gr':
-                            case 'gram':
-                            case 'g':
-                                numericAmount = value / 1000; // kg'a çevir
-                                break;
-                            case 'kg':
-                            case 'kilo':
-                            case 'kilogram':
-                                numericAmount = value;
-                                break;
-                            case 'adet':
-                            case 'tane':
-                                numericAmount = value;
-                                break;
-                            case 'ml':
-                            case 'mililitre':
-                                numericAmount = value / 1000; // litreye çevir
-                                break;
-                            case 'lt':
-                            case 'l':
-                            case 'litre':
-                                numericAmount = value;
-                                break;
-                            case 'su bardağı':
-                            case 'bardak':
-                                numericAmount = value * 0.2; // 1 su bardağı = 200ml = 0.2L
-                                break;
-                            case 'yemek kaşığı':
-                            case 'çorba kaşığı':
-                                numericAmount = value * 0.015; // 1 yemek kaşığı = 15ml = 0.015L
-                                break;
-                            case 'çay kaşığı':
-                            case 'tatlı kaşığı':
-                                numericAmount = value * 0.005; // 1 çay kaşığı = 5ml = 0.005L
-                                break;
-                            case 'demet':
-                                numericAmount = value;
-                                break;
-                            default:
-                                console.log('Bilinmeyen birim:', unit);
-                                numericAmount = value;
-                        }
-                    } else {
-                        console.log('Miktar formatı tanınamadı:', amount);
-                        numericAmount = 1;
-                    }
-
-                    console.log('Hesaplanan miktar:', {
-                        original: amount,
-                        converted: numericAmount,
-                        unit: product.unit,
-                        price: product.price
-                    });
-
-                    const price = product.price * numericAmount;
-                    totalPrice += price;
-
-                    console.log('Ürün fiyat hesaplaması:', {
-                        unitPrice: product.price,
-                        quantity: numericAmount,
-                        totalPrice: price
-                    });
-
-                    cart.push({
-                        name: normalizedName,
-                        amount: ingredient.amount,
-                        unitPrice: product.price,
-                        totalPrice: price.toFixed(2),
-                        unit: product.unit
-                    });
-                } else {
-                    console.warn('Ürün fiyatı bulunamadı:', {
-                        market: market,
-                        searchedName: normalizedName,
-                        availableProducts: Object.keys(marketProducts[market])
-                    });
-                }
-            });
-
-            console.log('Sepet oluşturuldu:', {
-                items: cart,
-                totalPrice: totalPrice
-            });
-
-            return {
-                items: cart,
-                totalPrice: totalPrice.toFixed(2)
-            };
-        }
-
-        // Modal içeriğini güncelleme fonksiyonu
-        function updateModalContent(market, cart) {
-            console.log('Modal içeriği güncelleniyor:', market, cart);
-            
-            const modalContent = document.querySelector('.modal-content');
-            modalContent.innerHTML = `
-                <span class="close">&times;</span>
-                <h2>${market.charAt(0).toUpperCase() + market.slice(1)} Alışveriş Sepeti</h2>
-                <div class="cart-items">
-                    ${cart.items.map(item => `
-                        <div class="cart-item">
-                            <span class="item-name">${item.name}</span>
-                            <span class="item-amount">${item.amount}</span>
-                            <span class="item-price">${item.unitPrice} TL/${item.unit}</span>
-                            <span class="item-total">${item.totalPrice} TL</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="cart-total">
-                    <strong>Toplam: ${cart.totalPrice} TL</strong>
-                </div>
-                <div class="modal-buttons">
-                    <button id="proceed" class="btn">Yönlendir</button>
-                    <button id="cancel" class="btn btn-cancel">İptal</button>
-                </div>
-            `;
-
-            // Yeni butonlara event listener'ları ekle
-            const proceedBtn = document.getElementById('proceed');
-            const cancelBtn = document.getElementById('cancel');
-            const closeBtn = document.querySelector('.close');
-
-            proceedBtn.addEventListener('click', proceedToCheckout);
-            cancelBtn.addEventListener('click', closeModal);
-            closeBtn.addEventListener('click', closeModal);
-
-            console.log('Modal butonlarına event listener\'lar eklendi');
-        }
-
-        function proceedToCheckout() {
-            console.log('Ödemeye geç butonu tıklandı');
-            const market = modal.getAttribute('data-market');
-            console.log('Seçilen market:', market);
-            
-            let marketUrl = '';
-            switch(market) {
-                case 'migros':
-                case 'weekly-migros':
-                    marketUrl = 'https://www.migros.com.tr/';
-                    break;
-                case 'carrefour':
-                case 'weekly-carrefour':
-                    marketUrl = 'https://www.carrefoursa.com/';
-                    break;
-                case 'getir':
-                case 'weekly-getir':
-                    marketUrl = 'https://getir.com/';
-                    break;
-                case 'a101':
-                case 'weekly-a101':
-                    marketUrl = 'https://www.a101.com.tr/';
-                    break;
-                case 'bim':
-                case 'weekly-bim':
-                    marketUrl = 'https://www.bim.com.tr/';
-                    break;
-                case 'sok':
-                case 'weekly-sok':
-                    marketUrl = 'https://www.sokmarket.com.tr/';
-                    break;
-                case 'yemeksepeti':
-                case 'weekly-yemeksepeti':
-                    marketUrl = 'https://www.yemeksepeti.com/';
-                    break;
-                default:
-                    marketUrl = '#';
-            }
-            
-            console.log('Yönlendirilecek URL:', marketUrl);
-            closeModal();
-            window.open(marketUrl, '_blank');
-        }
-
-        // Olay dinleyicileri
-        generateWeekBtn.addEventListener('click', generateWeeklyPlan);
-        generateRandomWeekBtn.addEventListener('click', generateRandomWeekPlan);
-        generateMealBtn.addEventListener('click', generateMeal);
-        
-        // Market butonları için genel event delegation
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('market-btn') && !e.target.disabled) {
-                openModal(e.target.id);
-            }
-        });
-
-        proceedBtn.addEventListener('click', proceedToCheckout);
-        cancelBtn.addEventListener('click', closeModal);
-        closeBtn.addEventListener('click', closeModal);
-
-        // Üyelik durumu ve yükseltme işlemleri
-        function checkMembershipStatus() {
-            // Artık bu fonksiyona gerek yok
-        }
-
-        // Haftalık plan erişimini kontrol et
-        function checkWeeklyPlanAccess() {
-            return true; // Herkes erişebilir
-        }
-
-        // Premium modalı aç
-        function openPremiumModal() {
-            // Modal açılmayacak
-        }
-
-        // Premium modalı kapat
-        function closePremiumModal() {
-            // Modal kapanmayacak
-        }
-
-        // Ödeme işlemi
-        function proceedToPayment() {
-            // Ödeme işlemi olmayacak
-        }
-
-        // Event listeners
-        upgradeBtn.style.display = 'none';
-        proceedPaymentBtn.style.display = 'none';
-        cancelPremiumBtn.style.display = 'none';
-        closePremiumBtn.style.display = 'none';
-        premiumModal.style.display = 'none';
-
-        // Hafta navigasyonu
-        function updateWeekNavigation() {
-            console.log('Hafta güncelleniyor:', currentWeek);
-            const currentWeekElement = document.getElementById('current-week');
-            const prevBtn = document.querySelector('[data-action="prev"]');
-            const nextBtn = document.querySelector('[data-action="next"]');
-            
-            if (currentWeekElement) {
-                currentWeekElement.textContent = `Hafta ${currentWeek}`;
-            }
-            
-            if (prevBtn) {
-                prevBtn.disabled = currentWeek === 1;
-            }
-            
-            if (nextBtn) {
-                nextBtn.disabled = currentWeek === 52;
-            }
-        }
-
-        // Hafta değiştirme fonksiyonları
-        function goToPrevWeek() {
-            console.log('Önceki haftaya geçiliyor');
-            if (currentWeek > 1) {
-                currentWeek--;
-                console.log('Yeni hafta:', currentWeek);
-                updateWeekNavigation();
-                loadWeekPlan();
-            }
-        }
-
-        function goToNextWeek() {
-            console.log('Sonraki haftaya geçiliyor');
-            if (currentWeek < 52) {
-                currentWeek++;
-                console.log('Yeni hafta:', currentWeek);
-                updateWeekNavigation();
-                loadWeekPlan();
-            }
-        }
-
-        // Hafta planını yükle
-        function loadWeekPlan() {
-            console.log('Hafta planı yükleniyor:', currentWeek);
-            const weekData = savedWeeks[currentWeek];
-            if (weekData) {
-                console.log('Hafta verisi bulundu:', weekData);
-                weeklyMeals = weekData.meals;
-                weeklyDietTypeSelect.value = weekData.dietType;
-                weeklyCalorieRangeSelect.value = weekData.calorieRange;
-                weeklyExcludeInput.value = weekData.excludeItems;
-                showWeeklyPlan();
-            } else {
-                console.log('Hafta verisi bulunamadı');
-                weeklyPlanDiv.innerHTML = '<p class="empty-message">Bu hafta için kaydedilmiş plan bulunamadı</p>';
-            }
-        }
-
-        // Rastgele haftalık plan oluşturma fonksiyonu
-        function generateRandomWeekPlan() {
-            console.log('Rastgele haftalık plan oluşturma başladı');
-
-            // Tüm diyet tiplerindeki yemekleri birleştir
-            let allMeals = [];
-            for (const dietType in mealDatabase) {
-                allMeals = allMeals.concat(mealDatabase[dietType]);
-            }
-
-            console.log('Toplam yemek sayısı:', allMeals.length);
-
-            if (!allMeals || allMeals.length === 0) {
-                console.log('Yemek veritabanında yemek bulunamadı');
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            // Tekrar eden yemekleri önlemek için Set kullan
-            const selectedMeals = new Set();
-            weeklyMeals = [];
-
-            // Mevcut yemekleri kopyala
-            const mealsToChooseFrom = [...allMeals];
-
-            // 7 farklı yemek seç
-            while (weeklyMeals.length < 7 && mealsToChooseFrom.length > 0) {
-                const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
-                const meal = mealsToChooseFrom[randomIndex];
-                
-                // Eğer bu yemek daha önce seçilmediyse ekle
-                if (!selectedMeals.has(meal.name)) {
-                    selectedMeals.add(meal.name);
-                    weeklyMeals.push(meal);
-                }
-                
-                // Bu yemeği kullanılabilir yemeklerden çıkar
-                mealsToChooseFrom.splice(randomIndex, 1);
-            }
-
-            // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
-            if (weeklyMeals.length < 7) {
-                const remainingCount = 7 - weeklyMeals.length;
-                for (let i = 0; i < remainingCount; i++) {
-                    const randomIndex = Math.floor(Math.random() * allMeals.length);
-                    weeklyMeals.push(allMeals[randomIndex]);
-                }
-            }
-
-            console.log('Seçilen rastgele haftalık yemekler:', weeklyMeals);
-            showWeeklyPlan();
-        }
-
-        // Sayfa yüklendiğinde
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('Sayfa yüklendi');
-            // Mevcut event listener'lar
-            disableMarketButtons();
-            disableWeeklyMarketButtons();
-            displayFavorites();
-
-            // Haftalık plan oluştur butonlarına event listener ekle
-            const generateWeekBtn = document.getElementById('generate-week');
-            const generateRandomWeekBtn = document.getElementById('generate-random-week');
-            
-            if (generateWeekBtn) {
-                generateWeekBtn.addEventListener('click', generateWeeklyPlan);
-            }
-            
-            if (generateRandomWeekBtn) {
-                generateRandomWeekBtn.addEventListener('click', generateRandomWeekPlan);
-            }
-
-            // Üyelik durumunu kontrol et
-            checkMembershipStatus();
-            
-            // İlk hafta planını yükle
-            currentWeek = 1;
-            updateWeekNavigation();
-            loadWeekPlan();
-        });
-
-        function closeModal() {
-            modal.style.display = 'none';
-        }
-
-        // Haftalık plan oluşturma fonksiyonu
-        function generateWeeklyPlan() {
-            if (!checkWeeklyPlanAccess()) {
-                return;
-            }
-
-            console.log('Haftalık plan oluşturma başladı');
-            const dietType = weeklyDietTypeSelect.value;
-            const calorieRange = weeklyCalorieRangeSelect.value;
-            const excludeItems = weeklyExcludeInput.value.split(',').map(item => item.trim()).filter(item => item);
-
-            console.log('Seçilen haftalık kriterler:', {
-                dietType,
-                calorieRange,
-                excludeItems
-            });
-
-            if (!mealDatabase || !mealDatabase[dietType]) {
-                console.error('Yemek veritabanı yüklenemedi veya diyet tipi geçersiz:', dietType);
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            const availableMeals = filterMeals(dietType, calorieRange, excludeItems);
-            console.log('Uygun haftalık yemek sayısı:', availableMeals.length);
-
-            if (!availableMeals || availableMeals.length === 0) {
-                console.log('Uygun haftalık öğün bulunamadı');
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            if (availableMeals.length < 7) {
-                console.log('Yetersiz yemek sayısı:', availableMeals.length);
-                const message = `
-                    <p class="empty-message">
-                        Bu kriterlere uygun sadece ${availableMeals.length} farklı yemek bulundu (7 yemek gerekli).<br>
-                        Öneriler:<br>
-                        - Kalori aralığını genişletin<br>
-                        - Hariç tuttuğunuz malzemeleri azaltın<br>
-                        - Farklı bir diyet tipi seçin
-                    </p>
-                    <button class="btn btn-try-again"><i class="fas fa-redo"></i> Tekrar Dene</button>
-                `;
-                weeklyPlanDiv.innerHTML = message;
-                weeklyPlanDiv.querySelector('.btn-try-again').addEventListener('click', generateWeeklyPlan);
-                return;
-            }
-
-            // Tüm haftalar için plan oluştur
-            for (let week = 1; week <= 52; week++) {
-                // Tekrar eden yemekleri önlemek için Set kullan
-                const selectedMeals = new Set();
-                const weekMeals = [];
-
-                // Mevcut yemekleri kopyala
-                const mealsToChooseFrom = [...availableMeals];
-
-                while (weekMeals.length < 7 && mealsToChooseFrom.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
-                    const meal = mealsToChooseFrom[randomIndex];
-                    
-                    // Eğer bu yemek daha önce seçilmediyse ekle
-                    if (!selectedMeals.has(meal.name)) {
-                        selectedMeals.add(meal.name);
-                        weekMeals.push(meal);
-                    }
-                    
-                    // Bu yemeği kullanılabilir yemeklerden çıkar
-                    mealsToChooseFrom.splice(randomIndex, 1);
-                }
-
-                // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
-                if (weekMeals.length < 7) {
-                    const remainingCount = 7 - weekMeals.length;
-                    for (let i = 0; i < remainingCount; i++) {
-                        const randomIndex = Math.floor(Math.random() * availableMeals.length);
-                        weekMeals.push(availableMeals[randomIndex]);
-                    }
-                }
-
-                // Hafta verisini kaydet
-                const weekData = {
-                    meals: weekMeals,
-                    dietType: dietType,
-                    calorieRange: calorieRange,
-                    excludeItems: excludeItems,
-                    date: new Date().toISOString()
-                };
-
-                savedWeeks[week] = weekData;
-            }
-
-            // Tüm haftaları localStorage'a kaydet
-            localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-
-            // Mevcut haftayı göster
-            weeklyMeals = savedWeeks[currentWeek].meals;
-            showWeeklyPlan();
-
-        }
-
-        // Haftalık alışveriş listesi oluşturma fonksiyonu
-        function generateWeeklyShoppingList(ingredients) {
-            console.log('Haftalık alışveriş listesi oluşturuluyor...');
-            
-            // Malzemeleri birleştir (aynı olanları grupla)
-            const mergedIngredients = {};
-            
-            ingredients.forEach(ing => {
-                const key = ing.name.toLowerCase();
-                if (mergedIngredients[key]) {
-                    // Miktarları topla
-                    const amounts = mergedIngredients[key].amount.split(' + ');
-                    amounts.push(ing.amount);
-                    mergedIngredients[key].amount = amounts.join(' + ');
-                } else {
-                    mergedIngredients[key] = {...ing};
-                }
-            });
-            
-            console.log('Birleştirilmiş malzemeler:', mergedIngredients);
-
-            // HTML oluştur
-            weeklyShoppingItemsDiv.innerHTML = `
-                <h3>Haftalık Alışveriş Listesi</h3>
-                ${Object.values(mergedIngredients).map(ing => `
-                    <div class="shopping-item">
-                        <div>
-                            <input type="checkbox" id="weekly-item-${ing.name.replace(/\s+/g, '-')}" checked>
-                            <label for="weekly-item-${ing.name.replace(/\s+/g, '-')}">${ing.amount} ${ing.name}</label>
-                        </div>
-                        <i class="fas fa-trash-alt" data-item="weekly-${ing.name.replace(/\s+/g, '-')}"></i>
-                    </div>
-                `).join('')}
-            `;
-            
-            // Silme butonlarına event listener ekle
-            document.querySelectorAll('#weekly-shopping-items .fa-trash-alt').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    const itemElement = e.target.closest('.shopping-item');
-                    itemElement.remove();
-                    
-                    if (weeklyShoppingItemsDiv.querySelectorAll('.shopping-item').length === 0) {
-                        disableWeeklyMarketButtons();
-                    }
-                });
-            });
-        }
-
-        // Favori ekleme fonksiyonu
-        function addToFavorites(meal) {
-            if (!favorites.some(f => f.name === meal.name)) {
-                favorites.push(meal);
-                localStorage.setItem('favorites', JSON.stringify(favorites));
-                displayFavorites();
-                return true;
-            }
-            return false;
-        }
-
-        // Favori silme fonksiyonu
-        function removeFromFavorites(mealName) {
-            favorites = favorites.filter(f => f.name !== mealName);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            displayFavorites();
-        }
-
-        // Favorileri gösterme fonksiyonu
-        function displayFavorites() {
-            const container = document.getElementById('favorites-container');
-            
-            if (favorites.length === 0) {
-                container.innerHTML = '<p class="empty-message">Henüz favori yemek eklemediniz</p>';
-                return;
-            }
-
-            container.innerHTML = favorites.map(meal => `
-                <div class="favorite-item">
-                    <div class="favorite-header">
-                        <h3>${meal.name}</h3>
-                        <div class="favorite-actions">
-                            <button class="favorite-action-btn" onclick="useFavorite('${meal.name}')">
-                                <i class="fas fa-utensils"></i>
-                            </button>
-                            <button class="favorite-action-btn delete" onclick="removeFromFavorites('${meal.name}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="calorie-info">Kalori: ${meal.calories} kcal</p>
-                    <p><strong>Açıklama:</strong> ${meal.description}</p>
-                    <div class="meal-details">
-                        <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Favoriyi kullanma fonksiyonu
-        function useFavorite(mealName) {
-            const meal = favorites.find(f => f.name === mealName);
-            if (meal) {
-                // Günlük plan sekmesine geç
-                document.querySelector('[data-tab="daily"]').click();
-                
-                // Diyet tipini ve kalori aralığını ayarla
-                dietTypeSelect.value = meal.dietType || 'balanced';
-                calorieRangeSelect.value = meal.calorieRange || '500-1000';
-                
-                // Öğünü göster
-                displayMeal(meal, meal.dietType || 'balanced', mealResultDiv);
-                generateShoppingList(meal.ingredients);
-                enableMarketButtons();
-            }
-        }
-
-        // Öğün gösterimini güncelle
-        function displayMeal(meal, dietType, container) {
-            let dietTag = '';
-            let dietClass = '';
-            
-            switch(dietType) {
-                case 'vegetarian':
-                    dietTag = 'Vejetaryen';
-                    dietClass = 'diet-vegetarian';
-                    break;
-                case 'vegan':
-                    dietTag = 'Vegan';
-                    dietClass = 'diet-vegan';
-                    break;
-                case 'low-carb':
-                    dietTag = 'Düşük Karbonhidrat';
-                    dietClass = 'diet-lowcarb';
-                    break;
-                case 'high-protein':
-                    dietTag = 'Yüksek Protein';
-                    dietClass = 'diet-highprotein';
-                    break;
-                default:
-                    dietTag = 'Dengeli';
-                    dietClass = 'diet-balanced';
-            }
-            
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const today = new Date().toDateString();
-            const dailySuggestions = JSON.parse(localStorage.getItem('dailySuggestions') || '{}');
-            const hasUsedSuggestion = dailySuggestions[today] && dailySuggestions[today][dietType];
-            const isFavorited = favorites.some(f => f.name === meal.name);
-            
-            container.innerHTML = `
-                <div class="meal-item">
-                    <div class="meal-info">
-                        <h3>${meal.name}</h3>
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(this, '${meal.name}')">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="meal-tags">
-                        <span class="diet-tag ${dietClass}">${dietTag}</span>
-                        <span class="calorie-info">${meal.calories} kcal</span>
-                    </div>
-                    <p><strong>Açıklama:</strong> ${meal.description}</p>
-                    <div class="meal-details">
-                        <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="meal-actions">
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareMeal('${meal.name}', 'whatsapp')">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn telegram" onclick="shareMeal('${meal.name}', 'telegram')">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn copy" onclick="shareMeal('${meal.name}', 'copy')">
-                                <i class="fas fa-copy"></i> Kopyala
-                            </button>
-                            ${filteredMeals.length > 1 ? 
-                                `<button id="change-meal" class="share-btn" title="Başka öneri">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>` 
-                                : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            if (filteredMeals.length > 1) {
-                const changeButton = document.getElementById('change-meal');
-                if (isPremium || !hasUsedSuggestion) {
-                    changeButton.addEventListener('click', changeMeal);
-                } else {
-                    changeButton.addEventListener('click', () => {
-                        openPremiumModal();
-                    });
-                }
-            }
-        }
-
-        // Favori ekleme/çıkarma fonksiyonu
-        function toggleFavorite(button, mealName) {
-            const meal = filteredMeals.find(m => m.name === mealName);
-            if (meal) {
-                if (button.classList.contains('favorited')) {
-                    removeFromFavorites(mealName);
-                    button.classList.remove('favorited');
-                } else {
-                    if (addToFavorites(meal)) {
-                        button.classList.add('favorited');
-                    }
-                }
-            }
-        }
-
-        // Paylaşım fonksiyonları
-        function shareMeal(mealName, platform) {
-            const meal = filteredMeals.find(m => m.name === mealName);
-            if (!meal) return;
-
-            const shareText = createShareText(meal);
-            const encodedText = encodeURIComponent(shareText);
-
-            switch(platform) {
-                case 'whatsapp':
-                    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
-                    break;
-                case 'telegram':
-                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`, '_blank');
-                    break;
-                case 'copy':
-                    navigator.clipboard.writeText(shareText)
-                        .then(() => {
-                            alert('Tarif panoya kopyalandı!');
-                        })
-                        .catch(err => {
-                            console.error('Kopyalama hatası:', err);
-                            alert('Kopyalama başarısız oldu. Lütfen tekrar deneyin.');
-                        });
-                    break;
-            }
-        }
-
-        function createShareText(meal) {
-            let text = `🍽️ ${meal.name}\n\n`;
-            text += `📝 Açıklama:\n${meal.description}\n\n`;
-            text += `🔥 Kalori: ${meal.calories} kcal\n\n`;
-            text += `🛒 Malzemeler:\n`;
-            meal.ingredients.forEach(ing => {
-                text += `- ${ing.amount} ${ing.name}\n`;
-            });
-            text += `\nBu öğünü FitPlan uygulamasından paylaştım!`;
-            return text;
-        }
-
-        // Paylaşım fonksiyonları
-        function shareWeeklyPlan(platform) {
-            if (!weeklyMeals || weeklyMeals.length === 0) {
-                alert('Lütfen önce bir haftalık plan oluşturun.');
-                return;
-            }
-
-            const weekData = {
-                meals: weeklyMeals,
-                dietType: weeklyDietTypeSelect.value,
-                calorieRange: weeklyCalorieRangeSelect.value,
-                excludeItems: weeklyExcludeInput.value
-            };
-
-            const shareText = createWeeklyShareText(weekData);
-            const encodedText = encodeURIComponent(shareText);
-
-            switch(platform) {
-                case 'whatsapp':
-                    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
-                    break;
-                case 'telegram':
-                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`, '_blank');
-                    break;
-                case 'copy':
-                    navigator.clipboard.writeText(shareText)
-                        .then(() => {
-                            alert('Haftalık plan panoya kopyalandı!');
-                        })
-                        .catch(err => {
-                            console.error('Kopyalama hatası:', err);
-                            alert('Kopyalama başarısız oldu. Lütfen tekrar deneyin.');
-                        });
-                    break;
-            }
-        }
-
-        function createWeeklyShareText(weekData) {
-            let text = `🍽️ Haftalık Plan\n\n`;
-            text += `📅 Hafta: ${currentWeek}\n\n`;
-            text += `🍽️ Diyet Tipi: ${getDietTypeName(weekData.dietType)}\n\n`;
-            text += `🔥 Kalori Aralığı: ${weekData.calorieRange}\n\n`;
-            text += `📋 Günlük Menüler:\n\n`;
-            weekData.meals.forEach((meal, index) => {
-                text += `${['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'][index]}:\n`;
-                text += `🍽️ ${meal.name}\n`;
-                text += `🔥 ${meal.calories} kcal\n`;
-                text += `📝 ${meal.description}\n`;
-                text += `🛒 Malzemeler:\n`;
-                meal.ingredients.forEach(ing => {
-                    text += `- ${ing.amount} ${ing.name}\n`;
-                });
-                text += `\n`;
-            });
-            text += `Bu haftalık planı FitPlan uygulamasından paylaştım!`;
-            return text;
-        }
-
-        function getDietTypeName(dietType) {
-            switch(dietType) {
-                case 'balanced':
-                    return 'Dengeli Beslenme';
-                case 'vegetarian':
-                    return 'Vejetaryen';
-                case 'vegan':
-                    return 'Vegan';
-                case 'low-carb':
-                    return 'Düşük Karbonhidrat';
-                case 'high-protein':
-                    return 'Yüksek Protein';
-                default:
-                    return dietType;
-            }
-        }
-    </script>
-</body>
-</html>
+// Genişletilmiş yemek veritabanı (kalori aralıklarına göre güncellendi)
+const mealDatabase = {
+    balanced: [
+        {
+            name: "Nohutlu Semizotu Salatası",
+            description: "Kırmızı soğan, nohut ve zeytinyağı ile hafif bir semizotu salatası",
+            calories: 320,
+            ingredients: [
+                { name: "Semizotu", amount: "1 demet" },
+                { name: "Haşlanmış nohut", amount: "1 su bardağı" },
+                { name: "Kırmızı soğan", amount: "1/2 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Yoğurtlu Kabak Sote",
+            description: "Sotelenmiş kabak ve yoğurt sos ile hafif öğün",
+            calories: 380,
+            ingredients: [
+                { name: "Kabak", amount: "2 adet" },
+                { name: "Yoğurt", amount: "150 gr" },
+                { name: "Sarımsak", amount: "1 diş" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Fırınlanmış Sebzeli Omlet",
+            description: "Ispanak ve biberle hazırlanan hafif fırın omlet",
+            calories: 450,
+            ingredients: [
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Ispanak", amount: "100 gr" },
+                { name: "Kırmızı biber", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Tavuklu Sebzeli Güveç",
+            description: "Tavuk göğsü ve sebzelerle hazırlanan ev yapımı güveç",
+            calories: 650,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "200 gr" },
+                { name: "Patates", amount: "1 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Domates", amount: "1 adet" },
+            ]
+        },
+        {
+            name: "Kıymalı Kabak Dolması",
+            description: "Kıymalı iç harcı ile hazırlanan kabak dolması",
+            calories: 720,
+            ingredients: [
+                { name: "Kabak", amount: "4 adet" },
+                { name: "Dana kıyma", amount: "150 gr" },
+                { name: "Pirinç", amount: "1/2 su bardağı" },
+                { name: "Domates sosu", amount: "1 su bardağı" },
+            ]
+        },
+        {
+            name: "Fırın Makarna ve Tavuk",
+            description: "Fırında beşamel soslu makarna ve tavuk parçaları",
+            calories: 800,
+            ingredients: [
+                { name: "Makarna", amount: "200 gr" },
+                { name: "Tavuk göğsü", amount: "150 gr" },
+                { name: "Beşamel sos", amount: "150 gr" },
+                { name: "Kaşar peyniri", amount: "50 gr" },
+            ]
+        },
+        {
+            name: "Kuzu İncik ve Sebzeli Pilav",
+            description: "Fırında pişmiş kuzu incik ve sebzeli pilav",
+            calories: 1200,
+            ingredients: [
+                { name: "Kuzu incik", amount: "250 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Bezelye", amount: "1 su bardağı" },
+            ]
+        },
+        {
+            name: "Fırında Soslu Kanat ve Patates",
+            description: "Baharatlı sosla marine edilmiş tavuk kanadı ve patates",
+            calories: 1350,
+            ingredients: [
+                { name: "Tavuk kanat", amount: "400 gr" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Barbekü sos", amount: "100 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+            ]
+        },
+        {
+            name: "Dana Rosto ve Sebzeli Garnitür",
+            description: "Dana rosto ve fırınlanmış sebze garnitürü",
+            calories: 1450,
+            ingredients: [
+                { name: "Dana rosto", amount: "300 gr" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Kereviz", amount: "1 adet" },
+            ]
+        },
+        // 100-500 kcal arası yemekler
+        {
+            name: "Izgara Köfte ve Salata",
+            description: "Izgara köfte ve mevsim yeşillikleri",
+            calories: 450,
+            ingredients: [
+                { name: "Dana kıyma", amount: "120 gr" },
+                { name: "Marul", amount: "2 yaprak" },
+                { name: "Domates", amount: "1 adet" },
+                { name: "Soğan", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Tavuk Şiş",
+            description: "Marine edilmiş tavuk şiş ve ızgara sebze",
+            calories: 350,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "150 gr" },
+                { name: "Biber", amount: "1 adet" },
+                { name: "Domates", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Mercimek Çorbası",
+            description: "Kırmızı mercimek, soğan ve baharatlarla hazırlanan geleneksel Türk çorbası",
+            calories: 250,
+            ingredients: [
+                { name: "Kırmızı mercimek", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Un", amount: "1 yemek kaşığı" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" },
+                { name: "Karabiber", amount: "1 çay kaşığı" }
+            ]
+        },
+        {
+            name: "Ezogelin Çorbası",
+            description: "Kırmızı mercimek, pirinç ve baharatlarla hazırlanan geleneksel Türk çorbası",
+            calories: 280,
+            ingredients: [
+                { name: "Kırmızı mercimek", amount: "1 su bardağı" },
+                { name: "Pirinç", amount: "1/2 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Domates salçası", amount: "1 yemek kaşığı" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" },
+                { name: "Nane", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "Yoğurtlu Tavuk Salata",
+            description: "Yoğurt soslu tavuk göğsü salatası",
+            calories: 380,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "100 gr" },
+                { name: "Yoğurt", amount: "100 gr" },
+                { name: "Marul", amount: "4 yaprak" },
+                { name: "Salatalık", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Sebzeli Balık Buğulama",
+            description: "Hafif baharatlı buğulama balık ve buharda sebze",
+            calories: 320,
+            ingredients: [
+                { name: "Levrek fileto", amount: "150 gr" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Brokoli", amount: "100 gr" },
+                { name: "Limon", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Yulaflı Tavuk Göğsü",
+            description: "Yulaf kaplama tavuk göğsü ve yeşillikler",
+            calories: 420,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "120 gr" },
+                { name: "Yulaf ezmesi", amount: "30 gr" },
+                { name: "Roka", amount: "1 demet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Lor Peynirli Salata",
+            description: "Taze otlar ve lor peyniri ile hazırlanmış salata",
+            calories: 280,
+            ingredients: [
+                { name: "Lor peyniri", amount: "100 gr" },
+                { name: "Roka", amount: "2 demet" },
+                { name: "Ceviz içi", amount: "20 gr" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Sebzeli Tavuk Wrap",
+            description: "Tam buğday lavaşına sarılmış tavuk ve sebze",
+            calories: 450,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "100 gr" },
+                { name: "Tam buğday lavaş", amount: "1 adet" },
+                { name: "Karışık yeşillik", amount: "1 porsiyon" },
+                { name: "Light süzme yoğurt", amount: "30 gr" }
+            ]
+        },
+        {
+            name: "Izgara Köfte Mini Porsiyon",
+            description: "Az yağlı ızgara köfte ve közlenmiş sebze",
+            calories: 380,
+            ingredients: [
+                { name: "Dana kıyma", amount: "100 gr" },
+                { name: "Közlenmiş biber", amount: "2 adet" },
+                { name: "Domates", amount: "1 adet" },
+                { name: "Maydanoz", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Ton Balıklı Kinoa Bowl",
+            description: "Light ton balığı ve kinoa karışımı",
+            calories: 420,
+            ingredients: [
+                { name: "Light ton balığı", amount: "100 gr" },
+                { name: "Kinoa", amount: "50 gr" },
+                { name: "Salatalık", amount: "1 adet" },
+                { name: "Cherry domates", amount: "5 adet" }
+            ]
+        },
+        // 500-1000 kcal arası yemekler
+        {
+            name: "Etli Taze Fasulye",
+            description: "Zeytinyağlı taze fasulye ve et sote",
+            calories: 650,
+            ingredients: [
+                { name: "Dana eti", amount: "100 gr" },
+                { name: "Taze fasulye", amount: "250 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Domates", amount: "2 adet" }
+            ]
+        },
+        {
+            name: "Tavuklu Pilav",
+            description: "Tavuk parçaları ile pirinç pilavı",
+            calories: 750,
+            ingredients: [
+                { name: "Tavuk but", amount: "200 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Kıymalı Ispanak",
+            description: "Kıymalı ıspanak yemeği ve bulgur pilavı",
+            calories: 580,
+            ingredients: [
+                { name: "Dana kıyma", amount: "150 gr" },
+                { name: "Ispanak", amount: "500 gr" },
+                { name: "Bulgur", amount: "1/2 su bardağı" },
+                { name: "Soğan", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Etli Bezelye",
+            description: "Dana etli bezelye yemeği",
+            calories: 620,
+            ingredients: [
+                { name: "Dana kuşbaşı", amount: "150 gr" },
+                { name: "Bezelye", amount: "300 gr" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Patates", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Tavuklu Sebze Sote",
+            description: "Tavuk ve karışık sebze sotesi",
+            calories: 520,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "200 gr" },
+                { name: "Brokoli", amount: "200 gr" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Etli Bamya",
+            description: "Dana etli bamya yemeği",
+            calories: 580,
+            ingredients: [
+                { name: "Dana eti", amount: "150 gr" },
+                { name: "Bamya", amount: "300 gr" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" }
+            ]
+        },
+        // 1000-1500 kcal arası yemekler
+        {
+            name: "Etli Bezelye ve Pirinç Pilavı",
+            description: "Bezelye, kuşbaşı et ve yanında sade pilavla geleneksel bir akşam yemeği.",
+            calories: 1150,
+            ingredients: [
+                { name: "Dana kuşbaşı", amount: "200 gr" },
+                { name: "Bezelye", amount: "1 su bardağı" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Etli Karnıyarık ve Pilav",
+            description: "Kıyma dolgulu patlıcan yemeği ve yanında sade pilav.",
+            calories: 1300,
+            ingredients: [
+                { name: "Patlıcan", amount: "2 adet" },
+                { name: "Kıyma", amount: "200 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Domates", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Karışık Kebap Tabağı",
+            description: "Çeşitli kebaplar ve pilav ile servis",
+            calories: 1400,
+            ingredients: [
+                { name: "Adana kebap", amount: "150 gr" },
+                { name: "Kuzu şiş", amount: "150 gr" },
+                { name: "Pirinç pilavı", amount: "1 porsiyon" },
+                { name: "Közlenmiş sebze", amount: "1 porsiyon" }
+            ]
+        },
+        {
+            name: "Fırın Tavuk ve Sebzeli Pilav",
+            description: "Fırında pişmiş bütün tavuk ve sebzeli pilav",
+            calories: 1250,
+            ingredients: [
+                { name: "Tavuk", amount: "1 adet (1.5 kg)" },
+                { name: "Pirinç", amount: "2 su bardağı" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Bezelye", amount: "1 su bardağı" }
+            ]
+        },
+        {
+            name: "İskender Kebap",
+            description: "Döner et, pide, domates sosu ve yoğurt",
+            calories: 1450,
+            ingredients: [
+                { name: "Dana döner", amount: "200 gr" },
+                { name: "Pide", amount: "2 adet" },
+                { name: "Tereyağı", amount: "30 gr" },
+                { name: "Yoğurt", amount: "200 gr" }
+            ]
+        },
+        {
+            name: "Kuzu Tandır",
+            description: "Fırında pişmiş kuzu eti ve pilav",
+            calories: 1350,
+            ingredients: [
+                { name: "Kuzu but", amount: "300 gr" },
+                { name: "Pirinç", amount: "1.5 su bardağı" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Havuç", amount: "2 adet" }
+            ]
+        },
+        {
+            name: "Etli Güveç",
+            description: "Fırında pişmiş etli sebze güveç",
+            calories: 1200,
+            ingredients: [
+                { name: "Dana eti", amount: "250 gr" },
+                { name: "Patlıcan", amount: "2 adet" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Domates", amount: "3 adet" }
+            ]
+        },
+        {
+            name: "Karışık Izgara",
+            description: "Çeşitli ızgara etler ve garnitür",
+            calories: 1480,
+            ingredients: [
+                { name: "Pirzola", amount: "200 gr" },
+                { name: "Köfte", amount: "150 gr" },
+                { name: "Tavuk şiş", amount: "150 gr" },
+                { name: "Pilav", amount: "1 porsiyon" }
+            ]
+        },
+        {
+            name: "Etli Kapama",
+            description: "Pirinç yatağında kuzu eti",
+            calories: 1380,
+            ingredients: [
+                { name: "Kuzu eti", amount: "300 gr" },
+                { name: "Pirinç", amount: "2 su bardağı" },
+                { name: "Nohut", amount: "1 su bardağı" },
+                { name: "Tereyağı", amount: "50 gr" }
+            ]
+        },
+        {
+            name: "Tepsi Kebabı",
+            description: "Fırında pişmiş kıymalı patates dizme",
+            calories: 1280,
+            ingredients: [
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Patates", amount: "4 adet" },
+                { name: "Patlıcan", amount: "3 adet" },
+                { name: "Domates", amount: "3 adet" }
+            ]
+        },
+        {
+            name: "Izgara Kuzu ve Sebze",
+            calories: 650,
+            description: "Taze baharatlarla marine edilmiş kuzu eti ve ızgara sebzeler",
+            dietType: "balanced",
+            ingredients: [
+                { name: "Kuzu but", amount: "200gr" },
+                { name: "Patlıcan", amount: "1 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ],
+            recipe: [
+                "Kuzu etini marine edin",
+                "Sebzeleri hazırlayın",
+                "Izgarayı ısıtın",
+                "Eti pişirin",
+                "Sebzeleri ızgarada pişirin"
+            ]
+        },
+        {
+            name: "Tavuk Sote ve Sebze",
+            calories: 450,
+            description: "Julyen doğranmış tavuk göğsü ve mevsim sebzeleri",
+            dietType: "balanced",
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "150gr" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Brokoli", amount: "100gr" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ],
+            recipe: [
+                "Tavuğu kuşbaşı doğrayın",
+                "Sebzeleri hazırlayın",
+                "Tavuğu soteleyin",
+                "Sebzeleri ekleyin",
+                "Baharatları ekleyip karıştırın"
+            ]
+        },
+        {
+            name: "Izgara Köfte",
+            description: "Baharatlı ızgara köfte",
+            calories: 680,
+            ingredients: [
+                { name: "Dana kıyma", amount: "250 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Maydanoz", amount: "1/2 demet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Tavuk Kapama",
+            description: "Fırında baharatlı bütün tavuk but",
+            calories: 720,
+            ingredients: [
+                { name: "Tavuk but", amount: "4 adet" },
+                { name: "Sarımsak", amount: "4 diş" },
+                { name: "Biberiye", amount: "2 dal" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Limon", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Mantarlı Dana Sote",
+            description: "Dana eti ve mantar sote, karabiberli",
+            calories: 680,
+            ingredients: [
+                { name: "Dana eti", amount: "200 gr" },
+                { name: "Mantar", amount: "300 gr" },
+                { name: "Tereyağı", amount: "30 gr" },
+                { name: "Sarımsak", amount: "3 diş" }
+            ]
+        },
+        {
+            name: "Izgara Levrek",
+            description: "Fesleğenli ızgara levrek fileto",
+            calories: 550,
+            ingredients: [
+                { name: "Levrek fileto", amount: "300 gr" },
+                { name: "Fesleğen", amount: "1 demet" },
+                { name: "Limon", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Kuzu Pirzola",
+            description: "Biberiyeli ızgara kuzu pirzola",
+            calories: 850,
+            ingredients: [
+                { name: "Kuzu pirzola", amount: "300 gr" },
+                { name: "Biberiye", amount: "3 dal" },
+                { name: "Sarımsak", amount: "4 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Yayla Çorbası",
+            description: "Yoğurt, pirinç ve nane ile hazırlanan geleneksel Türk çorbası",
+            calories: 260,
+            ingredients: [
+                { name: "Yoğurt", amount: "2 su bardağı" },
+                { name: "Pirinç", amount: "1/2 su bardağı" },
+                { name: "Un", amount: "1 yemek kaşığı" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" },
+                { name: "Nane", amount: "1 tatlı kaşığı" },
+                { name: "Yumurta", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Bolonez Soslu Makarna",
+            description: "Kıymalı domates soslu geleneksel İtalyan makarnası",
+            calories: 550,
+            ingredients: [
+                { name: "Spagetti", amount: "250 gr" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Domates sosu", amount: "200 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Parmesan peyniri", amount: "50 gr" }
+            ]
+        },
+        {
+            name: "Karidesli Makarna",
+            description: "Karides ve sarımsaklı nefis makarna",
+            calories: 480,
+            ingredients: [
+                { name: "Linguine", amount: "250 gr" },
+                { name: "Karides", amount: "300 gr" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Zeytinyağı", amount: "1/4 su bardağı" },
+                { name: "Limon", amount: "1 adet" },
+                { name: "Kırmızı biber", amount: "1 adet" },
+                { name: "Maydanoz", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Kıymalı Lazanya",
+            description: "Kıymalı ve beşamel soslu geleneksel İtalyan lazanyası",
+            calories: 650,
+            ingredients: [
+                { name: "Lazanya yaprağı", amount: "250 gr" },
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Domates sosu", amount: "300 gr" },
+                { name: "Beşamel sos", amount: "300 ml" },
+                { name: "Kaşar peyniri", amount: "150 gr" },
+                { name: "Mozarella", amount: "100 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" }
+            ]
+        },
+        {
+            name: "Etli Ravioli",
+            description: "Kıymalı iç harcı ve domates soslu ravioli",
+            calories: 580,
+            ingredients: [
+                { name: "Ravioli hamuru", amount: "300 gr" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Ricotta peyniri", amount: "150 gr" },
+                { name: "Domates sosu", amount: "200 gr" },
+                { name: "Parmesan peyniri", amount: "50 gr" },
+                { name: "Yumurta", amount: "1 adet" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Tavuk Fajita",
+            description: "Biber ve soğanlı tavuk fajita",
+            calories: 450,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "300 gr" },
+                { name: "Kırmızı biber", amount: "1 adet" },
+                { name: "Sarı biber", amount: "1 adet" },
+                { name: "Yeşil biber", amount: "1 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Tortilla ekmeği", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Fajita baharatı", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "Tavuk Çökertme",
+            description: "Patates ve tavuklu geleneksel çökertme",
+            calories: 520,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "300 gr" },
+                { name: "Patates", amount: "3 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Zeytinyağı", amount: "3 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Kekikli Tavuk Bonfile",
+            description: "Fırında kekikli tavuk bonfile",
+            calories: 380,
+            ingredients: [
+                { name: "Tavuk bonfile", amount: "250 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Limon suyu", amount: "1 adet" },
+                { name: "Taze biberiye", amount: "1 dal" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Tavuk Şiş",
+            description: "Marine edilmiş tavuk şiş",
+            calories: 420,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "300 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Yoğurt", amount: "2 yemek kaşığı" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Kırmızı biber", amount: "1 adet" },
+                { name: "Yeşil biber", amount: "1 adet" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Tavuk Sote",
+            description: "Sebzeli tavuk sote",
+            calories: 380,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "300 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Tavuk Döner",
+            description: "Geleneksel tavuk döner",
+            calories: 450,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "300 gr" },
+                { name: "Yoğurt", amount: "2 yemek kaşığı" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Taze kekik", amount: "1/2 demet" },
+                { name: "Kırmızı biber", amount: "1 tatlı kaşığı" },
+                { name: "Kimyon", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "Tavuklu Pilav",
+            description: "Tavuklu ve sebzeli pilav",
+            calories: 480,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "250 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Bezelye", amount: "1/2 su bardağı" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" },
+                { name: "Tavuk suyu", amount: "2 su bardağı" }
+            ]
+        },
+        {
+            name: "Tavuklu Salata",
+            description: "Izgara tavuklu yeşil salata",
+            calories: 350,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "200 gr" },
+                { name: "Marul", amount: "1/2 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Salatalık", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Fırında Tavuk Kanat",
+            description: "Baharatlı fırında tavuk kanat",
+            calories: 420,
+            ingredients: [
+                { name: "Tavuk kanat", amount: "500 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Kırmızı biber", amount: "1 tatlı kaşığı" },
+                { name: "Kekik", amount: "1 tatlı kaşığı" },
+                { name: "Karabiber", amount: "1 tatlı kaşığı" },
+                { name: "Tuz", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Fırında Tavuk But",
+            description: "Fırında pişmiş tavuk but",
+            calories: 480,
+            ingredients: [
+                { name: "Tavuk but", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Kekik", amount: "1 tatlı kaşığı" },
+                { name: "Biberiye", amount: "1 tatlı kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Fırında Tavuk Göğüs",
+            description: "Fırında pişmiş tavuk göğüs",
+            calories: 350,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "300 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Kekik", amount: "1 tatlı kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" },
+                { name: "Taze biberiye", amount: "1 dal" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Lahmacun",
+            description: "İnce hamur üzerine kıymalı harç",
+            calories: 450,
+            ingredients: [
+                { name: "Hamur", amount: "200 gr" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber salçası", amount: "1 yemek kaşığı" },
+                { name: "Maydanoz", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Ispanaklı Börek",
+            description: "Yufka ile hazırlanmış ıspanaklı börek",
+            calories: 380,
+            ingredients: [
+                { name: "Yufka", amount: "3 adet" },
+                { name: "Ispanak", amount: "500 gr" },
+                { name: "Peynir", amount: "200 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tereyağı", amount: "50 gr" }
+            ]
+        },
+        {
+            name: "Kıymalı Börek",
+            description: "Yufka ile hazırlanmış kıymalı börek",
+            calories: 420,
+            ingredients: [
+                { name: "Yufka", amount: "3 adet" },
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Maydanoz", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Peynirli Börek",
+            description: "Yufka ile hazırlanmış peynirli börek",
+            calories: 400,
+            ingredients: [
+                { name: "Yufka", amount: "3 adet" },
+                { name: "Beyaz peynir", amount: "300 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Maydanoz", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Su Böreği",
+            description: "Haşlanmış yufka ile hazırlanan su böreği",
+            calories: 350,
+            ingredients: [
+                { name: "Yufka", amount: "3 adet" },
+                { name: "Beyaz peynir", amount: "300 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Süt", amount: "1 su bardağı" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Tuz", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Tavuklu Sezar Salata",
+            description: "Marul, tavuk göğüs, kruton ve sezar soslu salata",
+            calories: 380,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "200 gr" },
+                { name: "Marul", amount: "1/2 adet" },
+                { name: "Kruton", amount: "50 gr" },
+                { name: "Parmesan peyniri", amount: "30 gr" },
+                { name: "Sezar sos", amount: "2 yemek kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Ton Balıklı Salata",
+            description: "Ton balığı, marul ve sebzelerle hazırlanan salata",
+            calories: 350,
+            ingredients: [
+                { name: "Ton balığı", amount: "150 gr" },
+                { name: "Marul", amount: "1/2 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Salatalık", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Nohutlu Tavuk Salatası",
+            description: "Tavuk, nohut ve sebzelerle hazırlanan salata",
+            calories: 420,
+            ingredients: [
+                { name: "Tavuk göğüs", amount: "200 gr" },
+                { name: "Haşlanmış nohut", amount: "1 su bardağı" },
+                { name: "Marul", amount: "1/2 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Patates Salatası",
+            description: "Haşlanmış patates, mayonez ve sebzelerle hazırlanan salata",
+            calories: 320,
+            ingredients: [
+                { name: "Patates", amount: "3 adet" },
+                { name: "Mayonez", amount: "2 yemek kaşığı" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Kornişon turşu", amount: "3 adet" },
+                { name: "Yeşil soğan", amount: "2 adet" },
+                { name: "Tuz", amount: "Yeteri kadar" },
+                { name: "Karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Mantı",
+            description: "Kıymalı hamur yemeği, yoğurt ve sos ile servis edilir",
+            calories: 480,
+            ingredients: [
+                { name: "Hamur", amount: "300 gr" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Yoğurt", amount: "200 gr" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Nane", amount: "1 tatlı kaşığı" },
+                { name: "Kırmızı biber", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "İçli Köfte",
+            description: "Bulgur hamuru içinde kıymalı iç harç",
+            calories: 420,
+            ingredients: [
+                { name: "İnce bulgur", amount: "2 su bardağı" },
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Antep fıstığı", amount: "50 gr" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Biber salçası", amount: "1 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Etli Yaprak Sarma",
+            description: "Asma yaprağı içinde kıymalı iç harç",
+            calories: 380,
+            ingredients: [
+                { name: "Asma yaprağı", amount: "20 adet" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Nane", amount: "1 tatlı kaşığı" },
+                { name: "Karabiber", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "Etli Biber Dolması",
+            description: "Biber içinde kıymalı iç harç",
+            calories: 350,
+            ingredients: [
+                { name: "Dolmalık biber", amount: "6 adet" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Nane", amount: "1 tatlı kaşığı" },
+                { name: "Karabiber", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "Etli Patlıcan Dolması",
+            description: "Patlıcan içinde kıymalı iç harç",
+            calories: 380,
+            ingredients: [
+                { name: "Patlıcan", amount: "6 adet" },
+                { name: "Dana kıyma", amount: "200 gr" },
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Nane", amount: "1 tatlı kaşığı" },
+                { name: "Karabiber", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "İzmir Köfte",
+            description: "Patates ve domates soslu köfte",
+            calories: 450,
+            ingredients: [
+                { name: "Kıyma", amount: "300 gr" },
+                { name: "Patates", amount: "3 adet" },
+                { name: "Domates", amount: "3 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Sebzeli Kağıt Kebabı",
+            description: "Kağıt içinde kıymalı ve sebzeli kebab",
+            calories: 480,
+            ingredients: [
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Fırında Kıymalı Patates",
+            description: "Fırında pişmiş kıymalı ve patatesli yemek",
+            calories: 420,
+            ingredients: [
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Patates", amount: "4 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Karnıyarık",
+            description: "Patlıcan içinde kıymalı iç harç",
+            calories: 450,
+            ingredients: [
+                { name: "Patlıcan", amount: "6 adet" },
+                { name: "Dana kıyma", amount: "300 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "3 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Mücver",
+            description: "Kabak, yumurta ve unla hazırlanan geleneksel Türk yemeği",
+            calories: 380,
+            ingredients: [
+                { name: "Kabak", amount: "3 adet" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Un", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Maydanoz", amount: "1/2 demet" },
+                { name: "Dereotu", amount: "1/2 demet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Ispanaklı Mücver",
+            description: "Ispanak, yumurta ve unla hazırlanan mücver",
+            calories: 350,
+            ingredients: [
+                { name: "Ispanak", amount: "500 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Un", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Maydanoz", amount: "1/2 demet" },
+                { name: "Dereotu", amount: "1/2 demet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Patlıcanlı Mücver",
+            description: "Patlıcan, yumurta ve unla hazırlanan mücver",
+            calories: 360,
+            ingredients: [
+                { name: "Patlıcan", amount: "3 adet" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Un", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Maydanoz", amount: "1/2 demet" },
+                { name: "Dereotu", amount: "1/2 demet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Soslu Somon Fileto",
+            description: "Fırında pişmiş soslu somon fileto",
+            calories: 420,
+            ingredients: [
+                { name: "Somon fileto", amount: "300 gr" },
+                { name: "Limon suyu", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Taze kekik", amount: "1/2 demet" },
+                { name: "Taze biberiye", amount: "1 dal" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Fırında Sebzeli Somon",
+            description: "Sebzelerle fırında pişmiş somon",
+            calories: 450,
+            ingredients: [
+                { name: "Somon fileto", amount: "300 gr" },
+                { name: "Patates", amount: "2 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Biber", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Limon suyu", amount: "1 adet" },
+                { name: "Taze kekik", amount: "1/2 demet" }
+            ]
+        },
+        {
+            name: "Patates Püreli Rosto",
+            description: "Fırında pişmiş dana rosto, patates püresi ve sebzelerle servis edilir",
+            calories: 650,
+            ingredients: [
+                { name: "Dana rosto", amount: "300 gr" },
+                { name: "Patates", amount: "4 adet" },
+                { name: "Süt", amount: "1 su bardağı" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Taze kekik", amount: "1/2 demet" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Zeytinyağlı Bezelye Yemeği",
+            description: "Taze bezelye, havuç ve soğanla hazırlanan geleneksel Türk yemeği",
+            calories: 320,
+            ingredients: [
+                { name: "Taze bezelye", amount: "500 gr" },
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "1/2 su bardağı" },
+                { name: "Şeker", amount: "1 çay kaşığı" },
+                { name: "Tuz", amount: "Yeteri kadar" },
+                { name: "Su", amount: "1 su bardağı" }
+            ]
+        },
+        {
+            name: "Mantar Güveç",
+            description: "Fırında pişmiş mantar, sebze ve baharatlarla hazırlanan güveç",
+            calories: 280,
+            ingredients: [
+                { name: "Kültür mantarı", amount: "500 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Sarımsak", amount: "3 diş" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Taze kekik", amount: "1 dal" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Mantarlı Omlet",
+            description: "Mantar, soğan ve baharatlarla hazırlanan protein zengini omlet",
+            calories: 320,
+            ingredients: [
+                { name: "Yumurta", amount: "3 adet" },
+                { name: "Kültür mantarı", amount: "200 gr" },
+                { name: "Soğan", amount: "1/2 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Mantarlı Pilav",
+            description: "Mantar ve sebzelerle hazırlanan lezzetli pilav",
+            calories: 380,
+            ingredients: [
+                { name: "Pirinç", amount: "1 su bardağı" },
+                { name: "Kültür mantarı", amount: "300 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tuz", amount: "Yeteri kadar" }
+            ]
+        },
+        {
+            name: "Mantarlı Tavuk Sote",
+            description: "Tavuk, mantar ve sebzelerle hazırlanan sağlıklı sote",
+            calories: 420,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "300 gr" },
+                { name: "Kültür mantarı", amount: "300 gr" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Tuz ve karabiber", amount: "Yeteri kadar" }
+            ]
+        }
+    ],
+    vegetarian: [
+        {
+            name: "Mercimek Çorbası",
+            description: "Geleneksel Türk mercimek çorbası",
+            calories: 220,
+            ingredients: [
+                { name: "Kırmızı mercimek", amount: "1 su bardağı" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Mevsim Salatası",
+            description: "Peynirli mevsim yeşillikleri",
+            calories: 250,
+            ingredients: [
+                { name: "Marul", amount: "4 yaprak" },
+                { name: "Beyaz peynir", amount: "50 gr" },
+                { name: "Domates", amount: "1 adet" },
+                { name: "Salatalık", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Yoğurtlu Havuç Salatası",
+            description: "Yoğurt soslu rendelenmiş havuç",
+            calories: 180,
+            ingredients: [
+                { name: "Havuç", amount: "2 adet" },
+                { name: "Yoğurt", amount: "100 gr" },
+                { name: "Sarımsak", amount: "1 diş" },
+                { name: "Zeytinyağı", amount: "1 tatlı kaşığı" }
+            ]
+        },
+        {
+            name: "Yumurtalı Ispanak",
+            description: "Yumurtalı ıspanak yemeği",
+            calories: 320,
+            ingredients: [
+                { name: "Ispanak", amount: "300 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Peynirli Omlet",
+            description: "Beyaz peynirli ve sebzeli omlet",
+            calories: 380,
+            ingredients: [
+                { name: "Yumurta", amount: "3 adet" },
+                { name: "Beyaz peynir", amount: "50 gr" },
+                { name: "Domates", amount: "1 adet" },
+                { name: "Biber", amount: "1 adet" }
+            ]
+        },
+        {
+            name: "Yumurtalı Ispanak Sote",
+            description: "Taze ıspanak ve yumurta ile hazırlanmış hafif bir öğün.",
+            calories: 280,
+            ingredients: [
+                { name: "Ispanak", amount: "300 gr" },
+                { name: "Yumurta", amount: "2 adet" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" },
+                { name: "Limon", amount: "1/2 adet" }
+            ]
+        },
+        {
+            name: "Peynirli Kabak Mücver",
+            description: "Rendelenmiş kabak ve beyaz peynir ile hazırlanmış fırında mücver.",
+            calories: 350,
+            ingredients: [
+                { name: "Kabak", amount: "3 adet" },
+                { name: "Beyaz peynir", amount: "100 gr" },
+                { name: "Yumurta", amount: "1 adet" },
+                { name: "Dereotu", amount: "1/2 demet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Yoğurtlu Pancar Salatası",
+            description: "Haşlanmış pancar, yoğurt ve ceviz ile hazırlanmış besleyici salata.",
+            calories: 290,
+            ingredients: [
+                { name: "Pancar", amount: "2 adet" },
+                { name: "Yoğurt", amount: "200 gr" },
+                { name: "Ceviz", amount: "50 gr" },
+                { name: "Sarımsak", amount: "2 diş" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Sebzeli Makarna",
+            description: "Karışık sebzeli makarna",
+            calories: 650,
+            ingredients: [
+                { name: "Makarna", amount: "100 gr" },
+                { name: "Brokoli", amount: "100 gr" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Mantarlı Risotto",
+            description: "Kremalı mantarlı risotto",
+            calories: 750,
+            ingredients: [
+                { name: "Arborio pirinci", amount: "1 su bardağı" },
+                { name: "Mantar", amount: "200 gr" },
+                { name: "Krema", amount: "100 ml" },
+                { name: "Parmesan", amount: "50 gr" }
+            ]
+        },
+        {
+            name: "Peynirli Pide",
+            description: "Karışık peynirli pide",
+            calories: 680,
+            ingredients: [
+                { name: "Un", amount: "200 gr" },
+                { name: "Beyaz peynir", amount: "100 gr" },
+                { name: "Kaşar peyniri", amount: "100 gr" },
+                { name: "Tereyağı", amount: "30 gr" }
+            ]
+        },
+        {
+            name: "Karnıyarık",
+            description: "Sebzeli karnıyarık",
+            calories: 580,
+            ingredients: [
+                { name: "Patlıcan", amount: "3 adet" },
+                { name: "Domates", amount: "2 adet" },
+                { name: "Biber", amount: "2 adet" },
+                { name: "Zeytinyağı", amount: "4 yemek kaşığı" }
+            ]
+        },
+        {
+            name: "Patates Graten",
+            description: "Kremalı fırın patates",
+            calories: 820,
+            ingredients: [
+                { name: "Patates", amount: "4 adet" },
+                { name: "Krema", amount: "200 ml" },
+                { name: "Kaşar peyniri", amount: "100 gr" },
+                { name: "Sarımsak", amount: "2 diş" }
+            ]
+        },
+        {
+            name: "Peynirli Ispanaklı Gözleme",
+            description: "El açması hamur ile hazırlanmış, ıspanak ve peynir dolgulu gözleme.",
+            calories: 680,
+            ingredients: [
+                { name: "Un", amount: "200 gr" },
+                { name: "Ispanak", amount: "300 gr" },
+                { name: "Beyaz peynir", amount: "150 gr" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Yoğurt", amount: "100 gr" }
+            ]
+        },
+        {
+            name: "Patlıcan Graten",
+            description: "Fırında peynir ve beşamel sos ile hazırlanmış patlıcan graten.",
+            calories: 750,
+            ingredients: [
+                { name: "Patlıcan", amount: "3 adet" },
+                { name: "Kaşar peyniri", amount: "200 gr" },
+                { name: "Süt", amount: "300 ml" },
+                { name: "Un", amount: "30 gr" },
+                { name: "Tereyağı", amount: "40 gr" }
+            ]
+        },
+        {
+            name: "Sebzeli Mantı",
+            description: "Patates, havuç ve mantarla hazırlanmış mantı, yoğurt sosu ile servis edilir.",
+            calories: 820,
+            ingredients: [
+                { name: "Mantı hamuru", amount: "300 gr" },
+                { name: "Patates", amount: "200 gr" },
+                { name: "Havuç", amount: "150 gr" },
+                { name: "Mantar", amount: "200 gr" },
+                { name: "Yoğurt", amount: "250 gr" }
+            ]
+        },
+        {
+            name: "Peynirli Börek Tabağı",
+            description: "Çeşitli peynirli börekler",
+            calories: 1200,
+            ingredients: [
+                { name: "Yufka", amount: "500 gr" },
+                { name: "Beyaz peynir", amount: "200 gr" },
+                { name: "Tereyağı", amount: "100 gr" },
+                { name: "Maydanoz", amount: "1 demet" }
+            ]
+        },
+        {
+            name: "Sebzeli Pizza",
+            description: "Ev yapımı sebzeli pizza",
+            calories: 1350,
+            ingredients: [
+                { name: "Pizza hamuru", amount: "400 gr" },
+                { name: "Mozzarella", amount: "200 gr" },
+                { name: "Mantar", amount: "200 gr" },
+                { name: "Biber", amount: "2 adet" }
+            ]
+        },
+        {
+            name: "Fırın Makarna",
+            description: "Beşamel soslu fırın makarna",
+            calories: 1280,
+            ingredients: [
+                { name: "Makarna", amount: "400 gr" },
+                { name: "Kaşar peyniri", amount: "200 gr" },
+                { name: "Süt", amount: "500 ml" },
+                { name: "Tereyağı", amount: "50 gr" }
+            ]
+        },
+        {
+            name: "Sebzeli Lazanya",
+            description: "Sebzeli ve peynirli lazanya",
+            calories: 1450,
+            ingredients: [
+                { name: "Lazanya yaprağı", amount: "400 gr" },
+                { name: "Ispanak", amount: "300 gr" },
+                { name: "Ricotta peyniri", amount: "250 gr" },
+                { name: "Mozzarella", amount: "200 gr" }
+            ]
+        },
+        {
+            name: "Mantı",
+            description: "Yoğurtlu mantı",
+            calories: 1180,
+            ingredients: [
+                { name: "Mantı hamuru", amount: "400 gr" },
+                { name: "Yoğurt", amount: "500 gr" },
+                { name: "Tereyağı", amount: "50 gr" },
+                { name: "Domates sosu", amount: "100 gr" }
+            ]
+        },
+        {
+            name: "Peynirli Gözleme Tabağı",
+            description: "Çeşitli peynirli gözlemeler",
+            calories: 1250,
+            ingredients: [
+                { name: "Gözleme hamuru", amount: "400 gr" },
+                { name: "Beyaz peynir", amount: "200 gr" },
+                { name: "Kaşar peyniri", amount: "150 gr" },
+                { name: "Tereyağı", amount: "50 gr" }
+            ]
+        },
+        {
+            name: "Sebzeli Güveç",
+            description: "Fırında sebze güveç",
+            calories: 1150,
+            ingredients: [
+                { name: "Patlıcan", amount: "3 adet" },
+                { name: "Patates", amount: "3 adet" },
+                { name: "Domates", amount: "4 adet" },
+                { name: "Kaşar peyniri", amount: "200 gr" }
+            ]
+        },
+        {
+            name: "Kumpir",
+            description: "Bol malzemeli kumpir",
+            calories: 1480,
+            ingredients: [
+                { name: "Büyük boy patates", amount: "2 adet" },
+                { name: "Dana eti", amount: "300 gr" },
+                { name: "Kuru fasulye", amount: "300 gr" },
+                { name: "Soğan", amount: "2 adet" },
+                { name: "Domates", amount: "3 adet" }
+            ]
+        },
+        {
+            name: "Izgara Biftek",
+            calories: 550,
+            description: "Protein açısından zengin ızgara dana biftek",
+            dietType: "high-protein",
+            ingredients: [
+                { name: "Dana biftek", amount: "200gr" },
+                { name: "Zeytinyağı", amount: "1 yemek kaşığı" },
+                { name: "Karabiber", amount: "1 tatlı kaşığı" },
+                { name: "Deniz tuzu", amount: "1 tatlı kaşığı" }
+            ],
+            recipe: [
+                "Bifteği oda sıcaklığına getirin",
+                "Marine edin",
+                "Izgarayı ısıtın",
+                "İstediğiniz pişme derecesine göre pişirin",
+                "5 dakika dinlendirip servis yapın"
+            ]
+        },
+        {
+            name: "Pirinçli Tavuk Çorbası",
+            description: "Tavuk suyu, pirinç ve sebzelerle hazırlanan besleyici çorba",
+            calories: 320,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "200 gr" },
+                { name: "Pirinç", amount: "1/2 su bardağı" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" },
+                { name: "Karabiber", amount: "1 çay kaşığı" }
+            ]
+        },
+        {
+            name: "Kremalı Tavuk Çorbası",
+            description: "Tavuk, krema ve sebzelerle hazırlanan zengin çorba",
+            calories: 350,
+            ingredients: [
+                { name: "Tavuk göğsü", amount: "250 gr" },
+                { name: "Krema", amount: "200 ml" },
+                { name: "Havuç", amount: "1 adet" },
+                { name: "Soğan", amount: "1 adet" },
+                { name: "Tereyağı", amount: "1 yemek kaşığı" },
+                { name: "Un", amount: "1 yemek kaşığı" },
+                { name: "Karabiber", amount: "1 çay kaşığı" }
+            ]
+        }
+    ]
+}; 
