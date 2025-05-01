@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yemelytics - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
+    <title>BESLENİX - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="vegan_meals.js"></script>
     <script src="high_protein_meals.js"></script>
@@ -26,70 +26,112 @@
             vegetarian: new Set()
         };
 
-        // Market veritabanı
+        // Market fiyatlarını daha gerçekçi hale getirelim
         const marketDatabase = {
             "Migros": {
-                "Semizotu": 12.99,
-                "Nohut": 45.99,
-                "Zeytinyağı": 89.99,
-                "Kabak": 15.99,
-                "Yoğurt": 24.99,
-                "Sarımsak": 19.99,
-                "Yumurta": 45.99,
-                "Ispanak": 14.99,
-                "Kırmızı biber": 12.99,
-                "Tavuk göğsü": 89.99,
-                "Patates": 9.99,
-                "Havuç": 8.99,
-                "Domates": 12.99,
-                "Dana kıyma": 129.99,
-                "Pirinç": 29.99,
-                "Makarna": 19.99,
-                "Kaşar peyniri": 89.99,
-                "Marul": 9.99,
-                "Soğan": 7.99
+                "Semizotu": 11.95,
+                "Nohut": 44.95,
+                "Zeytinyağı": 89.90,
+                "Kabak": 13.95,
+                "Yoğurt": 22.95,
+                "Sarımsak": 18.95,
+                "Yumurta": 44.95,
+                "Ispanak": 12.95,
+                "Kırmızı biber": 11.95,
+                "Tavuk göğsü": 84.90,
+                "Patates": 8.95,
+                "Havuç": 7.95,
+                "Domates": 12.95,
+                "Dana kıyma": 124.90,
+                "Pirinç": 27.95,
+                "Makarna": 16.95,
+                "Kaşar peyniri": 84.90,
+                "Marul": 8.95,
+                "Soğan": 6.95
             },
             "Carrefour": {
-                "Semizotu": 11.99,
-                "Nohut": 44.99,
-                "Zeytinyağı": 85.99,
-                "Kabak": 14.99,
-                "Yoğurt": 23.99,
-                "Sarımsak": 18.99,
-                "Yumurta": 44.99,
-                "Ispanak": 13.99,
-                "Kırmızı biber": 11.99,
-                "Tavuk göğsü": 87.99,
-                "Patates": 8.99,
-                "Havuç": 7.99,
-                "Domates": 11.99,
-                "Dana kıyma": 125.99,
-                "Pirinç": 27.99,
-                "Makarna": 18.99,
-                "Kaşar peyniri": 85.99,
-                "Marul": 8.99,
-                "Soğan": 6.99
+                "Semizotu": 12.90,
+                "Nohut": 42.90,
+                "Zeytinyağı": 87.90,
+                "Kabak": 14.90,
+                "Yoğurt": 23.90,
+                "Sarımsak": 17.90,
+                "Yumurta": 43.90,
+                "Ispanak": 13.90,
+                "Kırmızı biber": 10.90,
+                "Tavuk göğsü": 82.90,
+                "Patates": 7.90,
+                "Havuç": 6.90,
+                "Domates": 11.90,
+                "Dana kıyma": 119.90,
+                "Pirinç": 26.90,
+                "Makarna": 18.90,
+                "Kaşar peyniri": 86.90,
+                "Marul": 9.90,
+                "Soğan": 5.90
             },
             "A101": {
-                "Semizotu": 10.99,
-                "Nohut": 42.99,
-                "Zeytinyağı": 82.99,
-                "Kabak": 13.99,
-                "Yoğurt": 22.99,
-                "Sarımsak": 17.99,
-                "Yumurta": 42.99,
-                "Ispanak": 12.99,
-                "Kırmızı biber": 10.99,
-                "Tavuk göğsü": 84.99,
-                "Patates": 7.99,
-                "Havuç": 6.99,
-                "Domates": 10.99,
-                "Dana kıyma": 119.99,
-                "Pirinç": 25.99,
-                "Makarna": 17.99,
-                "Kaşar peyniri": 82.99,
-                "Marul": 7.99,
-                "Soğan": 5.99
+                "Semizotu": 10.95,
+                "Nohut": 41.95,
+                "Zeytinyağı": 85.95,
+                "Kabak": 12.95,
+                "Yoğurt": 21.95,
+                "Sarımsak": 16.95,
+                "Yumurta": 42.95,
+                "Ispanak": 11.95,
+                "Kırmızı biber": 9.95,
+                "Tavuk göğsü": 83.95,
+                "Patates": 8.95,
+                "Havuç": 6.95,
+                "Domates": 10.95,
+                "Dana kıyma": 122.95,
+                "Pirinç": 24.95,
+                "Makarna": 15.95,
+                "Kaşar peyniri": 82.95,
+                "Marul": 7.95,
+                "Soğan": 5.95
+            },
+            "ŞOK": {
+                "Semizotu": 11.90,
+                "Nohut": 43.90,
+                "Zeytinyağı": 86.90,
+                "Kabak": 13.90,
+                "Yoğurt": 22.90,
+                "Sarımsak": 17.90,
+                "Yumurta": 41.90,
+                "Ispanak": 12.90,
+                "Kırmızı biber": 10.90,
+                "Tavuk göğsü": 81.90,
+                "Patates": 7.90,
+                "Havuç": 6.90,
+                "Domates": 11.90,
+                "Dana kıyma": 118.90,
+                "Pirinç": 25.90,
+                "Makarna": 16.90,
+                "Kaşar peyniri": 83.90,
+                "Marul": 8.90,
+                "Soğan": 5.90
+            },
+            "BİM": {
+                "Semizotu": 11.95,
+                "Nohut": 42.95,
+                "Zeytinyağı": 88.95,
+                "Kabak": 13.95,
+                "Yoğurt": 21.95,
+                "Sarımsak": 16.95,
+                "Yumurta": 43.95,
+                "Ispanak": 12.95,
+                "Kırmızı biber": 10.95,
+                "Tavuk göğsü": 82.95,
+                "Patates": 7.95,
+                "Havuç": 6.95,
+                "Domates": 10.95,
+                "Dana kıyma": 121.95,
+                "Pirinç": 25.95,
+                "Makarna": 17.95,
+                "Kaşar peyniri": 84.95,
+                "Marul": 8.95,
+                "Soğan": 5.95
             }
         };
 
@@ -203,7 +245,15 @@
                         </button>
                     </li>`;
             });
-            cartHTML += '</ul><h3>Market Fiyatları:</h3>';
+            
+            cartHTML += `
+                </ul>
+                <div class="price-info-disclaimer">
+                    * Fiyatlar tahmini olup, güncel fiyatlar için market web sitelerini ziyaret ediniz.
+                    Marketlerin kampanya ve indirim durumlarına göre en uygun fiyat değişkenlik gösterebilir.
+                </div>
+                <h3>Market Fiyatları:</h3>
+            `;
 
             Object.entries(marketPrices).forEach(([market, price]) => {
                 cartHTML += `
@@ -247,7 +297,9 @@
             const urls = {
                 'Migros': 'https://www.migros.com.tr',
                 'Carrefour': 'https://www.carrefoursa.com',
-                'A101': 'https://www.a101.com.tr'
+                'A101': 'https://www.a101.com.tr',
+                'ŞOK': 'https://www.sokmarket.com.tr',
+                'BİM': 'https://www.bim.com.tr'
             };
             return urls[market];
         }
@@ -487,7 +539,7 @@
                    `📝 ${meal.description}\n` +
                    `🔥 Kalori: ${meal.calories} kcal\n\n` +
                    `📋 *Malzemeler:*\n${meal.ingredients.map(ing => `• ${ing.name}: ${ing.amount}`).join('\n')}\n\n` +
-                   `_Bu öğün FitPlan ile oluşturuldu._`;
+                   `_Bu öğün Beslenix ile oluşturuldu._`;
         }
 
         // Generate meal function
@@ -648,13 +700,20 @@
                     const meal = generateMeal(dietType, calorieRange, excludeIngredients);
                     if (meal) {
                         weeklyPlanMeals[day] = meal;
+                        const isFavorite = favorites.some(fav => fav.name === meal.name);
                         planHTML += `
                             <div class="meal-item weekly-meal-item">
                                 <div class="day-header">
                                     <h3>${day}</h3>
-                                    <button class="btn icon-btn select-day-btn" title="Malzeme Listesine Ekle">
-                                        <i class="fas fa-list"></i>
-                                    </button>
+                                    <div class="header-buttons">
+                                        <button class="btn icon-btn select-day-btn" title="Malzeme Listesine Ekle">
+                                            <i class="fas fa-list"></i>
+                                        </button>
+                                        <button class="btn icon-btn favorite-btn ${isFavorite ? 'favorited' : ''}" 
+                                                title="${isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <h4>${meal.name}</h4>
                                 <p>${meal.description}</p>
@@ -673,11 +732,15 @@
                 planHTML += '</div>';
                 weeklyPlanDiv.innerHTML = planHTML || '<p class="empty-message">Uygun öğün bulunamadı.</p>';
                 
-                // Add event listeners for day selection
+                // Gün seçimi ve favori butonları için event listener'lar
                 const selectedDays = new Set();
-                document.querySelectorAll('.select-day-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const day = this.closest('.weekly-meal-item').querySelector('h3').textContent;
+                
+                document.querySelectorAll('.weekly-meal-item').forEach(mealItem => {
+                    const day = mealItem.querySelector('h3').textContent;
+                    const meal = weeklyPlanMeals[day];
+                    
+                    // Malzeme listesi butonu için event listener
+                    mealItem.querySelector('.select-day-btn').addEventListener('click', function() {
                         if (selectedDays.has(day)) {
                             selectedDays.delete(day);
                             this.classList.remove('selected');
@@ -686,7 +749,7 @@
                             this.classList.add('selected');
                         }
                         
-                        // Show/hide shopping list button
+                        // Malzeme listesi butonunu göster/gizle
                         const shoppingListBtn = document.querySelector('.create-shopping-list-btn');
                         if (selectedDays.size > 0) {
                             if (!shoppingListBtn) {
@@ -701,6 +764,20 @@
                         } else if (shoppingListBtn) {
                             shoppingListBtn.remove();
                         }
+                    });
+
+                    // Favori butonu için event listener
+                    mealItem.querySelector('.favorite-btn').addEventListener('click', function() {
+                        toggleFavorite(meal);
+                        this.classList.toggle('favorited');
+                        this.setAttribute('title', 
+                            this.classList.contains('favorited') ? 'Favorilerden Kaldır' : 'Favorilere Ekle'
+                        );
+                        showToast(
+                            this.classList.contains('favorited') 
+                                ? 'Öğün favorilere eklendi' 
+                                : 'Öğün favorilerden kaldırıldı'
+                        );
                     });
                 });
             });
@@ -773,13 +850,147 @@
 
         header {
             text-align: center;
-            margin-bottom: 30px;
+            padding: 20px;
+            background: #2c3e50;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            opacity: 0.9;
+            z-index: 1;
+        }
+
+        .logo-container {
+            position: relative;
+            z-index: 2;
+            padding: 10px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .logo-icon i {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .app-title {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 10px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .title-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: block;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .title-decoration {
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #fff;
+            transform-origin: right;
+            animation: revealLine 1.8s ease-in-out forwards;
+        }
+
+        .app-slogan {
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin-top: 8px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 1s forwards;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes revealLine {
+            0% {
+                transform: scaleX(0);
+            }
+            100% {
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px;
+            }
+            
+            .title-text {
+                font-size: 2rem;
+            }
+            
+            .app-slogan {
+                font-size: 0.8rem;
+                letter-spacing: 1.5px;
+            }
+            
+            .logo-icon {
+                font-size: 1.5rem;
+            }
+            
+            .logo-icon i {
+                padding: 10px;
+            }
         }
 
         .tab-buttons {
@@ -895,10 +1106,6 @@
             padding: 10px;
             }
 
-            .app-title {
-                font-size: 2rem;
-            }
-
             .tab-buttons {
             flex-wrap: wrap;
         }
@@ -920,8 +1127,14 @@
         .market-price-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
+            align-items: center;
+            padding: 12px;
             border-bottom: 1px solid var(--gray-color);
+            transition: background-color 0.3s ease;
+        }
+        
+        .market-price-item:hover {
+            background-color: #f8f9fa;
         }
         
         .market-price-item:last-child {
@@ -929,22 +1142,31 @@
         }
         
         .market-name {
-            font-weight: bold;
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
         }
         
         .market-total {
+            font-weight: 600;
             color: var(--primary-color);
+            margin: 0 15px;
         }
         
         .best-price {
             background-color: #e8f5e9;
         }
         
+        .best-price .market-total {
+            color: #2e7d32;
+        }
+        
         .best-price::after {
             content: '✓ En Uygun';
-            color: var(--primary-color);
+            color: #2e7d32;
             font-size: 0.8em;
             margin-left: 10px;
+            font-weight: 500;
         }
 
         .button-group {
@@ -1306,12 +1528,55 @@
             font-size: 14px;
             color: #333;
         }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .weekly-meal-item .favorite-btn {
+            background-color: #6c757d;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .weekly-meal-item .favorite-btn.favorited {
+            background-color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .weekly-meal-item .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .price-info-disclaimer {
+            font-size: 0.8rem;
+            color: #666;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="app-title">Yemelytics</h1>
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h1 class="app-title">
+                    <div class="title-wrapper">
+                        <span class="title-text">BESLENİX</span>
+                        <div class="title-decoration"></div>
+                    </div>
+                </h1>
+                <p class="app-slogan">Sağlıklı Yaşamın Lezzetli Hali</p>
+            </div>
         </header>
 
         <div class="tab-buttons">
