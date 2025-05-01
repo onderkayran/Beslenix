@@ -2,11 +2,747 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitPlan - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yemelytics - Kişiselleştirilmiş Öğün ve Beslenme Planı</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="vegan_meals.js"></script>
+    <script src="high_protein_meals.js"></script>
+    <script src="balanced_meals.js"></script>
+    <script src="vegetarian_meals.js"></script>
+    <script>
+        // Meal database initialization
+        const mealDatabase = {
+            vegan: veganMeals,
+            'high-protein': highProteinMeals,
+            balanced: balancedMeals,
+            vegetarian: vegetarianMeals
+        };
+
+        // Keep track of shown meals
+        let shownMeals = {
+            vegan: new Set(),
+            'high-protein': new Set(),
+            balanced: new Set(),
+            vegetarian: new Set()
+        };
+
+        // Market veritabanı
+        const marketDatabase = {
+            "Migros": {
+                "Semizotu": 12.99,
+                "Nohut": 45.99,
+                "Zeytinyağı": 89.99,
+                "Kabak": 15.99,
+                "Yoğurt": 24.99,
+                "Sarımsak": 19.99,
+                "Yumurta": 45.99,
+                "Ispanak": 14.99,
+                "Kırmızı biber": 12.99,
+                "Tavuk göğsü": 89.99,
+                "Patates": 9.99,
+                "Havuç": 8.99,
+                "Domates": 12.99,
+                "Dana kıyma": 129.99,
+                "Pirinç": 29.99,
+                "Makarna": 19.99,
+                "Kaşar peyniri": 89.99,
+                "Marul": 9.99,
+                "Soğan": 7.99
+            },
+            "Carrefour": {
+                "Semizotu": 11.99,
+                "Nohut": 44.99,
+                "Zeytinyağı": 85.99,
+                "Kabak": 14.99,
+                "Yoğurt": 23.99,
+                "Sarımsak": 18.99,
+                "Yumurta": 44.99,
+                "Ispanak": 13.99,
+                "Kırmızı biber": 11.99,
+                "Tavuk göğsü": 87.99,
+                "Patates": 8.99,
+                "Havuç": 7.99,
+                "Domates": 11.99,
+                "Dana kıyma": 125.99,
+                "Pirinç": 27.99,
+                "Makarna": 18.99,
+                "Kaşar peyniri": 85.99,
+                "Marul": 8.99,
+                "Soğan": 6.99
+            },
+            "A101": {
+                "Semizotu": 10.99,
+                "Nohut": 42.99,
+                "Zeytinyağı": 82.99,
+                "Kabak": 13.99,
+                "Yoğurt": 22.99,
+                "Sarımsak": 17.99,
+                "Yumurta": 42.99,
+                "Ispanak": 12.99,
+                "Kırmızı biber": 10.99,
+                "Tavuk göğsü": 84.99,
+                "Patates": 7.99,
+                "Havuç": 6.99,
+                "Domates": 10.99,
+                "Dana kıyma": 119.99,
+                "Pirinç": 25.99,
+                "Makarna": 17.99,
+                "Kaşar peyniri": 82.99,
+                "Marul": 7.99,
+                "Soğan": 5.99
+            }
+        };
+
+        // Sepet yönetimi
+        let cart = new Map(); // ingredient -> amount
+
+        // Toast bildirimi gösterme fonksiyonu
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+
+            // Animasyon ile göster
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // 3 saniye sonra kaldır
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Sepete ekleme fonksiyonunu güncelle
+        function addToCart(ingredients) {
+            ingredients.forEach(ing => {
+                const amount = cart.get(ing.name) || 0;
+                cart.set(ing.name, amount + 1);
+            });
+            updateCartUI();
+            
+            // Bildirim göster
+            const itemCount = ingredients.length;
+            const message = itemCount === 1 
+                ? '1 malzeme sepete eklendi'
+                : `${itemCount} malzeme sepete eklendi`;
+            showToast(message);
+        }
+
+        function removeFromCart(ingredient) {
+            const amount = cart.get(ingredient);
+            if (amount > 1) {
+                cart.set(ingredient, amount - 1);
+            } else {
+                cart.delete(ingredient);
+            }
+            updateCartUI();
+        }
+
+        function calculateMarketPrices() {
+            const marketPrices = {};
+            let bestMarket = null;
+            let bestPrice = Infinity;
+
+            // Her market için toplam fiyatı hesapla
+            for (const [marketName, prices] of Object.entries(marketDatabase)) {
+                let total = 0;
+                cart.forEach((amount, ingredient) => {
+                    if (prices[ingredient]) {
+                        total += prices[ingredient] * amount;
+                    }
+                });
+                marketPrices[marketName] = total;
+
+                if (total < bestPrice) {
+                    bestPrice = total;
+                    bestMarket = marketName;
+                }
+            }
+
+            return { marketPrices, bestMarket };
+        }
+
+        function updateCartUI() {
+            const cartDiv = document.getElementById('cart-content');
+            if (cart.size === 0) {
+                cartDiv.innerHTML = '<p>Sepetiniz boş</p>';
+                return;
+            }
+
+            const { marketPrices, bestMarket } = calculateMarketPrices();
+
+            let cartHTML = `
+                <div class="cart-header">
+                    <h3>Sepetinizdeki Malzemeler:</h3>
+                    <button class="btn clear-cart-btn" title="Sepeti Temizle">
+                        <i class="fas fa-trash"></i> Sepeti Temizle
+                    </button>
+                </div>
+                <ul class="cart-items">
+            `;
+            
+            cart.forEach((amount, ingredient) => {
+                cartHTML += `
+                    <li class="cart-item">
+                        <div class="cart-item-info">
+                            <span>${ingredient}</span>
+                            <span class="amount">${amount} adet</span>
+                        </div>
+                        <button class="remove-item-btn" data-ingredient="${ingredient}">
+                            <i class="fas fa-minus-circle"></i>
+                        </button>
+                    </li>`;
+            });
+            cartHTML += '</ul><h3>Market Fiyatları:</h3>';
+
+            Object.entries(marketPrices).forEach(([market, price]) => {
+                cartHTML += `
+                    <div class="market-price-item ${market === bestMarket ? 'best-price' : ''}">
+                        <span class="market-name">${market}</span>
+                        <span class="market-total">${price.toFixed(2)} TL</span>
+                        <a href="#" class="buy-button" data-market="${market}">Satın Al</a>
+                    </div>
+                `;
+            });
+
+            cartDiv.innerHTML = cartHTML;
+
+            // Sepeti temizleme butonu için event listener
+            document.querySelector('.clear-cart-btn').addEventListener('click', () => {
+                if (confirm('Sepetteki tüm ürünleri silmek istediğinize emin misiniz?')) {
+                    cart.clear();
+                    updateCartUI();
+                }
+            });
+
+            // Satın alma butonları için event listener'lar
+            document.querySelectorAll('.buy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const market = e.target.dataset.market;
+                    window.open(getMarketURL(market), '_blank');
+                });
+            });
+
+            // Malzeme kaldırma butonları için event listener'lar
+            document.querySelectorAll('.remove-item-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const ingredient = button.dataset.ingredient;
+                    removeFromCart(ingredient);
+                });
+            });
+        }
+
+        function getMarketURL(market) {
+            const urls = {
+                'Migros': 'https://www.migros.com.tr',
+                'Carrefour': 'https://www.carrefoursa.com',
+                'A101': 'https://www.a101.com.tr'
+            };
+            return urls[market];
+        }
+
+        // Add this after the mealDatabase initialization
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+        function toggleFavorite(meal) {
+            const index = favorites.findIndex(fav => fav.name === meal.name);
+            if (index === -1) {
+                favorites.push(meal);
+            } else {
+                favorites.splice(index, 1);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            updateFavoritesUI();
+        }
+
+        function updateFavoritesUI() {
+            const favoritesContainer = document.getElementById('favorites-container');
+            if (favorites.length === 0) {
+                favoritesContainer.innerHTML = '<p class="empty-message">Henüz favori öğün eklenmemiş.</p>';
+                return;
+            }
+
+            let favoritesHTML = '<div class="favorites-grid">';
+            favorites.forEach(meal => {
+                favoritesHTML += `
+                    <div class="meal-item favorite-item">
+                        <h3>${meal.name}</h3>
+                        <p>${meal.description}</p>
+                        <p class="calorie-info">Kalori: ${meal.calories} kcal</p>
+                        <h4>Malzemeler:</h4>
+                        <ul>
+                            ${meal.ingredients.map(ing => 
+                                `<li>${ing.name}: ${ing.amount}</li>`
+                            ).join('')}
+                        </ul>
+                        <div class="button-group">
+                            <button class="btn icon-btn remove-favorite-btn" title="Favorilerden Kaldır">
+                                <i class="fas fa-heart-broken"></i>
+                            </button>
+                            <button class="btn icon-btn add-to-cart-btn" title="Sepete Ekle">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                            <button class="btn icon-btn share-whatsapp" title="WhatsApp'ta Paylaş">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button class="btn icon-btn share-telegram" title="Telegram'da Paylaş">
+                                <i class="fab fa-telegram"></i>
+                            </button>
+                            <button class="btn icon-btn copy-meal" title="Kopyala">
+                                <i class="far fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            favoritesHTML += '</div>';
+            favoritesContainer.innerHTML = favoritesHTML;
+
+            // Add event listeners for favorite items
+            document.querySelectorAll('.remove-favorite-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealName = this.closest('.meal-item').querySelector('h3').textContent;
+                    const meal = favorites.find(fav => fav.name === mealName);
+                    if (meal) {
+                        toggleFavorite(meal);
+                    }
+                });
+            });
+
+            // Add event listeners for other buttons in favorite items
+            document.querySelectorAll('.favorite-item .add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealName = this.closest('.meal-item').querySelector('h3').textContent;
+                    const meal = favorites.find(fav => fav.name === mealName);
+                    if (meal) {
+                        addToCart(meal.ingredients);
+                    }
+                });
+            });
+
+            // Add share and copy functionality for favorite items
+            document.querySelectorAll('.favorite-item .share-whatsapp').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealName = this.closest('.meal-item').querySelector('h3').textContent;
+                    const meal = favorites.find(fav => fav.name === mealName);
+                    if (meal) {
+                        const text = createShareText(meal);
+                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.favorite-item .share-telegram').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealName = this.closest('.meal-item').querySelector('h3').textContent;
+                    const meal = favorites.find(fav => fav.name === mealName);
+                    if (meal) {
+                        const text = createShareText(meal);
+                        window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`, '_blank');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.favorite-item .copy-meal').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealName = this.closest('.meal-item').querySelector('h3').textContent;
+                    const meal = favorites.find(fav => fav.name === mealName);
+                    if (meal) {
+                        const text = createShareText(meal);
+                        navigator.clipboard.writeText(text).then(() => {
+                            const originalTitle = button.getAttribute('title');
+                            button.setAttribute('title', 'Kopyalandı!');
+                            button.style.backgroundColor = '#28a745';
+                            button.innerHTML = '<i class="fas fa-check"></i>';
+                            
+                            setTimeout(() => {
+                                button.setAttribute('title', originalTitle);
+                                button.style.backgroundColor = '#6c757d';
+                                button.innerHTML = '<i class="far fa-copy"></i>';
+                            }, 2000);
+                        });
+                    }
+                });
+            });
+        }
+
+        function showMeal(meal, resultDiv, dietType, calorieRange, excludeIngredients) {
+            if (meal) {
+                const isFavorite = favorites.some(fav => fav.name === meal.name);
+                resultDiv.innerHTML = `
+                    <div class="meal-item">
+                        <h3>${meal.name}</h3>
+                        <p>${meal.description}</p>
+                        <p class="calorie-info">Kalori: ${meal.calories} kcal</p>
+                        <h4>Malzemeler:</h4>
+                        <ul>
+                            ${meal.ingredients.map(ing => 
+                                `<li>${ing.name}: ${ing.amount}</li>`
+                            ).join('')}
+                        </ul>
+                        <div class="button-group">
+                            <button class="btn icon-btn favorite-btn ${isFavorite ? 'favorited' : ''}" title="${isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="btn icon-btn switch-meal-btn" title="Başka Öğün Göster">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn icon-btn add-to-cart-btn" title="Sepete Ekle">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                            <button class="btn icon-btn share-whatsapp" title="WhatsApp'ta Paylaş">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button class="btn icon-btn share-telegram" title="Telegram'da Paylaş">
+                                <i class="fab fa-telegram"></i>
+                            </button>
+                            <button class="btn icon-btn copy-meal" title="Kopyala">
+                                <i class="far fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Add favorite button functionality
+                const favoriteButton = resultDiv.querySelector('.favorite-btn');
+                if (favoriteButton) {
+                    favoriteButton.addEventListener('click', function() {
+                        toggleFavorite(meal);
+                        this.classList.toggle('favorited');
+                        this.setAttribute('title', this.classList.contains('favorited') ? 'Favorilerden Kaldır' : 'Favorilere Ekle');
+                    });
+                }
+
+                // Switch meal button functionality
+                const switchButton = resultDiv.querySelector('.switch-meal-btn');
+                if (switchButton) {
+                    switchButton.addEventListener('click', function() {
+                        const newMeal = generateMeal(dietType, calorieRange, excludeIngredients);
+                        showMeal(newMeal, resultDiv, dietType, calorieRange, excludeIngredients);
+                    });
+                }
+
+                // Add to cart button functionality
+                const addToCartButton = resultDiv.querySelector('.add-to-cart-btn');
+                if (addToCartButton) {
+                    addToCartButton.addEventListener('click', function() {
+                        addToCart(meal.ingredients);
+                    });
+                }
+
+                // Share buttons functionality
+                const whatsappButton = resultDiv.querySelector('.share-whatsapp');
+                const telegramButton = resultDiv.querySelector('.share-telegram');
+                const copyButton = resultDiv.querySelector('.copy-meal');
+
+                if (whatsappButton) {
+                    whatsappButton.addEventListener('click', function() {
+                        const text = createShareText(meal);
+                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                    });
+                }
+
+                if (telegramButton) {
+                    telegramButton.addEventListener('click', function() {
+                        const text = createShareText(meal);
+                        window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`, '_blank');
+                    });
+                }
+
+                if (copyButton) {
+                    copyButton.addEventListener('click', function() {
+                        const text = createShareText(meal);
+                        navigator.clipboard.writeText(text).then(() => {
+                            const originalTitle = copyButton.getAttribute('title');
+                            copyButton.setAttribute('title', 'Kopyalandı!');
+                            copyButton.style.backgroundColor = '#28a745';
+                            copyButton.innerHTML = '<i class="fas fa-check"></i>';
+                            
+                            setTimeout(() => {
+                                copyButton.setAttribute('title', originalTitle);
+                                copyButton.style.backgroundColor = '#6c757d';
+                                copyButton.innerHTML = '<i class="far fa-copy"></i>';
+                            }, 2000);
+                        });
+                    });
+                }
+            } else {
+                resultDiv.innerHTML = '<p class="empty-message">Uygun öğün bulunamadı.</p>';
+            }
+        }
+
+        function createShareText(meal) {
+            return `🍽️ *${meal.name}*\n\n` +
+                   `📝 ${meal.description}\n` +
+                   `🔥 Kalori: ${meal.calories} kcal\n\n` +
+                   `📋 *Malzemeler:*\n${meal.ingredients.map(ing => `• ${ing.name}: ${ing.amount}`).join('\n')}\n\n` +
+                   `_Bu öğün FitPlan ile oluşturuldu._`;
+        }
+
+        // Generate meal function
+        function generateMeal(dietType, calorieRange, excludeIngredients) {
+            const meals = mealDatabase[dietType];
+            if (!meals) return null;
+
+            const [minCal, maxCal] = calorieRange.split('-').map(Number);
+            
+            const filteredMeals = meals.filter(meal => {
+                // Kalori ve malzeme filtresi
+                if (meal.calories < minCal || meal.calories > maxCal) return false;
+                
+                if (excludeIngredients) {
+                    const excluded = excludeIngredients.split(',').map(item => item.trim().toLowerCase());
+                    if (meal.ingredients.some(ing => excluded.includes(ing.name.toLowerCase()))) return false;
+                }
+                
+                // Daha önce gösterilmemiş yemekleri filtrele
+                return !shownMeals[dietType].has(meal.name);
+            });
+
+            // Eğer filtrelenmiş yemek kalmadıysa, gösterilen yemekleri sıfırla ve tekrar dene
+            if (filteredMeals.length === 0) {
+                shownMeals[dietType].clear();
+                return generateMeal(dietType, calorieRange, excludeIngredients);
+            }
+
+            // Rastgele bir yemek seç
+            const selectedMeal = filteredMeals[Math.floor(Math.random() * filteredMeals.length)];
+            
+            // Seçilen yemeği gösterilenler listesine ekle
+            shownMeals[dietType].add(selectedMeal.name);
+
+            return selectedMeal;
+        }
+
+        // Add this after the mealDatabase initialization
+        function countHighProteinMealsInRange() {
+            const highProteinMeals = mealDatabase['high-protein'];
+            const mealsInRange = highProteinMeals.filter(meal => meal.calories >= 500 && meal.calories <= 1000);
+            return mealsInRange.length;
+        }
+
+        // Add this after the mealDatabase initialization
+        let weeklyPlanMeals = {};
+
+        function createShoppingList(selectedDays) {
+            const shoppingList = new Map();
+            
+            selectedDays.forEach(day => {
+                const meal = weeklyPlanMeals[day];
+                if (meal) {
+                    meal.ingredients.forEach(ing => {
+                        const currentAmount = shoppingList.get(ing.name) || 0;
+                        shoppingList.set(ing.name, currentAmount + 1);
+                    });
+                }
+            });
+            
+            return shoppingList;
+        }
+
+        function showShoppingListModal(selectedDays) {
+            const shoppingList = createShoppingList(selectedDays);
+            const modal = document.createElement('div');
+            modal.className = 'shopping-list-modal';
+            modal.innerHTML = `
+                <div class="shopping-list-content">
+                    <h2>Alışveriş Listesi</h2>
+                    <div class="selected-days">
+                        <h3>Seçilen Günler:</h3>
+                        <p>${selectedDays.join(', ')}</p>
+                    </div>
+                    <div class="shopping-list-items">
+                        <h3>Malzemeler:</h3>
+                        <ul>
+                            ${Array.from(shoppingList.entries()).map(([ingredient, amount]) => 
+                                `<li>
+                                    <span class="ingredient-name">${ingredient}</span>
+                                    <span class="ingredient-amount">${amount} adet</span>
+                                    <button class="btn icon-btn add-to-cart-btn" title="Sepete Ekle">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                </li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    <div class="shopping-list-actions">
+                        <button class="btn add-all-to-cart">Tümünü Sepete Ekle</button>
+                        <button class="btn close-shopping-list">Kapat</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add event listeners
+            modal.querySelector('.close-shopping-list').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            modal.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const ingredient = this.closest('li').querySelector('.ingredient-name').textContent;
+                    const amount = parseInt(this.closest('li').querySelector('.ingredient-amount').textContent);
+                    addToCart([{ name: ingredient, amount: `${amount} adet` }]);
+                });
+            });
+            
+            modal.querySelector('.add-all-to-cart').addEventListener('click', () => {
+                Array.from(shoppingList.entries()).forEach(([ingredient, amount]) => {
+                    addToCart([{ name: ingredient, amount: `${amount} adet` }]);
+                });
+            });
+        }
+
+        // When DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelector('.tab-btn.active').classList.remove('active');
+                    document.querySelector('.tab-content.active').classList.remove('active');
+                    button.classList.add('active');
+                    document.getElementById(button.dataset.tab).classList.add('active');
+                });
+            });
+
+            // Daily meal button
+            document.getElementById('generate-meal').addEventListener('click', () => {
+                const dietType = document.getElementById('diet-type').value;
+                const calorieRange = document.getElementById('calorie-range').value;
+                const excludeIngredients = document.getElementById('exclude').value;
+                
+                // Yeni öğün oluşturulduğunda gösterilen yemekleri sıfırla
+                shownMeals[dietType].clear();
+                
+                const meal = generateMeal(dietType, calorieRange, excludeIngredients);
+                const resultDiv = document.getElementById('meal-result');
+                
+                showMeal(meal, resultDiv, dietType, calorieRange, excludeIngredients);
+            });
+
+            // Weekly plan button
+            document.getElementById('generate-week').addEventListener('click', () => {
+                const dietType = document.getElementById('weekly-diet-type').value;
+                const calorieRange = document.getElementById('weekly-calorie-range').value;
+                const excludeIngredients = document.getElementById('weekly-exclude').value;
+                
+                shownMeals[dietType].clear();
+                
+                const weekDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+                const weeklyPlanDiv = document.getElementById('weekly-plan');
+                let planHTML = '<div class="weekly-plan-grid">';
+                
+                weekDays.forEach(day => {
+                    const meal = generateMeal(dietType, calorieRange, excludeIngredients);
+                    if (meal) {
+                        weeklyPlanMeals[day] = meal;
+                        planHTML += `
+                            <div class="meal-item weekly-meal-item">
+                                <div class="day-header">
+                                    <h3>${day}</h3>
+                                    <button class="btn icon-btn select-day-btn" title="Malzeme Listesine Ekle">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                </div>
+                                <h4>${meal.name}</h4>
+                                <p>${meal.description}</p>
+                                <p class="calorie-info">Kalori: ${meal.calories} kcal</p>
+                                <h4>Malzemeler:</h4>
+                                <ul>
+                                    ${meal.ingredients.map(ing => 
+                                        `<li>${ing.name}: ${ing.amount}</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+                });
+                
+                planHTML += '</div>';
+                weeklyPlanDiv.innerHTML = planHTML || '<p class="empty-message">Uygun öğün bulunamadı.</p>';
+                
+                // Add event listeners for day selection
+                const selectedDays = new Set();
+                document.querySelectorAll('.select-day-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const day = this.closest('.weekly-meal-item').querySelector('h3').textContent;
+                        if (selectedDays.has(day)) {
+                            selectedDays.delete(day);
+                            this.classList.remove('selected');
+                        } else {
+                            selectedDays.add(day);
+                            this.classList.add('selected');
+                        }
+                        
+                        // Show/hide shopping list button
+                        const shoppingListBtn = document.querySelector('.create-shopping-list-btn');
+                        if (selectedDays.size > 0) {
+                            if (!shoppingListBtn) {
+                                const newBtn = document.createElement('button');
+                                newBtn.className = 'btn create-shopping-list-btn';
+                                newBtn.innerHTML = '<i class="fas fa-shopping-basket"></i> Malzeme Listesi Oluştur';
+                                newBtn.addEventListener('click', () => {
+                                    showShoppingListModal(Array.from(selectedDays));
+                                });
+                                weeklyPlanDiv.insertBefore(newBtn, weeklyPlanDiv.firstChild);
+                            }
+                        } else if (shoppingListBtn) {
+                            shoppingListBtn.remove();
+                        }
+                    });
+                });
+            });
+
+            // Cart button functionality
+            const cartButton = document.createElement('button');
+            cartButton.className = 'cart-button';
+            cartButton.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+            document.body.appendChild(cartButton);
+
+            const cartModal = document.createElement('div');
+            cartModal.className = 'cart-modal';
+            cartModal.innerHTML = `
+                <div class="cart-content">
+                    <h2>Alışveriş Sepeti</h2>
+                    <div id="cart-content"></div>
+                    <button class="btn close-cart">Kapat</button>
+                </div>
+            `;
+            document.body.appendChild(cartModal);
+
+            cartButton.addEventListener('click', () => {
+                cartModal.style.display = 'flex';
+                updateCartUI();
+            });
+
+            cartModal.querySelector('.close-cart').addEventListener('click', () => {
+                cartModal.style.display = 'none';
+            });
+
+            // Initial cart UI update
+            updateCartUI();
+
+            // Initialize favorites UI
+            updateFavoritesUI();
+
+            // Count and display high protein meals in 500-1000 kcal range
+            const count = countHighProteinMealsInRange();
+            console.log(`Yüksek protein kategorisinde 500-1000 kcal aralığında ${count} yemek bulunmaktadır.`);
+        });
+    </script>
     <style>
-        /* Temel Stiller */
         :root {
             --primary-color: #4CAF50;
             --secondary-color: #45a049;
@@ -14,12 +750,6 @@
             --light-color: #f9f9f9;
             --dark-color: #333;
             --gray-color: #e0e0e0;
-            --danger-color: #f44336;
-            --vegetarian-color: #8BC34A;
-            --vegan-color: #4CAF50;
-            --lowcarb-color: #2196F3;
-            --highprotein-color: #FF9800;
-            --weekday-color: #607D8B;
         }
 
         * {
@@ -27,310 +757,29 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: #f5f5f5;
             color: var(--dark-color);
             line-height: 1.6;
-            overflow-x: hidden;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
-        }
-
-        /* Mobil için responsive düzenlemeler */
-        @media (max-width: 768px) {
-            .container {
-                padding: 5px;
-            }
-
-            .app-title {
-                font-size: 1.8rem;
-            }
-
-            .tab-buttons {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .tab-btn {
-                padding: 8px 15px;
-                font-size: 14px;
-                flex: 1 1 auto;
-                min-width: 120px;
-                text-align: center;
-            }
-
-            .app-container {
-                flex-direction: column;
-            }
-
-            .meal-planner, .shopping-list {
-                width: 100%;
-                margin-bottom: 15px;
-            }
-
-            .form-group {
-                margin-bottom: 10px;
-            }
-
-            select, input {
-                font-size: 14px;
-                padding: 8px;
-            }
-
-            .btn {
-                padding: 10px 15px;
-                font-size: 14px;
-            }
-
-            .meal-item {
-                padding: 10px;
-            }
-
-            .meal-actions {
-                flex-wrap: wrap;
-            }
-
-            .share-buttons {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .share-btn {
-                flex: 1 1 auto;
-                min-width: 100px;
-                margin: 5px;
-            }
-
-            .market-links {
-                flex-direction: column;
-            }
-
-            .market-btn {
-                width: 100%;
-                margin-bottom: 5px;
-            }
-
-            .weekly-plan {
-                grid-template-columns: 1fr;
-            }
-
-            .day-card {
-                margin-bottom: 10px;
-            }
-
-            .week-navigation {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .week-pagination {
-                margin-bottom: 10px;
-            }
-
-            .week-actions {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .cart-items {
-                max-height: 200px;
-            }
-
-            .cart-item {
-                grid-template-columns: 1fr 1fr;
-                font-size: 14px;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 10% auto;
-                padding: 15px;
-            }
-
-            .favorites-container {
-                grid-template-columns: 1fr;
-            }
-
-            .favorite-item {
-                margin-bottom: 10px;
-            }
-
-            /* Mobil için özel düzenlemeler */
-            .letter-icon {
-                margin: 0 1px;
-            }
-
-            .letter-icon i {
-                font-size: 0.4em;
-                top: -0.5em;
-            }
-
-            .membership-status, .upgrade-btn {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin: 10px;
-            }
-
-            .week-days {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-
-            .day-slot {
-                min-height: 50px;
-            }
-
-            .meal-details {
-                grid-template-columns: 1fr;
-            }
-
-            .ingredients-section {
-                padding: 10px;
-            }
-
-            .ingredients-section ul {
-                margin-left: 15px;
-            }
-        }
-
-        /* Küçük ekranlar için ek düzenlemeler */
-        @media (max-width: 480px) {
-            .app-title {
-                font-size: 1.5rem;
-            }
-
-            .tab-btn {
-                padding: 6px 10px;
-                font-size: 12px;
-                min-width: 100px;
-            }
-
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .meal-item h3 {
-                font-size: 16px;
-            }
-
-            .share-btn {
-                min-width: 80px;
-                font-size: 12px;
-            }
-
-            .cart-item {
-                font-size: 12px;
-            }
-        }
-
-        /* Yatay mod için düzenlemeler */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .container {
-                padding: 5px;
-            }
-
-            .app-title {
-                font-size: 1.5rem;
-            }
-
-            .meal-planner, .shopping-list {
-                max-height: 80vh;
-                overflow-y: auto;
-            }
+            padding: 20px;
         }
 
         header {
             text-align: center;
-            padding: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 30px;
         }
 
         .app-title {
             font-size: 2.5rem;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        .letter-icon {
-            position: relative;
-            display: inline-block;
-            margin: 0 2px;
-            transition: transform 0.3s ease;
-        }
-
-        .letter-icon i {
-            position: absolute;
-            font-size: 0.5em;
-            top: -0.7em;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0.8;
-            color: #4CAF50;
-        }
-
-        .letter-icon:hover {
-            transform: translateY(-5px);
-        }
-
-        .letter-icon:hover i {
-            transform: translateX(-50%) scale(1.2);
-        }
-
-        .membership-status {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .membership-free {
-            background-color: #f0f0f0;
-            color: #666;
-        }
-
-        .membership-premium {
-            background-color: #FFD700;
-            color: #000;
-        }
-
-        .upgrade-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .upgrade-btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .week-limit-message {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
         }
 
         .tab-buttons {
@@ -358,32 +807,14 @@
 
         .tab-content {
             display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .app-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .meal-planner, .shopping-list {
-            flex: 1;
-            min-width: 300px;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--gray-color);
+        .tab-content.active {
+            display: block;
         }
 
         .form-group {
@@ -415,47 +846,10 @@
             font-weight: 600;
             transition: background-color 0.3s;
             width: 100%;
-            margin-top: 10px;
         }
 
         .btn:hover {
             background-color: var(--secondary-color);
-        }
-
-        .btn-change {
-            background-color: var(--lowcarb-color);
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 36px;
-            width: 36px;
-            margin: 0;
-        }
-
-        .btn-change:hover {
-            background-color: #1976D2;
-        }
-
-        .btn-try-again {
-            background-color: var(--highprotein-color);
-        }
-
-        .btn-try-again:hover {
-            background-color: #F57C00;
-        }
-
-        .btn-generate-week {
-            background-color: var(--weekday-color);
-            margin-bottom: 15px;
-        }
-
-        .btn-generate-week:hover {
-            background-color: #455A64;
         }
 
         .meal-result {
@@ -469,120 +863,11 @@
             margin-bottom: 15px;
             padding-bottom: 15px;
             border-bottom: 1px dashed var(--gray-color);
-            position: relative;
         }
 
         .meal-item h3 {
             color: var(--primary-color);
             margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .meal-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            gap: 10px;
-        }
-
-        .share-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .share-btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            height: 36px;
-        }
-
-        .share-btn.whatsapp {
-            background-color: #25D366;
-            color: white;
-        }
-
-        .share-btn.telegram {
-            background-color: #0088cc;
-            color: white;
-        }
-
-        .share-btn.copy {
-            background-color: var(--gray-color);
-            color: var(--dark-color);
-        }
-
-        .share-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .share-btn:active {
-            transform: translateY(0);
-        }
-
-        .favorite-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: #ccc;
-            transition: all 0.3s ease;
-            padding: 5px;
-        }
-
-        .favorite-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .favorite-btn.favorited {
-            color: var(--danger-color);
-        }
-
-        .favorite-btn.favorited:hover {
-            color: #d32f2f;
-        }
-
-        .meal-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .meal-tags {
-            display: flex;
-            gap: 10px;
-        }
-
-        .diet-balanced {
-            background-color: var(--primary-color);
-        }
-
-        .diet-vegetarian {
-            background-color: var(--vegetarian-color);
-        }
-
-        .diet-vegan {
-            background-color: var(--vegan-color);
-        }
-
-        .diet-lowcarb {
-            background-color: var(--lowcarb-color);
-        }
-
-        .diet-highprotein {
-            background-color: var(--highprotein-color);
         }
 
         .meal-item p {
@@ -595,388 +880,236 @@
             margin-bottom: 10px;
         }
 
-        .empty-message {
-            color: #666;
-            text-align: center;
-            padding: 20px;
+        .favorite-btn {
+            background-color: #6c757d;
+            color: white;
         }
 
-        .shopping-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .favorite-btn.favorited {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
             padding: 10px;
-            border-bottom: 1px solid var(--gray-color);
-        }
+            }
 
-        .shopping-item:last-child {
-            border-bottom: none;
-        }
+            .app-title {
+                font-size: 2rem;
+            }
 
-        .shopping-item input {
-            width: auto;
-            margin-right: 10px;
-        }
-
-        .market-links {
-            display: flex;
+            .tab-buttons {
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
         }
 
-        .market-btn {
+            .tab-btn {
             flex: 1;
             min-width: 120px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .market-btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .market-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        /* Haftalık planlama */
-        .weekly-plan {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .day-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .day-header {
-            color: var(--weekday-color);
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--gray-color);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .day-meal {
-            margin-bottom: 10px;
-        }
-
-        .day-meal h4 {
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        /* Modal Stilleri */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 500px;
-            position: relative;
-        }
-
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-cancel {
-            background-color: var(--danger-color);
-        }
-
-        .btn-cancel:hover {
-            background-color: #d32f2f;
-        }
-
-        /* Sepet Stilleri */
-        .cart-items {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 20px 0;
-        }
-
-        .cart-item {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
-            gap: 10px;
-            padding: 10px;
-            border-bottom: 1px solid var(--gray-color);
-            align-items: center;
-        }
-
-        .cart-total {
-            text-align: right;
-            font-size: 1.2em;
-            margin: 20px 0;
-            padding-top: 10px;
-            border-top: 2px solid var(--gray-color);
+            text-align: center;
+            }
         }
 
         .market-prices {
-            margin: 20px 0;
+            margin-top: 20px;
             border: 1px solid var(--gray-color);
             border-radius: 8px;
-            overflow: hidden;
+            padding: 15px;
         }
-
-        .market-price-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
+        
         .market-price-item {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            justify-content: space-between;
             padding: 10px;
             border-bottom: 1px solid var(--gray-color);
         }
-
+        
         .market-price-item:last-child {
             border-bottom: none;
         }
-
+        
         .market-name {
             font-weight: bold;
         }
-
+        
+        .market-total {
+            color: var(--primary-color);
+        }
+        
         .best-price {
             background-color: #e8f5e9;
-            position: relative;
         }
-
+        
         .best-price::after {
             content: '✓ En Uygun';
-            position: absolute;
-            right: 10px;
             color: var(--primary-color);
             font-size: 0.8em;
-            font-weight: bold;
+            margin-left: 10px;
         }
 
-        /* Responsive Tasarım */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .market-links {
-                flex-direction: column;
-            }
-            
-            .market-btn {
-                width: 100%;
-            }
-            
-            .weekly-plan {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .weekly-plans-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .week-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative;
-        }
-
-        .week-header {
+        .button-group {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--gray-color);
-        }
-
-        .week-number {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .week-actions {
-            display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-top: 15px;
+            justify-content: flex-start;
             align-items: center;
         }
 
-        .week-actions .share-buttons {
-            display: flex;
-            gap: 5px;
-        }
-
-        .week-actions .share-btn {
-            padding: 6px 10px;
-            font-size: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .week-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .week-actions .share-buttons {
-                justify-content: space-between;
-            }
-        }
-
-        .week-action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--dark-color);
-            font-size: 16px;
-        }
-
-        .week-action-btn:hover {
-            color: var(--primary-color);
-        }
-
-        .week-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .day-slot {
-            padding: 5px;
-            border: 1px solid var(--gray-color);
-            border-radius: 4px;
-            min-height: 60px;
-            cursor: move;
-            transition: background-color 0.3s;
-        }
-
-        .day-slot:hover {
-            background-color: #f0f0f0;
-        }
-
-        .day-slot.dragging {
-            opacity: 0.5;
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .day-slot.drop-target {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .day-slot.empty {
-            background-color: #f5f5f5;
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #999;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .week-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-        }
-
-        .week-pagination {
-            display: flex;
-            gap: 10px;
-        }
-
-        .week-pagination-btn {
+        .icon-btn::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
             padding: 5px 10px;
-            border: 1px solid var(--gray-color);
             border-radius: 4px;
-            background: none;
-            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
-        .week-pagination-btn.active {
+        .icon-btn:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .share-whatsapp {
+            background-color: #25D366;
+            color: white;
+        }
+
+        .share-telegram {
+            background-color: #0088cc;
+            color: white;
+        }
+
+        .copy-meal {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .cart-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             background-color: var(--primary-color);
             color: white;
-            border-color: var(--primary-color);
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
         }
 
-        .meal-details {
-            margin-top: 15px;
-            display: grid;
-            gap: 20px;
-            grid-template-columns: 1fr;
+        .cart-button:hover {
+            transform: scale(1.1);
         }
 
-        @media (min-width: 768px) {
-            .meal-details {
-                grid-template-columns: 1fr;
-            }
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .ingredients-section {
-            background-color: var(--light-color);
-            padding: 15px;
+        .cart-content {
+            background-color: white;
+            padding: 20px;
             border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        .ingredients-section ul {
-            margin-left: 20px;
-            margin-top: 10px;
+        .buy-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
         }
 
-        .ingredients-section li {
-            margin-bottom: 5px;
+        .buy-button:hover {
+            background-color: var(--secondary-color);
         }
 
-        /* Favoriler Stilleri */
-        .favorites-container {
+        .cart-items {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid var(--gray-color);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-info {
+            display: flex;
+            justify-content: space-between;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .cart-item .amount {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .remove-item-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        .remove-item-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .favorites-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 20px;
+            padding: 20px;
         }
 
         .favorite-item {
@@ -984,1892 +1117,265 @@
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative;
         }
 
-        .favorite-header {
+        .remove-favorite-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .weekly-plan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .weekly-meal-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .day-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--gray-color);
         }
 
-        .favorite-actions {
+        .select-day-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
             display: flex;
-            gap: 10px;
-        }
-
-        .favorite-action-btn {
-            background: none;
-            border: none;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            color: var(--dark-color);
-            font-size: 16px;
+            transition: all 0.3s ease;
         }
 
-        .favorite-action-btn:hover {
-            color: var(--primary-color);
+        .select-day-btn.selected {
+            background-color: #28a745;
         }
 
-        .favorite-action-btn.delete {
-            color: var(--danger-color);
+        .shopping-list-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .favorite-action-btn.delete:hover {
-            color: #d32f2f;
+        .shopping-list-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        .add-to-favorites {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: #ccc;
-            transition: color 0.3s;
+        .shopping-list-items ul {
+            list-style: none;
+            padding: 0;
         }
 
-        .add-to-favorites:hover {
-            color: var(--danger-color);
-        }
-
-        .add-to-favorites.favorited {
-            color: var(--danger-color);
-        }
-
-        .header {
+        .shopping-list-items li {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .logo {
-            text-align: center;
-            flex-grow: 1;
+        .ingredient-name {
+            font-weight: 500;
         }
 
-        .header-right {
+        .ingredient-amount {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .shopping-list-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .create-shopping-list-btn {
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 10px;
         }
 
-        #shopping-cart-btn {
-            background-color: #4CAF50;
+        .create-shopping-list-btn i {
+            font-size: 18px;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .clear-cart-btn {
+            background-color: #dc3545;
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 8px 15px;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 5px;
+            width: auto;
         }
 
-        #shopping-cart-btn:hover {
-            background-color: #45a049;
+        .clear-cart-btn:hover {
+            background-color: #c82333;
+        }
+
+        .clear-cart-btn i {
+            font-size: 16px;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(150%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 9999;
+            min-width: 200px;
+        }
+
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        .toast-notification.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast-notification.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast-content i {
+            font-size: 20px;
+        }
+
+        .toast-content i.fa-check-circle {
+            color: #28a745;
+        }
+
+        .toast-content i.fa-exclamation-circle {
+            color: #dc3545;
+        }
+
+        .toast-content span {
+            font-size: 14px;
+            color: #333;
         }
     </style>
-    <script src="meal_database.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="app-title">
-                <span class="letter-icon"><i class="fas fa-dumbbell"></i>F</span>
-                <span class="letter-icon"><i class="fas fa-heartbeat"></i>I</span>
-                <span class="letter-icon"><i class="fas fa-running"></i>T</span>
-                <span class="letter-icon"><i class="fas fa-apple-alt"></i>P</span>
-                <span class="letter-icon"><i class="fas fa-carrot"></i>L</span>
-                <span class="letter-icon"><i class="fas fa-utensils"></i>A</span>
-                <span class="letter-icon"><i class="fas fa-weight"></i>N</span>
-            </h1>
+            <h1 class="app-title">Yemelytics</h1>
         </header>
 
         <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="daily">Günlük Plan</button>
+            <button class="tab-btn active" data-tab="daily">Günlük Öğün Planlama</button>
             <button class="tab-btn" data-tab="weekly">Haftalık Plan</button>
             <button class="tab-btn" data-tab="favorites">Favoriler</button>
         </div>
 
-        <!-- Günlük Plan Sekmesi -->
-        <div id="daily" class="tab-content active">
-            <div class="app-container">
-                <div class="meal-planner">
-                    <h2><i class="fas fa-calendar-alt"></i> Öğün Planlayıcı</h2>
-                    
+        <div class="tab-content active" id="daily">
                     <div class="form-group">
-                        <label for="diet-type">Diyet Tercihi:</label>
+                <label for="diet-type">Diyet Tipi:</label>
                         <select id="diet-type">
                             <option value="balanced">Dengeli Beslenme</option>
                             <option value="vegetarian">Vejetaryen</option>
                             <option value="vegan">Vegan</option>
-                            <option value="low-carb">Düşük Karbonhidrat</option>
                             <option value="high-protein">Yüksek Protein</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="calorie-range">Kalori Aralığı:</label>
                         <select id="calorie-range">
-                            <option value="100-500">100-500 kcal (Hafif)</option>
-                            <option value="500-1000">500-1000 kcal (Orta)</option>
-                            <option value="1000-1500">1000-1500 kcal (Yüksek)</option>
+                    <option value="100-500">100-500 kcal</option>
+                    <option value="500-1000">500-1000 kcal</option>
+                    <option value="1000-1500">1000-1500 kcal</option>
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label for="exclude">Hariç Tutulacaklar (virgülle ayırın):</label>
-                        <input type="text" id="exclude" placeholder="örnek: soya, gluten, süt">
+                <label for="exclude">Hariç Tutulacak Malzemeler:</label>
+                <input type="text" id="exclude" placeholder="Örnek: domates, soğan">
                     </div>
-
-                    <button id="generate-meal" class="btn"><i class="fas fa-magic"></i> Öğün Önerisi Oluştur</button>
-
-                    <div id="meal-result" class="meal-result">
-                        <!-- Öğün önerisi burada görünecek -->
-                    </div>
+            <button id="generate-meal" class="btn">Öğün Oluştur</button>
+            <div id="meal-result" class="meal-result"></div>
                 </div>
 
-                <div class="shopping-list">
-                    <h2><i class="fas fa-shopping-basket"></i> Alışveriş Listesi</h2>
-                    <div id="shopping-items">
-                        <!-- Alışveriş öğeleri burada görünecek -->
-                        <p class="empty-message">Önce bir öğün planı oluşturun</p>
-                    </div>
-                    <div class="market-links">
-                        <button id="migros" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Migros</button>
-                        <button id="carrefour" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Carrefour</button>
-                        <button id="getir" class="market-btn" disabled><i class="fas fa-cart-plus"></i> GetirYemek</button>
-                        <button id="a101" class="market-btn" disabled><i class="fas fa-cart-plus"></i> A101</button>
-                        <button id="bim" class="market-btn" disabled><i class="fas fa-cart-plus"></i> BİM</button>
-                        <button id="sok" class="market-btn" disabled><i class="fas fa-cart-plus"></i> ŞOK</button>
-                        <button id="yemeksepeti" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Yemeksepeti</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Haftalık Plan Sekmesi -->
-        <div id="weekly" class="tab-content">
-            <div class="meal-planner">
-                <h2><i class="fas fa-calendar-week"></i> Haftalık Öğün Planlayıcı</h2>
-                
+        <div class="tab-content" id="weekly">
                 <div class="form-group">
-                    <label for="weekly-diet-type">Diyet Tercihi:</label>
+                <label for="weekly-diet-type">Diyet Tipi:</label>
                     <select id="weekly-diet-type">
                         <option value="balanced">Dengeli Beslenme</option>
                         <option value="vegetarian">Vejetaryen</option>
                         <option value="vegan">Vegan</option>
-                        <option value="low-carb">Düşük Karbonhidrat</option>
                         <option value="high-protein">Yüksek Protein</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="weekly-calorie-range">Kalori Aralığı:</label>
                     <select id="weekly-calorie-range">
-                        <option value="100-500">100-500 kcal (Hafif)</option>
-                        <option value="500-1000">500-1000 kcal (Orta)</option>
-                        <option value="1000-1500">1000-1500 kcal (Yüksek)</option>
+                    <option value="100-500">100-500 kcal</option>
+                    <option value="500-1000">500-1000 kcal</option>
+                    <option value="1000-1500">1000-1500 kcal</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label for="weekly-exclude">Hariç Tutulacaklar (virgülle ayırın):</label>
-                    <input type="text" id="weekly-exclude" placeholder="örnek: soya, gluten, süt">
+                <label for="weekly-exclude">Hariç Tutulacak Malzemeler:</label>
+                <input type="text" id="weekly-exclude" placeholder="Örnek: domates, soğan">
+                </div>
+            <button id="generate-week" class="btn">Haftalık Plan Oluştur</button>
+            <div id="weekly-plan" class="meal-result"></div>
                 </div>
 
-                <button id="generate-week" class="btn btn-generate-week"><i class="fas fa-calendar-plus"></i> Haftalık Plan Oluştur</button>
-                <button id="generate-random-week" class="btn" style="background-color: var(--accent-color); margin-top: 10px;">
-                    <i class="fas fa-random"></i> Rastgele Plan Oluştur
-                </button>
-
-                <div class="week-navigation">
-                    <div class="week-pagination">
-                        <button class="week-pagination-btn" data-action="prev" onclick="goToPrevWeek()"><i class="fas fa-chevron-left"></i></button>
-                        <span id="current-week">Hafta 1</span>
-                        <button class="week-pagination-btn" data-action="next" onclick="goToNextWeek()"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="week-actions">
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareWeeklyPlan('whatsapp')">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn telegram" onclick="shareWeeklyPlan('telegram')">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn copy" onclick="shareWeeklyPlan('copy')">
-                                <i class="fas fa-copy"></i> Kopyala
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="weekly-plan" class="weekly-plan">
-                    <!-- Haftalık plan burada görünecek -->
-                    <p class="empty-message">Haftalık öğün planı oluşturmak için yukarıdaki butona tıklayın</p>
-                </div>
-
-                <div id="saved-weeks" class="weekly-plans-container">
-                    <!-- Kaydedilmiş haftalık planlar burada görünecek -->
+        <div class="tab-content" id="favorites">
+            <div id="favorites-container" class="meal-result"></div>
                 </div>
             </div>
 
-            <div class="shopping-list">
-                <h2><i class="fas fa-shopping-basket"></i> Haftalık Alışveriş Listesi</h2>
-                <div id="weekly-shopping-items">
-                    <!-- Haftalık alışveriş öğeleri burada görünecek -->
-                    <p class="empty-message">Önce bir haftalık plan oluşturun</p>
-                </div>
-                <div class="market-links">
-                    <button id="weekly-migros" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Migros</button>
-                    <button id="weekly-carrefour" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Carrefour</button>
-                    <button id="weekly-getir" class="market-btn" disabled><i class="fas fa-cart-plus"></i> GetirYemek</button>
-                    <button id="weekly-a101" class="market-btn" disabled><i class="fas fa-cart-plus"></i> A101</button>
-                    <button id="weekly-bim" class="market-btn" disabled><i class="fas fa-cart-plus"></i> BİM</button>
-                    <button id="weekly-sok" class="market-btn" disabled><i class="fas fa-cart-plus"></i> ŞOK</button>
-                    <button id="weekly-yemeksepeti" class="market-btn" disabled><i class="fas fa-cart-plus"></i> Yemeksepeti</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Favoriler Sekmesi -->
-        <div id="favorites" class="tab-content">
-            <div class="meal-planner">
-                <h2><i class="fas fa-heart"></i> Favori Yemeklerim</h2>
-                <div id="favorites-container" class="favorites-container">
-                    <p class="empty-message">Henüz favori yemek eklemediniz</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Alışveriş Listesi Gönderildi</h2>
-            <p>Seçtiğiniz marketin web sitesine yönlendiriliyorsunuz. Lütfen alışveriş sepetinizi kontrol edip ödeme işlemini tamamlayın.</p>
-            <div class="modal-buttons">
-                <button id="proceed" class="btn">Yönlendir</button>
-                <button id="cancel" class="btn btn-cancel">İptal</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Premium Üyelik Modal -->
-    <div id="premium-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Premium Üyeliğe Yükselt</h2>
-            <div class="premium-features">
-                <h3>Premium Özellikler:</h3>
-                <ul>
-                    <li><i class="fas fa-check"></i> 52 Haftalık Yemek Planına Erişim</li>
-                    <li><i class="fas fa-check"></i> Özel Tarifler ve İpuçları</li>
-                    <li><i class="fas fa-check"></i> Öncelikli Destek</li>
-                    <li><i class="fas fa-check"></i> Reklamsız Deneyim</li>
-                </ul>
-            </div>
-            <div class="pricing">
-                <h3>Yıllık Üyelik: 199 TL</h3>
-                <p>Günlük sadece 0.54 TL!</p>
-            </div>
-            <div class="modal-buttons">
-                <button id="proceed-payment" class="btn">Ödemeye Geç</button>
-                <button id="cancel-premium" class="btn btn-cancel">İptal</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // DOM Elementleri
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const generateMealBtn = document.getElementById('generate-meal');
-        const generateWeekBtn = document.getElementById('generate-week');
-        const generateRandomWeekBtn = document.getElementById('generate-random-week');
-        const mealResultDiv = document.getElementById('meal-result');
-        const shoppingItemsDiv = document.getElementById('shopping-items');
-        const weeklyPlanDiv = document.getElementById('weekly-plan');
-        const weeklyShoppingItemsDiv = document.getElementById('weekly-shopping-items');
-        const dietTypeSelect = document.getElementById('diet-type');
-        const weeklyDietTypeSelect = document.getElementById('weekly-diet-type');
-        const calorieRangeSelect = document.getElementById('calorie-range');
-        const weeklyCalorieRangeSelect = document.getElementById('weekly-calorie-range');
-        const excludeInput = document.getElementById('exclude');
-        const weeklyExcludeInput = document.getElementById('weekly-exclude');
-        const marketButtons = document.querySelectorAll('.market-btn');
-        const weeklyMarketButtons = document.querySelectorAll('#weekly-migros, #weekly-carrefour, #weekly-getir, #weekly-a101, #weekly-bim, #weekly-sok, #weekly-yemeksepeti');
-        const modal = document.getElementById('modal');
-        const proceedBtn = document.getElementById('proceed');
-        const cancelBtn = document.getElementById('cancel');
-        const closeBtn = document.querySelector('.close');
-
-        // Üyelik durumu ve yükseltme işlemleri
-        const membershipStatus = document.getElementById('membership-status');
-        const upgradeBtn = document.getElementById('upgrade-btn');
-        const premiumModal = document.getElementById('premium-modal');
-        const proceedPaymentBtn = document.getElementById('proceed-payment');
-        const cancelPremiumBtn = document.getElementById('cancel-premium');
-        const closePremiumBtn = premiumModal.querySelector('.close');
-
-        // Global değişkenler
-        let currentDietType = '';
-        let currentCalorieRange = '';
-        let currentExcludeItems = [];
-        let filteredMeals = [];
-        let currentMealIndex = 0;
-        let weeklyMeals = [];
-        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-
-        // Haftalık plan yönetimi
-        let currentWeek = 1;
-        let savedWeeks = JSON.parse(localStorage.getItem('savedWeeks') || '{}');
-
-        // Tab geçiş fonksiyonu
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.getAttribute('data-tab');
-                
-                // Tab butonlarını güncelle
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                // Tab içeriklerini güncelle
-                tabContents.forEach(content => content.classList.remove('active'));
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
-
-        // Öğün filtreleme fonksiyonu
-        function filterMeals(dietType, calorieRange, excludeItems) {
-            console.log('Filtreleme başladı:', { dietType, calorieRange, excludeItems });
-            
-            if (!mealDatabase || !mealDatabase[dietType]) {
-                console.error('Meal database not loaded or invalid diet type:', dietType);
-                return [];
-            }
-
-            // Kalori aralığını parçala
-            const [minCalStr, maxCalStr] = calorieRange.split('-');
-            const minCal = parseInt(minCalStr);
-            const maxCal = parseInt(maxCalStr.split(' ')[0]); // "kcal" kısmını kaldır
-
-            console.log('İşlenen kalori aralığı:', { minCal, maxCal, originalRange: calorieRange });
-
-            // Veritabanındaki tüm yemekleri kontrol et
-            const meals = mealDatabase[dietType];
-            console.log(`${dietType} için toplam yemek sayısı:`, meals.length);
-            console.log('Mevcut yemekler:', meals.map(m => `${m.name} (${m.calories} kcal)`));
-
-            const filtered = meals.filter(meal => {
-                // Kalori kontrolü
-                const isInCalorieRange = meal.calories >= minCal && meal.calories <= maxCal;
-                
-                if (!isInCalorieRange) {
-                    console.log(`Kalori dışı yemek: ${meal.name} (${meal.calories} kcal), beklenen aralık: ${minCal}-${maxCal}`);
-                    return false;
-                }
-
-                // Hariç tutulan malzemeler kontrolü
-                if (excludeItems && excludeItems.length > 0 && excludeItems[0] !== '') {
-                    for (const ingredient of meal.ingredients) {
-                        const ingredientName = ingredient.name.toLowerCase();
-                        if (excludeItems.some(item => {
-                            const trimmedItem = item.trim().toLowerCase();
-                            return trimmedItem && ingredientName.includes(trimmedItem);
-                        })) {
-                            console.log(`Hariç tutulan malzeme içeren yemek: ${meal.name}, malzeme: ${ingredient.name}`);
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            });
-
-            console.log('Filtreleme sonucu:', {
-                totalMeals: meals.length,
-                filteredMeals: filtered.length,
-                calorieRange: `${minCal}-${maxCal}`,
-                filteredMealNames: filtered.map(m => `${m.name} (${m.calories} kcal)`)
-            });
-
-            return filtered;
-        }
-
-        // Öğün oluşturma fonksiyonu
-        function generateMeal() {
-            console.log('Öğün oluşturma başladı');
-            currentDietType = dietTypeSelect.value;
-            currentCalorieRange = calorieRangeSelect.value;
-            currentExcludeItems = excludeInput.value.split(',').map(item => item.trim());
-
-            console.log('Seçilen değerler:', {
-                dietType: currentDietType,
-                calorieRange: currentCalorieRange,
-                excludeItems: currentExcludeItems
-            });
-
-            filteredMeals = filterMeals(currentDietType, currentCalorieRange, currentExcludeItems);
-
-            if (!filteredMeals || filteredMeals.length === 0) {
-                console.log('Uygun öğün bulunamadı');
-                showNoMealFound(mealResultDiv);
-                return;
-            }
-
-            console.log('Filtrelenen öğünler:', filteredMeals.map(m => `${m.name} (${m.calories} kcal)`));
-            
-            // Rastgele bir öğün seç
-            currentMealIndex = Math.floor(Math.random() * filteredMeals.length);
-            showCurrentMeal();
-        }
-
-        // Haftalık planı gösterme fonksiyonu
-        function showWeeklyPlan() {
-            console.log('Haftalık plan gösteriliyor...');
-            console.log('Seçilen yemekler:', weeklyMeals);
-
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-            
-            weeklyPlanDiv.innerHTML = days.map((day, index) => {
-                const meal = weeklyMeals[index];
-                return `
-                    <div class="day-card">
-                        <div class="day-header">
-                            <span>${day}</span>
-                            <span class="diet-tag diet-${weeklyDietTypeSelect.value}">${meal.calories} kcal</span>
-                        </div>
-                        <div class="day-meal" ${isPremium ? 'draggable="true"' : ''} data-day-index="${index}">
-                            <h4>${meal.name}</h4>
-                            <p>${meal.description}</p>
-                            <div class="meal-details">
-                                <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Sadece premium üyeler için sürükle-bırak özelliğini etkinleştir
-            if (isPremium) {
-                setupDragAndDrop();
-            }
-
-            // Tüm malzemeleri topla
-            const allIngredients = weeklyMeals.flatMap(meal => meal.ingredients);
-            console.log('Toplam malzeme listesi:', allIngredients);
-            
-            // Haftalık alışveriş listesini oluştur
-            generateWeeklyShoppingList(allIngredients);
-            
-            // Market butonlarını aktif et
-            enableWeeklyMarketButtons();
-        }
-
-        // Sürükle-bırak işlemleri için gerekli fonksiyonlar
-        function setupDragAndDrop() {
-            const dayMeals = document.querySelectorAll('.day-meal');
-            
-            dayMeals.forEach(meal => {
-                meal.addEventListener('dragstart', handleDragStart);
-                meal.addEventListener('dragend', handleDragEnd);
-                meal.addEventListener('dragover', handleDragOver);
-                meal.addEventListener('drop', handleDrop);
-            });
-        }
-
-        function handleDragStart(e) {
-            e.target.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-day-index'));
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.target.classList.add('drop-target');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.target.classList.remove('drop-target');
-            
-            const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'));
-            const targetIndex = parseInt(e.target.getAttribute('data-day-index'));
-            
-            if (sourceIndex !== targetIndex) {
-                // Yemekleri değiştir
-                const temp = weeklyMeals[sourceIndex];
-                weeklyMeals[sourceIndex] = weeklyMeals[targetIndex];
-                weeklyMeals[targetIndex] = temp;
-                
-                // Planı güncelle
-                showWeeklyPlan();
-                
-                // Değişiklik yapıldığını belirt
-                document.getElementById('save-week').classList.add('btn-change');
-            }
-        }
-
-        // Haftalık planı kaydet
-        function saveWeeklyPlan() {
-            if (!weeklyMeals || weeklyMeals.length === 0) {
-                alert('Önce bir haftalık plan oluşturun!');
-                return;
-            }
-
-            const weekData = {
-                meals: weeklyMeals,
-                dietType: weeklyDietTypeSelect.value,
-                calorieRange: weeklyCalorieRangeSelect.value,
-                excludeItems: weeklyExcludeInput.value,
-                date: new Date().toISOString()
-            };
-
-            savedWeeks[currentWeek] = weekData;
-            localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-            
-            alert('Haftalık plan başarıyla kaydedildi!');
-        }
-
-        // Mevcut öğünü gösterme fonksiyonu
-        function showCurrentMeal() {
-            const selectedMeal = filteredMeals[currentMealIndex];
-            displayMeal(selectedMeal, currentDietType, mealResultDiv);
-            generateShoppingList(selectedMeal.ingredients);
-            enableMarketButtons();
-        }
-
-        // Öğün bilgilerini gösterme fonksiyonu
-        function displayMeal(meal, dietType, container) {
-            let dietTag = '';
-            let dietClass = '';
-            
-            switch(dietType) {
-                case 'vegetarian':
-                    dietTag = 'Vejetaryen';
-                    dietClass = 'diet-vegetarian';
-                    break;
-                case 'vegan':
-                    dietTag = 'Vegan';
-                    dietClass = 'diet-vegan';
-                    break;
-                case 'low-carb':
-                    dietTag = 'Düşük Karbonhidrat';
-                    dietClass = 'diet-lowcarb';
-                    break;
-                case 'high-protein':
-                    dietTag = 'Yüksek Protein';
-                    dietClass = 'diet-highprotein';
-                    break;
-                default:
-                    dietTag = 'Dengeli';
-                    dietClass = 'diet-balanced';
-            }
-            
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const today = new Date().toDateString();
-            const dailySuggestions = JSON.parse(localStorage.getItem('dailySuggestions') || '{}');
-            const hasUsedSuggestion = dailySuggestions[today] && dailySuggestions[today][dietType];
-            const isFavorited = favorites.some(f => f.name === meal.name);
-            
-            container.innerHTML = `
-                <div class="meal-item">
-                    <div class="meal-info">
-                        <h3>${meal.name}</h3>
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(this, '${meal.name}')">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="meal-tags">
-                        <span class="diet-tag ${dietClass}">${dietTag}</span>
-                        <span class="calorie-info">${meal.calories} kcal</span>
-                    </div>
-                    <p><strong>Açıklama:</strong> ${meal.description}</p>
-                    <div class="meal-details">
-                        <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="meal-actions">
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareMeal('${meal.name}', 'whatsapp')">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn telegram" onclick="shareMeal('${meal.name}', 'telegram')">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn copy" onclick="shareMeal('${meal.name}', 'copy')">
-                                <i class="fas fa-copy"></i> Kopyala
-                            </button>
-                            ${filteredMeals.length > 1 ? 
-                                `<button id="change-meal" class="share-btn" title="Başka öneri">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>` 
-                                : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            if (filteredMeals.length > 1) {
-                const changeButton = document.getElementById('change-meal');
-                if (isPremium || !hasUsedSuggestion) {
-                    changeButton.addEventListener('click', changeMeal);
-                } else {
-                    changeButton.addEventListener('click', () => {
-                        openPremiumModal();
-                    });
-                }
-            }
-        }
-
-        // Öğün değiştirme fonksiyonu
-        function changeMeal() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            
-            if (!isPremium) {
-                // Ücretsiz kullanıcılar için günlük öneri sayısını kontrol et
-                const today = new Date().toDateString();
-                const dailySuggestions = JSON.parse(localStorage.getItem('dailySuggestions') || '{}');
-                
-                if (dailySuggestions[today] && dailySuggestions[today][currentDietType]) {
-                    alert('Ücretsiz versiyonda her kategoriden günlük sadece 1 öneri alabilirsiniz.\nSınırsız öneri için Premium üyeliğe yükseltin!');
-                    return;
-                }
-                
-                // Öneriyi kaydet
-                if (!dailySuggestions[today]) {
-                    dailySuggestions[today] = {};
-                }
-                dailySuggestions[today][currentDietType] = true;
-                localStorage.setItem('dailySuggestions', JSON.stringify(dailySuggestions));
-            }
-            
-            currentMealIndex = (currentMealIndex + 1) % filteredMeals.length;
-            showCurrentMeal();
-        }
-
-        // Alışveriş listesi oluşturma fonksiyonu
-        function generateShoppingList(ingredients) {
-            shoppingItemsDiv.innerHTML = `
-                <h3>Alışveriş Listesi</h3>
-                ${ingredients.map(ing => `
-                    <div class="shopping-item">
-                        <div>
-                            <input type="checkbox" id="item-${ing.name.replace(/\s+/g, '-')}" checked>
-                            <label for="item-${ing.name.replace(/\s+/g, '-')}">${ing.amount} ${ing.name}</label>
-                        </div>
-                        <i class="fas fa-trash-alt" data-item="${ing.name.replace(/\s+/g, '-')}"></i>
-                    </div>
-                `).join('')}
-            `;
-            
-            document.querySelectorAll('.fa-trash-alt').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    const itemElement = e.target.closest('.shopping-item');
-                    itemElement.remove();
-                    
-                    if (shoppingItemsDiv.querySelectorAll('.shopping-item').length === 0) {
-                        disableMarketButtons();
-                    }
-                });
-            });
-        }
-
-        // Öğün bulunamadı mesajı
-        function showNoMealFound(container) {
-            container.innerHTML = `
-                <p class="empty-message">Belirtilen kriterlere uygun öğün bulunamadı. Lütfen farklı tercihler deneyin.</p>
-                <button class="btn btn-try-again"><i class="fas fa-redo"></i> Tekrar Dene</button>
-            `;
-            
-            container.querySelector('.btn-try-again').addEventListener('click', () => {
-                if (container.id === 'meal-result') generateMeal();
-                else generateWeeklyPlan();
-            });
-        }
-
-        // Market butonlarını aktif etme fonksiyonları
-        function enableMarketButtons() {
-            marketButtons.forEach(button => {
-                button.disabled = false;
-            });
-        }
-
-        function enableWeeklyMarketButtons() {
-            weeklyMarketButtons.forEach(button => {
-                button.disabled = false;
-            });
-        }
-
-        // Market butonlarını devre dışı bırakma fonksiyonları
-        function disableMarketButtons() {
-            marketButtons.forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        function disableWeeklyMarketButtons() {
-            weeklyMarketButtons.forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        // Market ürün fiyatları
-        const marketProducts = {
-            migros: {
-                "Tavuk göğsü": { price: 159.90, unit: "kg" },
-                "Tavuk but": { price: 129.90, unit: "kg" },
-                "Dana kıyma": { price: 449.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 479.90, unit: "kg" },
-                "Kuzu eti": { price: 499.90, unit: "kg" },
-                "Domates": { price: 34.90, unit: "kg" },
-                "Salatalık": { price: 39.90, unit: "kg" },
-                "Soğan": { price: 19.90, unit: "kg" },
-                "Patates": { price: 24.90, unit: "kg" },
-                "Havuç": { price: 29.90, unit: "kg" },
-                "Biber": { price: 44.90, unit: "kg" },
-                "Patlıcan": { price: 49.90, unit: "kg" },
-                "Maydanoz": { price: 7.90, unit: "demet" },
-                "Dereotu": { price: 7.90, unit: "demet" },
-                "Nane": { price: 7.90, unit: "demet" },
-                "Roka": { price: 9.90, unit: "demet" },
-                "Marul": { price: 29.90, unit: "adet" },
-                "Pirinç": { price: 84.90, unit: "kg" },
-                "Bulgur": { price: 49.90, unit: "kg" },
-                "Mercimek": { price: 64.90, unit: "kg" },
-                "Nohut": { price: 69.90, unit: "kg" },
-                "Fasulye": { price: 79.90, unit: "kg" },
-                "Makarna": { price: 29.90, unit: "kg" },
-                "Un": { price: 39.90, unit: "kg" },
-                "Yoğurt": { price: 49.90, unit: "kg" },
-                "Süt": { price: 39.90, unit: "litre" },
-                "Yumurta": { price: 109.90, unit: "30'lu" },
-                "Peynir": { price: 289.90, unit: "kg" },
-                "Zeytin": { price: 199.90, unit: "kg" },
-                "Zeytinyağı": { price: 419.90, unit: "litre" },
-                "Tereyağı": { price: 399.90, unit: "kg" },
-                "Ekmek": { price: 7.50, unit: "adet" }
-            },
-            carrefour: {
-                "Tavuk göğsü": { price: 154.90, unit: "kg" },
-                "Tavuk but": { price: 124.90, unit: "kg" },
-                "Dana kıyma": { price: 444.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 474.90, unit: "kg" },
-                "Kuzu eti": { price: 494.90, unit: "kg" },
-                "Domates": { price: 32.90, unit: "kg" },
-                "Salatalık": { price: 37.90, unit: "kg" },
-                "Soğan": { price: 18.90, unit: "kg" },
-                "Patates": { price: 23.90, unit: "kg" },
-                "Havuç": { price: 28.90, unit: "kg" },
-                "Biber": { price: 42.90, unit: "kg" },
-                "Patlıcan": { price: 47.90, unit: "kg" },
-                "Maydanoz": { price: 6.90, unit: "demet" },
-                "Dereotu": { price: 6.90, unit: "demet" },
-                "Nane": { price: 6.90, unit: "demet" },
-                "Roka": { price: 8.90, unit: "demet" },
-                "Marul": { price: 27.90, unit: "adet" },
-                "Pirinç": { price: 82.90, unit: "kg" },
-                "Bulgur": { price: 47.90, unit: "kg" },
-                "Mercimek": { price: 62.90, unit: "kg" },
-                "Nohut": { price: 67.90, unit: "kg" },
-                "Fasulye": { price: 77.90, unit: "kg" },
-                "Makarna": { price: 27.90, unit: "kg" },
-                "Un": { price: 37.90, unit: "kg" },
-                "Yoğurt": { price: 47.90, unit: "kg" },
-                "Süt": { price: 37.90, unit: "litre" },
-                "Yumurta": { price: 107.90, unit: "30'lu" },
-                "Peynir": { price: 284.90, unit: "kg" },
-                "Zeytin": { price: 194.90, unit: "kg" },
-                "Zeytinyağı": { price: 414.90, unit: "litre" },
-                "Tereyağı": { price: 394.90, unit: "kg" },
-                "Ekmek": { price: 7.50, unit: "adet" }
-            },
-            a101: {
-                "Tavuk göğsü": { price: 149.90, unit: "kg" },
-                "Tavuk but": { price: 119.90, unit: "kg" },
-                "Dana kıyma": { price: 439.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 469.90, unit: "kg" },
-                "Kuzu eti": { price: 489.90, unit: "kg" },
-                "Domates": { price: 29.90, unit: "kg" },
-                "Salatalık": { price: 34.90, unit: "kg" },
-                "Soğan": { price: 16.90, unit: "kg" },
-                "Patates": { price: 21.90, unit: "kg" },
-                "Havuç": { price: 26.90, unit: "kg" },
-                "Biber": { price: 39.90, unit: "kg" },
-                "Patlıcan": { price: 44.90, unit: "kg" },
-                "Maydanoz": { price: 5.90, unit: "demet" },
-                "Dereotu": { price: 5.90, unit: "demet" },
-                "Nane": { price: 5.90, unit: "demet" },
-                "Roka": { price: 7.90, unit: "demet" },
-                "Marul": { price: 24.90, unit: "adet" },
-                "Pirinç": { price: 79.90, unit: "kg" },
-                "Bulgur": { price: 44.90, unit: "kg" },
-                "Mercimek": { price: 59.90, unit: "kg" },
-                "Nohut": { price: 64.90, unit: "kg" },
-                "Fasulye": { price: 74.90, unit: "kg" },
-                "Makarna": { price: 24.90, unit: "kg" },
-                "Un": { price: 34.90, unit: "kg" },
-                "Yoğurt": { price: 44.90, unit: "kg" },
-                "Süt": { price: 34.90, unit: "litre" },
-                "Yumurta": { price: 104.90, unit: "30'lu" },
-                "Peynir": { price: 279.90, unit: "kg" },
-                "Zeytin": { price: 189.90, unit: "kg" },
-                "Zeytinyağı": { price: 409.90, unit: "litre" },
-                "Tereyağı": { price: 389.90, unit: "kg" },
-                "Ekmek": { price: 7.00, unit: "adet" }
-            },
-            getir: {
-                "Tavuk göğsü": { price: 164.90, unit: "kg" },
-                "Tavuk but": { price: 134.90, unit: "kg" },
-                "Dana kıyma": { price: 459.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 489.90, unit: "kg" },
-                "Kuzu eti": { price: 509.90, unit: "kg" },
-                "Domates": { price: 36.90, unit: "kg" },
-                "Salatalık": { price: 41.90, unit: "kg" },
-                "Soğan": { price: 21.90, unit: "kg" },
-                "Patates": { price: 26.90, unit: "kg" },
-                "Havuç": { price: 31.90, unit: "kg" },
-                "Biber": { price: 46.90, unit: "kg" },
-                "Patlıcan": { price: 51.90, unit: "kg" },
-                "Maydanoz": { price: 8.90, unit: "demet" },
-                "Dereotu": { price: 8.90, unit: "demet" },
-                "Nane": { price: 8.90, unit: "demet" },
-                "Roka": { price: 10.90, unit: "demet" },
-                "Marul": { price: 31.90, unit: "adet" },
-                "Pirinç": { price: 86.90, unit: "kg" },
-                "Bulgur": { price: 51.90, unit: "kg" },
-                "Mercimek": { price: 66.90, unit: "kg" },
-                "Nohut": { price: 71.90, unit: "kg" },
-                "Fasulye": { price: 81.90, unit: "kg" },
-                "Makarna": { price: 31.90, unit: "kg" },
-                "Un": { price: 41.90, unit: "kg" },
-                "Yoğurt": { price: 51.90, unit: "kg" },
-                "Süt": { price: 41.90, unit: "litre" },
-                "Yumurta": { price: 111.90, unit: "30'lu" },
-                "Peynir": { price: 294.90, unit: "kg" },
-                "Zeytin": { price: 204.90, unit: "kg" },
-                "Zeytinyağı": { price: 424.90, unit: "litre" },
-                "Tereyağı": { price: 404.90, unit: "kg" },
-                "Ekmek": { price: 8.00, unit: "adet" }
-            },
-            bim: {
-                "Tavuk göğsü": { price: 144.90, unit: "kg" },
-                "Tavuk but": { price: 114.90, unit: "kg" },
-                "Dana kıyma": { price: 434.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 464.90, unit: "kg" },
-                "Kuzu eti": { price: 484.90, unit: "kg" },
-                "Domates": { price: 27.90, unit: "kg" },
-                "Salatalık": { price: 32.90, unit: "kg" },
-                "Soğan": { price: 15.90, unit: "kg" },
-                "Patates": { price: 20.90, unit: "kg" },
-                "Havuç": { price: 25.90, unit: "kg" },
-                "Biber": { price: 37.90, unit: "kg" },
-                "Patlıcan": { price: 42.90, unit: "kg" },
-                "Maydanoz": { price: 4.90, unit: "demet" },
-                "Dereotu": { price: 4.90, unit: "demet" },
-                "Nane": { price: 4.90, unit: "demet" },
-                "Roka": { price: 6.90, unit: "demet" },
-                "Marul": { price: 22.90, unit: "adet" },
-                "Pirinç": { price: 77.90, unit: "kg" },
-                "Bulgur": { price: 42.90, unit: "kg" },
-                "Mercimek": { price: 57.90, unit: "kg" },
-                "Nohut": { price: 62.90, unit: "kg" },
-                "Fasulye": { price: 72.90, unit: "kg" },
-                "Makarna": { price: 22.90, unit: "kg" },
-                "Un": { price: 32.90, unit: "kg" },
-                "Yoğurt": { price: 42.90, unit: "kg" },
-                "Süt": { price: 32.90, unit: "litre" },
-                "Yumurta": { price: 102.90, unit: "30'lu" },
-                "Peynir": { price: 274.90, unit: "kg" },
-                "Zeytin": { price: 184.90, unit: "kg" },
-                "Zeytinyağı": { price: 404.90, unit: "litre" },
-                "Tereyağı": { price: 384.90, unit: "kg" },
-                "Ekmek": { price: 6.50, unit: "adet" }
-            },
-            sok: {
-                "Tavuk göğsü": { price: 146.90, unit: "kg" },
-                "Tavuk but": { price: 116.90, unit: "kg" },
-                "Dana kıyma": { price: 436.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 466.90, unit: "kg" },
-                "Kuzu eti": { price: 486.90, unit: "kg" },
-                "Domates": { price: 28.90, unit: "kg" },
-                "Salatalık": { price: 33.90, unit: "kg" },
-                "Soğan": { price: 16.90, unit: "kg" },
-                "Patates": { price: 21.90, unit: "kg" },
-                "Havuç": { price: 26.90, unit: "kg" },
-                "Biber": { price: 38.90, unit: "kg" },
-                "Patlıcan": { price: 43.90, unit: "kg" },
-                "Maydanoz": { price: 5.90, unit: "demet" },
-                "Dereotu": { price: 5.90, unit: "demet" },
-                "Nane": { price: 5.90, unit: "demet" },
-                "Roka": { price: 7.90, unit: "demet" },
-                "Marul": { price: 23.90, unit: "adet" },
-                "Pirinç": { price: 78.90, unit: "kg" },
-                "Bulgur": { price: 43.90, unit: "kg" },
-                "Mercimek": { price: 58.90, unit: "kg" },
-                "Nohut": { price: 63.90, unit: "kg" },
-                "Fasulye": { price: 73.90, unit: "kg" },
-                "Makarna": { price: 23.90, unit: "kg" },
-                "Un": { price: 33.90, unit: "kg" },
-                "Yoğurt": { price: 43.90, unit: "kg" },
-                "Süt": { price: 33.90, unit: "litre" },
-                "Yumurta": { price: 103.90, unit: "30'lu" },
-                "Peynir": { price: 276.90, unit: "kg" },
-                "Zeytin": { price: 186.90, unit: "kg" },
-                "Zeytinyağı": { price: 406.90, unit: "litre" },
-                "Tereyağı": { price: 386.90, unit: "kg" },
-                "Ekmek": { price: 6.75, unit: "adet" }
-            },
-            yemeksepeti: {
-                "Tavuk göğsü": { price: 169.90, unit: "kg" },
-                "Tavuk but": { price: 139.90, unit: "kg" },
-                "Dana kıyma": { price: 464.90, unit: "kg" },
-                "Dana kuşbaşı": { price: 494.90, unit: "kg" },
-                "Kuzu eti": { price: 514.90, unit: "kg" },
-                "Domates": { price: 38.90, unit: "kg" },
-                "Salatalık": { price: 43.90, unit: "kg" },
-                "Soğan": { price: 23.90, unit: "kg" },
-                "Patates": { price: 28.90, unit: "kg" },
-                "Havuç": { price: 33.90, unit: "kg" },
-                "Biber": { price: 48.90, unit: "kg" },
-                "Patlıcan": { price: 53.90, unit: "kg" },
-                "Maydanoz": { price: 9.90, unit: "demet" },
-                "Dereotu": { price: 9.90, unit: "demet" },
-                "Nane": { price: 9.90, unit: "demet" },
-                "Roka": { price: 11.90, unit: "demet" },
-                "Marul": { price: 33.90, unit: "adet" },
-                "Pirinç": { price: 88.90, unit: "kg" },
-                "Bulgur": { price: 53.90, unit: "kg" },
-                "Mercimek": { price: 68.90, unit: "kg" },
-                "Nohut": { price: 73.90, unit: "kg" },
-                "Fasulye": { price: 83.90, unit: "kg" },
-                "Makarna": { price: 33.90, unit: "kg" },
-                "Un": { price: 43.90, unit: "kg" },
-                "Yoğurt": { price: 53.90, unit: "kg" },
-                "Süt": { price: 43.90, unit: "litre" },
-                "Yumurta": { price: 113.90, unit: "30'lu" },
-                "Peynir": { price: 298.90, unit: "kg" },
-                "Zeytin": { price: 208.90, unit: "kg" },
-                "Zeytinyağı": { price: 428.90, unit: "litre" },
-                "Tereyağı": { price: 408.90, unit: "kg" },
-                "Ekmek": { price: 8.50, unit: "adet" }
-            }
-        };
-
-        // Modal fonksiyonlarını güncelle
-        function openModal(market) {
-            console.log('Modal açılıyor:', market);
-            
-            // Günlük veya haftalık sekmesine göre doğru div'i seç
-            const isWeekly = market.startsWith('weekly-');
-            const containerSelector = isWeekly ? '#weekly-shopping-items' : '#shopping-items';
-            
-            // Seçili malzemeleri al
-            const ingredients = Array.from(document.querySelectorAll(`${containerSelector} .shopping-item input:checked`))
-                .map(input => {
-                    const label = input.nextElementSibling;
-                    const text = label.textContent.trim();
-                    console.log('İşlenen alışveriş öğesi:', text);
-                    
-                    // İlk boşluğa kadar olan kısmı miktar, geri kalanı isim olarak al
-                    const firstSpace = text.indexOf(' ');
-                    const amount = text.substring(0, firstSpace);
-                    const name = text.substring(firstSpace + 1);
-                    
-                    console.log('Ayrıştırılan bilgiler:', {
-                        amount: amount,
-                        name: name
-                    });
-                    
-                    return { amount, name };
-                });
-
-            console.log('Seçili malzemeler:', ingredients);
-
-            // Market adını düzelt
-            const marketName = market.replace('weekly-', '');
-            
-            // Sepeti oluştur
-            const cart = createMarketCart(marketName, ingredients);
-            console.log('Oluşturulan sepet:', cart);
-
-            // Modal içeriğini güncelle
-            updateModalContent(marketName, cart);
-            
-            // Modalı göster
-            modal.style.display = 'block';
-            modal.setAttribute('data-market', market);
-        }
-
-        // Market sepeti oluşturma fonksiyonu
-        function createMarketCart(market, ingredients) {
-            console.log('Sepet oluşturuluyor:', market);
-            console.log('Gelen malzemeler:', ingredients);
-            console.log('Market ürünleri:', marketProducts[market]);
-            
-            let cart = [];
-            let totalPrice = 0;
-
-            ingredients.forEach(ingredient => {
-                // Malzeme ismini temizle ve normalize et
-                const rawName = ingredient.name.trim();
-                const normalizedName = rawName.split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                    .join(' ');
-                
-                console.log('İşlenen malzeme:', {
-                    raw: rawName,
-                    normalized: normalizedName,
-                    amount: ingredient.amount
-                });
-                
-                const product = marketProducts[market][normalizedName];
-                if (product) {
-                    console.log('Ürün bulundu:', product);
-                    
-                    // Miktar ve birim dönüşümlerini yap
-                    let amount = ingredient.amount;
-                    let numericAmount = 0;
-                    
-                    // Sayısal değeri ve birimi ayır
-                    const matches = amount.match(/(\d+(?:\.\d+)?)\s*([a-zA-ZğüşıöçĞÜŞİÖÇ]+)/);
-                    if (matches) {
-                        const value = parseFloat(matches[1]);
-                        const unit = matches[2].toLowerCase();
-                        
-                        console.log('Miktar analizi:', {
-                            fullMatch: matches[0],
-                            value: value,
-                            unit: unit
-                        });
-                        
-                        // Birim dönüşümlerini yap
-                        switch (unit) {
-                            case 'gr':
-                            case 'gram':
-                            case 'g':
-                                numericAmount = value / 1000; // kg'a çevir
-                                break;
-                            case 'kg':
-                            case 'kilo':
-                            case 'kilogram':
-                                numericAmount = value;
-                                break;
-                            case 'adet':
-                            case 'tane':
-                                numericAmount = value;
-                                break;
-                            case 'ml':
-                            case 'mililitre':
-                                numericAmount = value / 1000; // litreye çevir
-                                break;
-                            case 'lt':
-                            case 'l':
-                            case 'litre':
-                                numericAmount = value;
-                                break;
-                            case 'su bardağı':
-                            case 'bardak':
-                                numericAmount = value * 0.2; // 1 su bardağı = 200ml = 0.2L
-                                break;
-                            case 'yemek kaşığı':
-                            case 'çorba kaşığı':
-                                numericAmount = value * 0.015; // 1 yemek kaşığı = 15ml = 0.015L
-                                break;
-                            case 'çay kaşığı':
-                            case 'tatlı kaşığı':
-                                numericAmount = value * 0.005; // 1 çay kaşığı = 5ml = 0.005L
-                                break;
-                            case 'demet':
-                                numericAmount = value;
-                                break;
-                            default:
-                                console.log('Bilinmeyen birim:', unit);
-                                numericAmount = value;
-                        }
-                    } else {
-                        console.log('Miktar formatı tanınamadı:', amount);
-                        numericAmount = 1;
-                    }
-
-                    console.log('Hesaplanan miktar:', {
-                        original: amount,
-                        converted: numericAmount,
-                        unit: product.unit,
-                        price: product.price
-                    });
-
-                    const price = product.price * numericAmount;
-                    totalPrice += price;
-
-                    console.log('Ürün fiyat hesaplaması:', {
-                        unitPrice: product.price,
-                        quantity: numericAmount,
-                        totalPrice: price
-                    });
-
-                    cart.push({
-                        name: normalizedName,
-                        amount: ingredient.amount,
-                        unitPrice: product.price,
-                        totalPrice: price.toFixed(2),
-                        unit: product.unit
-                    });
-                } else {
-                    console.warn('Ürün fiyatı bulunamadı:', {
-                        market: market,
-                        searchedName: normalizedName,
-                        availableProducts: Object.keys(marketProducts[market])
-                    });
-                }
-            });
-
-            console.log('Sepet oluşturuldu:', {
-                items: cart,
-                totalPrice: totalPrice
-            });
-
-            return {
-                items: cart,
-                totalPrice: totalPrice.toFixed(2)
-            };
-        }
-
-        // Modal içeriğini güncelleme fonksiyonu
-        function updateModalContent(market, cart) {
-            console.log('Modal içeriği güncelleniyor:', market, cart);
-            
-            const modalContent = document.querySelector('.modal-content');
-            modalContent.innerHTML = `
-                <span class="close">&times;</span>
-                <h2>${market.charAt(0).toUpperCase() + market.slice(1)} Alışveriş Sepeti</h2>
-                <div class="cart-items">
-                    ${cart.items.map(item => `
-                        <div class="cart-item">
-                            <span class="item-name">${item.name}</span>
-                            <span class="item-amount">${item.amount}</span>
-                            <span class="item-price">${item.unitPrice} TL/${item.unit}</span>
-                            <span class="item-total">${item.totalPrice} TL</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="cart-total">
-                    <strong>Toplam: ${cart.totalPrice} TL</strong>
-                </div>
-                <div class="modal-buttons">
-                    <button id="proceed" class="btn">Yönlendir</button>
-                    <button id="cancel" class="btn btn-cancel">İptal</button>
-                </div>
-            `;
-
-            // Yeni butonlara event listener'ları ekle
-            const proceedBtn = document.getElementById('proceed');
-            const cancelBtn = document.getElementById('cancel');
-            const closeBtn = document.querySelector('.close');
-
-            proceedBtn.addEventListener('click', proceedToCheckout);
-            cancelBtn.addEventListener('click', closeModal);
-            closeBtn.addEventListener('click', closeModal);
-
-            console.log('Modal butonlarına event listener\'lar eklendi');
-        }
-
-        function proceedToCheckout() {
-            console.log('Ödemeye geç butonu tıklandı');
-            const market = modal.getAttribute('data-market');
-            console.log('Seçilen market:', market);
-            
-            let marketUrl = '';
-            switch(market) {
-                case 'migros':
-                case 'weekly-migros':
-                    marketUrl = 'https://www.migros.com.tr/';
-                    break;
-                case 'carrefour':
-                case 'weekly-carrefour':
-                    marketUrl = 'https://www.carrefoursa.com/';
-                    break;
-                case 'getir':
-                case 'weekly-getir':
-                    marketUrl = 'https://getir.com/';
-                    break;
-                case 'a101':
-                case 'weekly-a101':
-                    marketUrl = 'https://www.a101.com.tr/';
-                    break;
-                case 'bim':
-                case 'weekly-bim':
-                    marketUrl = 'https://www.bim.com.tr/';
-                    break;
-                case 'sok':
-                case 'weekly-sok':
-                    marketUrl = 'https://www.sokmarket.com.tr/';
-                    break;
-                case 'yemeksepeti':
-                case 'weekly-yemeksepeti':
-                    marketUrl = 'https://www.yemeksepeti.com/';
-                    break;
-                default:
-                    marketUrl = '#';
-            }
-            
-            console.log('Yönlendirilecek URL:', marketUrl);
-            closeModal();
-            window.open(marketUrl, '_blank');
-        }
-
-        // Olay dinleyicileri
-        generateWeekBtn.addEventListener('click', generateWeeklyPlan);
-        generateRandomWeekBtn.addEventListener('click', generateRandomWeekPlan);
-        generateMealBtn.addEventListener('click', generateMeal);
-        
-        // Market butonları için genel event delegation
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('market-btn') && !e.target.disabled) {
-                openModal(e.target.id);
-            }
-        });
-
-        proceedBtn.addEventListener('click', proceedToCheckout);
-        cancelBtn.addEventListener('click', closeModal);
-        closeBtn.addEventListener('click', closeModal);
-
-        // Üyelik durumu ve yükseltme işlemleri
-        function checkMembershipStatus() {
-            // Artık bu fonksiyona gerek yok
-        }
-
-        // Haftalık plan erişimini kontrol et
-        function checkWeeklyPlanAccess() {
-            return true; // Herkes erişebilir
-        }
-
-        // Premium modalı aç
-        function openPremiumModal() {
-            // Modal açılmayacak
-        }
-
-        // Premium modalı kapat
-        function closePremiumModal() {
-            // Modal kapanmayacak
-        }
-
-        // Ödeme işlemi
-        function proceedToPayment() {
-            // Ödeme işlemi olmayacak
-        }
-
-        // Event listeners
-        upgradeBtn.style.display = 'none';
-        proceedPaymentBtn.style.display = 'none';
-        cancelPremiumBtn.style.display = 'none';
-        closePremiumBtn.style.display = 'none';
-        premiumModal.style.display = 'none';
-
-        // Hafta navigasyonu
-        function updateWeekNavigation() {
-            console.log('Hafta güncelleniyor:', currentWeek);
-            const currentWeekElement = document.getElementById('current-week');
-            const prevBtn = document.querySelector('[data-action="prev"]');
-            const nextBtn = document.querySelector('[data-action="next"]');
-            
-            if (currentWeekElement) {
-                currentWeekElement.textContent = `Hafta ${currentWeek}`;
-            }
-            
-            if (prevBtn) {
-                prevBtn.disabled = currentWeek === 1;
-            }
-            
-            if (nextBtn) {
-                nextBtn.disabled = currentWeek === 52;
-            }
-        }
-
-        // Hafta değiştirme fonksiyonları
-        function goToPrevWeek() {
-            console.log('Önceki haftaya geçiliyor');
-            if (currentWeek > 1) {
-                currentWeek--;
-                console.log('Yeni hafta:', currentWeek);
-                updateWeekNavigation();
-                loadWeekPlan();
-            }
-        }
-
-        function goToNextWeek() {
-            console.log('Sonraki haftaya geçiliyor');
-            if (currentWeek < 52) {
-                currentWeek++;
-                console.log('Yeni hafta:', currentWeek);
-                updateWeekNavigation();
-                loadWeekPlan();
-            }
-        }
-
-        // Hafta planını yükle
-        function loadWeekPlan() {
-            console.log('Hafta planı yükleniyor:', currentWeek);
-            const weekData = savedWeeks[currentWeek];
-            if (weekData) {
-                console.log('Hafta verisi bulundu:', weekData);
-                weeklyMeals = weekData.meals;
-                weeklyDietTypeSelect.value = weekData.dietType;
-                weeklyCalorieRangeSelect.value = weekData.calorieRange;
-                weeklyExcludeInput.value = weekData.excludeItems;
-                showWeeklyPlan();
-            } else {
-                console.log('Hafta verisi bulunamadı');
-                weeklyPlanDiv.innerHTML = '<p class="empty-message">Bu hafta için kaydedilmiş plan bulunamadı</p>';
-            }
-        }
-
-        // Rastgele haftalık plan oluşturma fonksiyonu
-        function generateRandomWeekPlan() {
-            console.log('Rastgele haftalık plan oluşturma başladı');
-
-            // Tüm diyet tiplerindeki yemekleri birleştir
-            let allMeals = [];
-            for (const dietType in mealDatabase) {
-                allMeals = allMeals.concat(mealDatabase[dietType]);
-            }
-
-            console.log('Toplam yemek sayısı:', allMeals.length);
-
-            if (!allMeals || allMeals.length === 0) {
-                console.log('Yemek veritabanında yemek bulunamadı');
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            // Tekrar eden yemekleri önlemek için Set kullan
-            const selectedMeals = new Set();
-            weeklyMeals = [];
-
-            // Mevcut yemekleri kopyala
-            const mealsToChooseFrom = [...allMeals];
-
-            // 7 farklı yemek seç
-            while (weeklyMeals.length < 7 && mealsToChooseFrom.length > 0) {
-                const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
-                const meal = mealsToChooseFrom[randomIndex];
-                
-                // Eğer bu yemek daha önce seçilmediyse ekle
-                if (!selectedMeals.has(meal.name)) {
-                    selectedMeals.add(meal.name);
-                    weeklyMeals.push(meal);
-                }
-                
-                // Bu yemeği kullanılabilir yemeklerden çıkar
-                mealsToChooseFrom.splice(randomIndex, 1);
-            }
-
-            // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
-            if (weeklyMeals.length < 7) {
-                const remainingCount = 7 - weeklyMeals.length;
-                for (let i = 0; i < remainingCount; i++) {
-                    const randomIndex = Math.floor(Math.random() * allMeals.length);
-                    weeklyMeals.push(allMeals[randomIndex]);
-                }
-            }
-
-            console.log('Seçilen rastgele haftalık yemekler:', weeklyMeals);
-            showWeeklyPlan();
-        }
-
-        // Sayfa yüklendiğinde
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('Sayfa yüklendi');
-            // Mevcut event listener'lar
-            disableMarketButtons();
-            disableWeeklyMarketButtons();
-            displayFavorites();
-
-            // Haftalık plan oluştur butonlarına event listener ekle
-            const generateWeekBtn = document.getElementById('generate-week');
-            const generateRandomWeekBtn = document.getElementById('generate-random-week');
-            
-            if (generateWeekBtn) {
-                generateWeekBtn.addEventListener('click', generateWeeklyPlan);
-            }
-            
-            if (generateRandomWeekBtn) {
-                generateRandomWeekBtn.addEventListener('click', generateRandomWeekPlan);
-            }
-
-            // Üyelik durumunu kontrol et
-            checkMembershipStatus();
-            
-            // İlk hafta planını yükle
-            currentWeek = 1;
-            updateWeekNavigation();
-            loadWeekPlan();
-        });
-
-        function closeModal() {
-            modal.style.display = 'none';
-        }
-
-        // Haftalık plan oluşturma fonksiyonu
-        function generateWeeklyPlan() {
-            if (!checkWeeklyPlanAccess()) {
-                return;
-            }
-
-            console.log('Haftalık plan oluşturma başladı');
-            const dietType = weeklyDietTypeSelect.value;
-            const calorieRange = weeklyCalorieRangeSelect.value;
-            const excludeItems = weeklyExcludeInput.value.split(',').map(item => item.trim()).filter(item => item);
-
-            console.log('Seçilen haftalık kriterler:', {
-                dietType,
-                calorieRange,
-                excludeItems
-            });
-
-            if (!mealDatabase || !mealDatabase[dietType]) {
-                console.error('Yemek veritabanı yüklenemedi veya diyet tipi geçersiz:', dietType);
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            const availableMeals = filterMeals(dietType, calorieRange, excludeItems);
-            console.log('Uygun haftalık yemek sayısı:', availableMeals.length);
-
-            if (!availableMeals || availableMeals.length === 0) {
-                console.log('Uygun haftalık öğün bulunamadı');
-                showNoMealFound(weeklyPlanDiv);
-                return;
-            }
-
-            if (availableMeals.length < 7) {
-                console.log('Yetersiz yemek sayısı:', availableMeals.length);
-                const message = `
-                    <p class="empty-message">
-                        Bu kriterlere uygun sadece ${availableMeals.length} farklı yemek bulundu (7 yemek gerekli).<br>
-                        Öneriler:<br>
-                        - Kalori aralığını genişletin<br>
-                        - Hariç tuttuğunuz malzemeleri azaltın<br>
-                        - Farklı bir diyet tipi seçin
-                    </p>
-                    <button class="btn btn-try-again"><i class="fas fa-redo"></i> Tekrar Dene</button>
-                `;
-                weeklyPlanDiv.innerHTML = message;
-                weeklyPlanDiv.querySelector('.btn-try-again').addEventListener('click', generateWeeklyPlan);
-                return;
-            }
-
-            // Tüm haftalar için plan oluştur
-            for (let week = 1; week <= 52; week++) {
-                // Tekrar eden yemekleri önlemek için Set kullan
-                const selectedMeals = new Set();
-                const weekMeals = [];
-
-                // Mevcut yemekleri kopyala
-                const mealsToChooseFrom = [...availableMeals];
-
-                while (weekMeals.length < 7 && mealsToChooseFrom.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * mealsToChooseFrom.length);
-                    const meal = mealsToChooseFrom[randomIndex];
-                    
-                    // Eğer bu yemek daha önce seçilmediyse ekle
-                    if (!selectedMeals.has(meal.name)) {
-                        selectedMeals.add(meal.name);
-                        weekMeals.push(meal);
-                    }
-                    
-                    // Bu yemeği kullanılabilir yemeklerden çıkar
-                    mealsToChooseFrom.splice(randomIndex, 1);
-                }
-
-                // Eğer hala 7 yemek seçilemediyse, tekrarlara izin ver
-                if (weekMeals.length < 7) {
-                    const remainingCount = 7 - weekMeals.length;
-                    for (let i = 0; i < remainingCount; i++) {
-                        const randomIndex = Math.floor(Math.random() * availableMeals.length);
-                        weekMeals.push(availableMeals[randomIndex]);
-                    }
-                }
-
-                // Hafta verisini kaydet
-                const weekData = {
-                    meals: weekMeals,
-                    dietType: dietType,
-                    calorieRange: calorieRange,
-                    excludeItems: excludeItems,
-                    date: new Date().toISOString()
-                };
-
-                savedWeeks[week] = weekData;
-            }
-
-            // Tüm haftaları localStorage'a kaydet
-            localStorage.setItem('savedWeeks', JSON.stringify(savedWeeks));
-
-            // Mevcut haftayı göster
-            weeklyMeals = savedWeeks[currentWeek].meals;
-            showWeeklyPlan();
-
-        }
-
-        // Haftalık alışveriş listesi oluşturma fonksiyonu
-        function generateWeeklyShoppingList(ingredients) {
-            console.log('Haftalık alışveriş listesi oluşturuluyor...');
-            
-            // Malzemeleri birleştir (aynı olanları grupla)
-            const mergedIngredients = {};
-            
-            ingredients.forEach(ing => {
-                const key = ing.name.toLowerCase();
-                if (mergedIngredients[key]) {
-                    // Miktarları topla
-                    const amounts = mergedIngredients[key].amount.split(' + ');
-                    amounts.push(ing.amount);
-                    mergedIngredients[key].amount = amounts.join(' + ');
-                } else {
-                    mergedIngredients[key] = {...ing};
-                }
-            });
-            
-            console.log('Birleştirilmiş malzemeler:', mergedIngredients);
-
-            // HTML oluştur
-            weeklyShoppingItemsDiv.innerHTML = `
-                <h3>Haftalık Alışveriş Listesi</h3>
-                ${Object.values(mergedIngredients).map(ing => `
-                    <div class="shopping-item">
-                        <div>
-                            <input type="checkbox" id="weekly-item-${ing.name.replace(/\s+/g, '-')}" checked>
-                            <label for="weekly-item-${ing.name.replace(/\s+/g, '-')}">${ing.amount} ${ing.name}</label>
-                        </div>
-                        <i class="fas fa-trash-alt" data-item="weekly-${ing.name.replace(/\s+/g, '-')}"></i>
-                    </div>
-                `).join('')}
-            `;
-            
-            // Silme butonlarına event listener ekle
-            document.querySelectorAll('#weekly-shopping-items .fa-trash-alt').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    const itemElement = e.target.closest('.shopping-item');
-                    itemElement.remove();
-                    
-                    if (weeklyShoppingItemsDiv.querySelectorAll('.shopping-item').length === 0) {
-                        disableWeeklyMarketButtons();
-                    }
-                });
-            });
-        }
-
-        // Favori ekleme fonksiyonu
-        function addToFavorites(meal) {
-            if (!favorites.some(f => f.name === meal.name)) {
-                favorites.push(meal);
-                localStorage.setItem('favorites', JSON.stringify(favorites));
-                displayFavorites();
-                return true;
-            }
-            return false;
-        }
-
-        // Favori silme fonksiyonu
-        function removeFromFavorites(mealName) {
-            favorites = favorites.filter(f => f.name !== mealName);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            displayFavorites();
-        }
-
-        // Favorileri gösterme fonksiyonu
-        function displayFavorites() {
-            const container = document.getElementById('favorites-container');
-            
-            if (favorites.length === 0) {
-                container.innerHTML = '<p class="empty-message">Henüz favori yemek eklemediniz</p>';
-                return;
-            }
-
-            container.innerHTML = favorites.map(meal => `
-                <div class="favorite-item">
-                    <div class="favorite-header">
-                        <h3>${meal.name}</h3>
-                        <div class="favorite-actions">
-                            <button class="favorite-action-btn" onclick="useFavorite('${meal.name}')">
-                                <i class="fas fa-utensils"></i>
-                            </button>
-                            <button class="favorite-action-btn delete" onclick="removeFromFavorites('${meal.name}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="calorie-info">Kalori: ${meal.calories} kcal</p>
-                    <p><strong>Açıklama:</strong> ${meal.description}</p>
-                    <div class="meal-details">
-                        <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Favoriyi kullanma fonksiyonu
-        function useFavorite(mealName) {
-            const meal = favorites.find(f => f.name === mealName);
-            if (meal) {
-                // Günlük plan sekmesine geç
-                document.querySelector('[data-tab="daily"]').click();
-                
-                // Diyet tipini ve kalori aralığını ayarla
-                dietTypeSelect.value = meal.dietType || 'balanced';
-                calorieRangeSelect.value = meal.calorieRange || '500-1000';
-                
-                // Öğünü göster
-                displayMeal(meal, meal.dietType || 'balanced', mealResultDiv);
-                generateShoppingList(meal.ingredients);
-                enableMarketButtons();
-            }
-        }
-
-        // Öğün gösterimini güncelle
-        function displayMeal(meal, dietType, container) {
-            let dietTag = '';
-            let dietClass = '';
-            
-            switch(dietType) {
-                case 'vegetarian':
-                    dietTag = 'Vejetaryen';
-                    dietClass = 'diet-vegetarian';
-                    break;
-                case 'vegan':
-                    dietTag = 'Vegan';
-                    dietClass = 'diet-vegan';
-                    break;
-                case 'low-carb':
-                    dietTag = 'Düşük Karbonhidrat';
-                    dietClass = 'diet-lowcarb';
-                    break;
-                case 'high-protein':
-                    dietTag = 'Yüksek Protein';
-                    dietClass = 'diet-highprotein';
-                    break;
-                default:
-                    dietTag = 'Dengeli';
-                    dietClass = 'diet-balanced';
-            }
-            
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            const today = new Date().toDateString();
-            const dailySuggestions = JSON.parse(localStorage.getItem('dailySuggestions') || '{}');
-            const hasUsedSuggestion = dailySuggestions[today] && dailySuggestions[today][dietType];
-            const isFavorited = favorites.some(f => f.name === meal.name);
-            
-            container.innerHTML = `
-                <div class="meal-item">
-                    <div class="meal-info">
-                        <h3>${meal.name}</h3>
-                        <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(this, '${meal.name}')">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="meal-tags">
-                        <span class="diet-tag ${dietClass}">${dietTag}</span>
-                        <span class="calorie-info">${meal.calories} kcal</span>
-                    </div>
-                    <p><strong>Açıklama:</strong> ${meal.description}</p>
-                    <div class="meal-details">
-                        <div class="ingredients-section">
-                            <p><strong>Malzemeler:</strong></p>
-                            <ul>
-                                ${meal.ingredients.map(ing => `<li>${ing.amount} ${ing.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="meal-actions">
-                        <div class="share-buttons">
-                            <button class="share-btn whatsapp" onclick="shareMeal('${meal.name}', 'whatsapp')">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </button>
-                            <button class="share-btn telegram" onclick="shareMeal('${meal.name}', 'telegram')">
-                                <i class="fab fa-telegram"></i> Telegram
-                            </button>
-                            <button class="share-btn copy" onclick="shareMeal('${meal.name}', 'copy')">
-                                <i class="fas fa-copy"></i> Kopyala
-                            </button>
-                            ${filteredMeals.length > 1 ? 
-                                `<button id="change-meal" class="share-btn" title="Başka öneri">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>` 
-                                : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            if (filteredMeals.length > 1) {
-                const changeButton = document.getElementById('change-meal');
-                if (isPremium || !hasUsedSuggestion) {
-                    changeButton.addEventListener('click', changeMeal);
-                } else {
-                    changeButton.addEventListener('click', () => {
-                        openPremiumModal();
-                    });
-                }
-            }
-        }
-
-        // Favori ekleme/çıkarma fonksiyonu
-        function toggleFavorite(button, mealName) {
-            const meal = filteredMeals.find(m => m.name === mealName);
-            if (meal) {
-                if (button.classList.contains('favorited')) {
-                    removeFromFavorites(mealName);
-                    button.classList.remove('favorited');
-                } else {
-                    if (addToFavorites(meal)) {
-                        button.classList.add('favorited');
-                    }
-                }
-            }
-        }
-
-        // Paylaşım fonksiyonları
-        function shareMeal(mealName, platform) {
-            const meal = filteredMeals.find(m => m.name === mealName);
-            if (!meal) return;
-
-            const shareText = createShareText(meal);
-            const encodedText = encodeURIComponent(shareText);
-
-            switch(platform) {
-                case 'whatsapp':
-                    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
-                    break;
-                case 'telegram':
-                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`, '_blank');
-                    break;
-                case 'copy':
-                    navigator.clipboard.writeText(shareText)
-                        .then(() => {
-                            alert('Tarif panoya kopyalandı!');
-                        })
-                        .catch(err => {
-                            console.error('Kopyalama hatası:', err);
-                            alert('Kopyalama başarısız oldu. Lütfen tekrar deneyin.');
-                        });
-                    break;
-            }
-        }
-
-        function createShareText(meal) {
-            let text = `🍽️ ${meal.name}\n\n`;
-            text += `📝 Açıklama:\n${meal.description}\n\n`;
-            text += `🔥 Kalori: ${meal.calories} kcal\n\n`;
-            text += `🛒 Malzemeler:\n`;
-            meal.ingredients.forEach(ing => {
-                text += `- ${ing.amount} ${ing.name}\n`;
-            });
-            text += `\nBu öğünü FitPlan uygulamasından paylaştım!`;
-            return text;
-        }
-
-        // Paylaşım fonksiyonları
-        function shareWeeklyPlan(platform) {
-            if (!weeklyMeals || weeklyMeals.length === 0) {
-                alert('Lütfen önce bir haftalık plan oluşturun.');
-                return;
-            }
-
-            const weekData = {
-                meals: weeklyMeals,
-                dietType: weeklyDietTypeSelect.value,
-                calorieRange: weeklyCalorieRangeSelect.value,
-                excludeItems: weeklyExcludeInput.value
-            };
-
-            const shareText = createWeeklyShareText(weekData);
-            const encodedText = encodeURIComponent(shareText);
-
-            switch(platform) {
-                case 'whatsapp':
-                    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
-                    break;
-                case 'telegram':
-                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedText}`, '_blank');
-                    break;
-                case 'copy':
-                    navigator.clipboard.writeText(shareText)
-                        .then(() => {
-                            alert('Haftalık plan panoya kopyalandı!');
-                        })
-                        .catch(err => {
-                            console.error('Kopyalama hatası:', err);
-                            alert('Kopyalama başarısız oldu. Lütfen tekrar deneyin.');
-                        });
-                    break;
-            }
-        }
-
-        function createWeeklyShareText(weekData) {
-            let text = `🍽️ Haftalık Plan\n\n`;
-            text += `📅 Hafta: ${currentWeek}\n\n`;
-            text += `🍽️ Diyet Tipi: ${getDietTypeName(weekData.dietType)}\n\n`;
-            text += `🔥 Kalori Aralığı: ${weekData.calorieRange}\n\n`;
-            text += `📋 Günlük Menüler:\n\n`;
-            weekData.meals.forEach((meal, index) => {
-                text += `${['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'][index]}:\n`;
-                text += `🍽️ ${meal.name}\n`;
-                text += `🔥 ${meal.calories} kcal\n`;
-                text += `📝 ${meal.description}\n`;
-                text += `🛒 Malzemeler:\n`;
-                meal.ingredients.forEach(ing => {
-                    text += `- ${ing.amount} ${ing.name}\n`;
-                });
-                text += `\n`;
-            });
-            text += `Bu haftalık planı FitPlan uygulamasından paylaştım!`;
-            return text;
-        }
-
-        function getDietTypeName(dietType) {
-            switch(dietType) {
-                case 'balanced':
-                    return 'Dengeli Beslenme';
-                case 'vegetarian':
-                    return 'Vejetaryen';
-                case 'vegan':
-                    return 'Vegan';
-                case 'low-carb':
-                    return 'Düşük Karbonhidrat';
-                case 'high-protein':
-                    return 'Yüksek Protein';
-                default:
-                    return dietType;
-            }
-        }
-    </script>
 </body>
 </html>
