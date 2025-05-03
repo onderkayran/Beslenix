@@ -26,113 +26,162 @@
             vegetarian: new Set()
         };
 
-        // Market fiyatlarını daha gerçekçi hale getirelim
-        const marketDatabase = {
-            "Migros": {
-                "Semizotu": 11.95,
-                "Nohut": 44.95,
-                "Zeytinyağı": 89.90,
-                "Kabak": 13.95,
-                "Yoğurt": 22.95,
-                "Sarımsak": 18.95,
-                "Yumurta": 44.95,
-                "Ispanak": 12.95,
-                "Kırmızı biber": 11.95,
-                "Tavuk göğsü": 84.90,
-                "Patates": 8.95,
-                "Havuç": 7.95,
-                "Domates": 12.95,
-                "Dana kıyma": 124.90,
-                "Pirinç": 27.95,
-                "Makarna": 16.95,
-                "Kaşar peyniri": 84.90,
-                "Marul": 8.95,
-                "Soğan": 6.95
-            },
-            "Carrefour": {
-                "Semizotu": 12.90,
-                "Nohut": 42.90,
-                "Zeytinyağı": 87.90,
-                "Kabak": 14.90,
-                "Yoğurt": 23.90,
-                "Sarımsak": 17.90,
-                "Yumurta": 43.90,
-                "Ispanak": 13.90,
-                "Kırmızı biber": 10.90,
-                "Tavuk göğsü": 82.90,
-                "Patates": 7.90,
-                "Havuç": 6.90,
-                "Domates": 11.90,
-                "Dana kıyma": 119.90,
-                "Pirinç": 26.90,
-                "Makarna": 18.90,
-                "Kaşar peyniri": 86.90,
-                "Marul": 9.90,
-                "Soğan": 5.90
-            },
-            "A101": {
-                "Semizotu": 10.95,
-                "Nohut": 41.95,
-                "Zeytinyağı": 85.95,
-                "Kabak": 12.95,
-                "Yoğurt": 21.95,
-                "Sarımsak": 16.95,
-                "Yumurta": 42.95,
-                "Ispanak": 11.95,
-                "Kırmızı biber": 9.95,
-                "Tavuk göğsü": 83.95,
-                "Patates": 8.95,
-                "Havuç": 6.95,
-                "Domates": 10.95,
-                "Dana kıyma": 122.95,
-                "Pirinç": 24.95,
-                "Makarna": 15.95,
-                "Kaşar peyniri": 82.95,
-                "Marul": 7.95,
-                "Soğan": 5.95
-            },
-            "ŞOK": {
-                "Semizotu": 11.90,
-                "Nohut": 43.90,
-                "Zeytinyağı": 86.90,
-                "Kabak": 13.90,
-                "Yoğurt": 22.90,
-                "Sarımsak": 17.90,
-                "Yumurta": 41.90,
-                "Ispanak": 12.90,
-                "Kırmızı biber": 10.90,
-                "Tavuk göğsü": 81.90,
-                "Patates": 7.90,
-                "Havuç": 6.90,
-                "Domates": 11.90,
-                "Dana kıyma": 118.90,
-                "Pirinç": 25.90,
-                "Makarna": 16.90,
-                "Kaşar peyniri": 83.90,
-                "Marul": 8.90,
-                "Soğan": 5.90
-            },
-            "BİM": {
-                "Semizotu": 11.95,
-                "Nohut": 42.95,
-                "Zeytinyağı": 88.95,
-                "Kabak": 13.95,
-                "Yoğurt": 21.95,
-                "Sarımsak": 16.95,
-                "Yumurta": 43.95,
-                "Ispanak": 12.95,
-                "Kırmızı biber": 10.95,
-                "Tavuk göğsü": 82.95,
-                "Patates": 7.95,
-                "Havuç": 6.95,
-                "Domates": 10.95,
-                "Dana kıyma": 121.95,
-                "Pirinç": 25.95,
-                "Makarna": 17.95,
-                "Kaşar peyniri": 84.95,
-                "Marul": 8.95,
-                "Soğan": 5.95
-            }
+        // Market fiyatlarını JSON dosyasından yükle
+        let marketDatabase = {};
+        let lastUpdated = '';
+
+        // JSON dosyasını yükle
+        fetch('market_prices.json')
+            .then(response => response.json())
+            .then(data => {
+                marketDatabase = data.markets;
+                lastUpdated = data.last_updated;
+                console.log(`Market fiyatları güncellendi: ${lastUpdated}`);
+            })
+            .catch(error => {
+                console.error('Market fiyatları yüklenirken hata oluştu:', error);
+                // Varsayılan fiyatları kullan
+                marketDatabase = {
+                    "Migros": {
+                        "Semizotu": 11.95,
+                        "Nohut": 44.95,
+                        "Zeytinyağı": 89.90,
+                        "Kabak": 13.95,
+                        "Yoğurt": 22.95,
+                        "Sarımsak": 18.95,
+                        "Yumurta": 44.95,
+                        "Ispanak": 12.95,
+                        "Kırmızı biber": 11.95,
+                        "Tavuk göğsü": 84.90,
+                        "Patates": 8.95,
+                        "Havuç": 7.95,
+                        "Domates": 12.95,
+                        "Dana kıyma": 124.90,
+                        "Pirinç": 27.95,
+                        "Makarna": 16.95,
+                        "Kaşar peyniri": 84.90,
+                        "Marul": 8.95,
+                        "Soğan": 6.95
+                    },
+                    "Carrefour": {
+                        "Semizotu": 12.90,
+                        "Nohut": 42.90,
+                        "Zeytinyağı": 87.90,
+                        "Kabak": 14.90,
+                        "Yoğurt": 23.90,
+                        "Sarımsak": 17.90,
+                        "Yumurta": 43.90,
+                        "Ispanak": 13.90,
+                        "Kırmızı biber": 10.90,
+                        "Tavuk göğsü": 82.90,
+                        "Patates": 7.90,
+                        "Havuç": 6.90,
+                        "Domates": 11.90,
+                        "Dana kıyma": 119.90,
+                        "Pirinç": 26.90,
+                        "Makarna": 18.90,
+                        "Kaşar peyniri": 86.90,
+                        "Marul": 9.90,
+                        "Soğan": 5.90
+                    },
+                    "A101": {
+                        "Semizotu": 10.95,
+                        "Nohut": 41.95,
+                        "Zeytinyağı": 85.95,
+                        "Kabak": 12.95,
+                        "Yoğurt": 21.95,
+                        "Sarımsak": 16.95,
+                        "Yumurta": 42.95,
+                        "Ispanak": 11.95,
+                        "Kırmızı biber": 9.95,
+                        "Tavuk göğsü": 83.95,
+                        "Patates": 8.95,
+                        "Havuç": 6.95,
+                        "Domates": 10.95,
+                        "Dana kıyma": 122.95,
+                        "Pirinç": 24.95,
+                        "Makarna": 15.95,
+                        "Kaşar peyniri": 82.95,
+                        "Marul": 7.95,
+                        "Soğan": 5.95
+                    },
+                    "ŞOK": {
+                        "Semizotu": 11.90,
+                        "Nohut": 43.90,
+                        "Zeytinyağı": 86.90,
+                        "Kabak": 13.90,
+                        "Yoğurt": 22.90,
+                        "Sarımsak": 17.90,
+                        "Yumurta": 41.90,
+                        "Ispanak": 12.90,
+                        "Kırmızı biber": 10.90,
+                        "Tavuk göğsü": 81.90,
+                        "Patates": 7.90,
+                        "Havuç": 6.90,
+                        "Domates": 11.90,
+                        "Dana kıyma": 118.90,
+                        "Pirinç": 25.90,
+                        "Makarna": 16.90,
+                        "Kaşar peyniri": 83.90,
+                        "Marul": 8.90,
+                        "Soğan": 5.90
+                    }
+                };
+            });
+
+        // Ürün birimleri
+        const ingredientUnits = {
+            "Dana kıyma": "kg",
+            "Tavuk göğsü": "kg",
+            "Zeytinyağı": "lt",
+            "Yumurta": "adet",
+            "Semizotu": "kg",
+            "Nohut": "kg",
+            "Kabak": "kg",
+            "Yoğurt": "kg",
+            "Sarımsak": "kg",
+            "Ispanak": "kg",
+            "Kırmızı biber": "kg",
+            "Patates": "kg",
+            "Havuç": "kg",
+            "Domates": "kg",
+            "Pirinç": "kg",
+            "Makarna": "kg",
+            "Kaşar peyniri": "kg",
+            "Marul": "kg",
+            "Soğan": "kg",
+            "Yulaf": "kg",
+            "Salatalık": "kg",
+            "Roka": "kg",
+            "Maydanoz": "kg",
+            "Brokoli": "kg",
+            "Limon": "adet",
+            "Kinoa": "kg",
+            "Avokado": "adet",
+            "Cherry domates": "kg",
+            "Konserve domates": "gr",
+            "Bezelye": "kg",
+            "Mantar": "kg",
+            "Somon fileto": "kg",
+            "Karides": "kg",
+            "Dana antrikot": "kg",
+            "Uskumru": "kg",
+            "Hindi göğsü": "kg",
+            "Ton balığı": "kg",
+            "Kırmızı mercimek": "kg",
+            "İnce bulgur": "kg",
+            "Tam buğday ekmeği": "adet",
+            "Kuru fasulye": "kg",
+            "Arborio pirinci": "kg",
+            "Vegan beyaz şarap": "lt",
+            "Patlıcan": "kg",
+            "Kuskus": "kg",
+            "Mercimek": "kg",
+            "Yufka": "adet",
+            "Peynir": "kg",
+            "Esmer pirinç": "kg",
+            "Bulgur": "kg",
+            "Taze kekik": "kg"
         };
 
         // Sepet yönetimi
@@ -214,6 +263,7 @@
             return { marketPrices, bestMarket };
         }
 
+        // Sepet UI'ını güncelle
         function updateCartUI() {
             const cartDiv = document.getElementById('cart-content');
             if (cart.size === 0) {
@@ -234,11 +284,12 @@
             `;
             
             cart.forEach((amount, ingredient) => {
+                const unit = ingredientUnits[ingredient] || "adet";
                 cartHTML += `
                     <li class="cart-item">
                         <div class="cart-item-info">
                             <span>${ingredient}</span>
-                            <span class="amount">${amount} adet</span>
+                            <span class="amount">${amount} ${unit}</span>
                         </div>
                         <button class="remove-item-btn" data-ingredient="${ingredient}">
                             <i class="fas fa-minus-circle"></i>
@@ -251,13 +302,15 @@
                 <div class="price-info-disclaimer">
                     * Fiyatlar tahmini olup, güncel fiyatlar için market web sitelerini ziyaret ediniz.
                     Marketlerin kampanya ve indirim durumlarına göre en uygun fiyat değişkenlik gösterebilir.
+                    <br>
+                    Son güncelleme: ${lastUpdated}
                 </div>
                 <h3>Market Fiyatları:</h3>
             `;
 
             Object.entries(marketPrices).forEach(([market, price]) => {
                 cartHTML += `
-                    <div class="market-price-item ${market === bestMarket ? 'best-price' : ''}">
+                    <div class="market-price-item">
                         <span class="market-name">${market}</span>
                         <span class="market-total">${price.toFixed(2)} TL</span>
                         <a href="#" class="buy-button" data-market="${market}">Satın Al</a>
@@ -298,8 +351,7 @@
                 'Migros': 'https://www.migros.com.tr',
                 'Carrefour': 'https://www.carrefoursa.com',
                 'A101': 'https://www.a101.com.tr',
-                'ŞOK': 'https://www.sokmarket.com.tr',
-                'BİM': 'https://www.bim.com.tr'
+                'ŞOK': 'https://www.sokmarket.com.tr'
             };
             return urls[market];
         }
@@ -1153,20 +1205,17 @@
             margin: 0 15px;
         }
         
-        .best-price {
-            background-color: #e8f5e9;
+        .buy-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
         }
-        
-        .best-price .market-total {
-            color: #2e7d32;
-        }
-        
-        .best-price::after {
-            content: '✓ En Uygun';
-            color: #2e7d32;
-            font-size: 0.8em;
-            margin-left: 10px;
-            font-weight: 500;
+
+        .buy-button:hover {
+            background-color: var(--secondary-color);
         }
 
         .button-group {
@@ -1268,19 +1317,6 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-        }
-
-        .buy-button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .buy-button:hover {
-            background-color: var(--secondary-color);
         }
 
         .cart-items {
