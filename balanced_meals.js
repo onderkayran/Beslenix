@@ -518,6 +518,146 @@ const balancedMeals = [
             { name: "Soğan", amount: "2 adet" },
             { name: "Zeytinyağı", amount: "3 yemek kaşığı" }
         ]
+    },
+    {
+        name: "Tavuklu Sebze Güveç",
+        description: "Tavuk göğsü ve sebzelerle hazırlanan fırın güveç",
+        calories: 680,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Tavuk göğsü", amount: "200 gr" },
+            { name: "Patates", amount: "2 adet" },
+            { name: "Havuç", amount: "2 adet" },
+            { name: "Kabak", amount: "1 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Izgara Somon ve Sebzeli Pilav",
+        description: "Izgara somon fileto ve sebzeli bulgur pilavı",
+        calories: 750,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Somon fileto", amount: "200 gr" },
+            { name: "Bulgur", amount: "100 gr" },
+            { name: "Havuç", amount: "1 adet" },
+            { name: "Bezelye", amount: "100 gr" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Hindi Göğsü ve Kinoa Salatası",
+        description: "Izgara hindi göğsü ve sebzeli kinoa salatası",
+        calories: 720,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Hindi göğsü", amount: "200 gr" },
+            { name: "Kinoa", amount: "100 gr" },
+            { name: "Avokado", amount: "1/2 adet" },
+            { name: "Cherry domates", amount: "8 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Ton Balıklı Makarna",
+        description: "Ton balığı ve sebzeli tam buğday makarna",
+        calories: 650,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Ton balığı", amount: "150 gr" },
+            { name: "Tam buğday makarna", amount: "100 gr" },
+            { name: "Konserve domates", amount: "200 gr" },
+            { name: "Sarımsak", amount: "2 diş" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Izgara Karides ve Sebzeli Pilav",
+        description: "Izgara karides ve sebzeli esmer pirinç pilavı",
+        calories: 780,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Karides", amount: "200 gr" },
+            { name: "Esmer pirinç", amount: "100 gr" },
+            { name: "Bezelye", amount: "100 gr" },
+            { name: "Havuç", amount: "1 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Tavuklu Sebzeli Pilav",
+        description: "Tavuk göğsü ve sebzeli esmer pirinç pilavı",
+        calories: 720,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Tavuk göğsü", amount: "200 gr" },
+            { name: "Esmer pirinç", amount: "100 gr" },
+            { name: "Bezelye", amount: "100 gr" },
+            { name: "Havuç", amount: "1 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Izgara Köfte ve Bulgur Pilavı",
+        description: "Izgara köfte ve sebzeli bulgur pilavı",
+        calories: 850,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Dana kıyma", amount: "200 gr" },
+            { name: "Bulgur", amount: "100 gr" },
+            { name: "Domates", amount: "2 adet" },
+            { name: "Soğan", amount: "1 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Izgara Dana Antrikot ve Sebzeli Pilav",
+        description: "Izgara dana antrikot ve sebzeli bulgur pilavı",
+        calories: 850,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Dana antrikot", amount: "250 gr" },
+            { name: "Bulgur", amount: "100 gr" },
+            { name: "Havuç", amount: "1 adet" },
+            { name: "Bezelye", amount: "100 gr" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Hindi Göğsü ve Tam Buğday Makarna",
+        description: "Izgara hindi göğsü ve sebzeli tam buğday makarna",
+        calories: 720,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Hindi göğsü", amount: "200 gr" },
+            { name: "Tam buğday makarna", amount: "100 gr" },
+            { name: "Mantar", amount: "100 gr" },
+            { name: "Domates", amount: "2 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
+    },
+    {
+        name: "Izgara Uskumru ve Sebzeli Pilav",
+        description: "Izgara uskumru ve sebzeli esmer pirinç pilavı",
+        calories: 780,
+        dietType: "dengeli",
+        calorieRange: "orta",
+        ingredients: [
+            { name: "Uskumru", amount: "200 gr" },
+            { name: "Esmer pirinç", amount: "100 gr" },
+            { name: "Bezelye", amount: "100 gr" },
+            { name: "Havuç", amount: "1 adet" },
+            { name: "Zeytinyağı", amount: "2 yemek kaşığı" }
+        ]
     }
 ];
 
